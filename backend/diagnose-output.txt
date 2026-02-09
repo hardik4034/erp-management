@@ -1,0 +1,32 @@
+﻿Γ£à Database connected successfully
+=== Checking PayrollComponents ===
+Found 13 active components:
+  - Deduction: Income Tax (TDS) (Percentage, 10)
+  - Deduction: Insurance Premium (Fixed, 500)
+  - Deduction: Loan Repayment (Fixed, 0)
+  - Deduction: Other Deductions (Fixed, 0)
+  - Deduction: Professional Tax (Fixed, 200)
+  - Deduction: Provident Fund (PF) (Percentage, 12)
+  - Earning: Basic Salary (Fixed, 0)
+  - Earning: HRA (House Rent Allowance) (Percentage, 40)
+  - Earning: Medical Allowance (Fixed, 1250)
+  - Earning: Overtime Pay (Fixed, 0)
+  - Earning: Performance Bonus (Fixed, 0)
+  - Earning: Special Allowance (Percentage, 10)
+  - Earning: Transport Allowance (Fixed, 1600)
+
+=== Checking Employees with Salary ===
+Found 1 employees with salary:
+  - tes1 demoo (EMP2026003): $1000
+
+=== Testing Component Calculation for tes1 ===
+Base Salary: $1000
+
+Earnings Calculation:
+  - Basic Salary: $0
+  - HRA (House Rent Allowance): $400
+  - Transport Allowance: $1600
+  - Medical Allowance: $1250
+  - Special Allowance: $100
+  - Performance Bonus: $0
+  - Overtime Pay: $0

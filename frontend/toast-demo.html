@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Toast Notification Demo - HRMS</title>
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/toast.css">
+    <style>
+        .demo-container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 30px;
+        }
+        .demo-section {
+            margin-bottom: 40px;
+        }
+        .demo-section h2 {
+            margin-bottom: 20px;
+            color: #1f2937;
+        }
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+        .demo-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .demo-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+        .btn-error {
+            background: #ef4444;
+            color: white;
+        }
+        .btn-warning {
+            background: #f59e0b;
+            color: white;
+        }
+        .btn-info {
+            background: #3b82f6;
+            color: white;
+        }
+        .btn-custom {
+            background: #8b5cf6;
+            color: white;
+        }
+        .code-block {
+            background: #f3f4f6;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            overflow-x: auto;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <h1 style="text-align: center; margin-bottom: 40px;">🎉 Toast Notification Demo</h1>
+
+        <!-- Basic Toasts -->
+        <div class="demo-section">
+            <h2>Basic Toast Notifications</h2>
+            <div class="button-group">
+                <button class="demo-btn btn-success" onclick="toast.success('Operation completed successfully!')">
+                    Success Toast
+                </button>
+                <button class="demo-btn btn-error" onclick="toast.error('Something went wrong!')">
+                    Error Toast
+                </button>
+                <button class="demo-btn btn-warning" onclick="toast.warning('Please review your input')">
+                    Warning Toast
+                </button>
+                <button class="demo-btn btn-info" onclick="toast.info('Here is some information')">
+                    Info Toast
+                </button>
+            </div>
+            <div class="code-block">
+toast.success('Operation completed successfully!');<br>
+toast.error('Something went wrong!');<br>
+toast.warning('Please review your input');<br>
+toast.info('Here is some information');
+            </div>
+        </div>
+
+        <!-- Custom Duration -->
+        <div class="demo-section">
+            <h2>Custom Duration</h2>
+            <div class="button-group">
+                <button class="demo-btn btn-info" onclick="toast.info('This will stay for 2 seconds', 2000)">
+                    2 Second Toast
+                </button>
+                <button class="demo-btn btn-success" onclick="toast.success('This will stay for 8 seconds', 8000)">
+                    8 Second Toast
+                </button>
+                <button class="demo-btn btn-warning" onclick="toast.warning('This stays until you close it', 0)">
+                    Persistent Toast
+                </button>
+            </div>
+            <div class="code-block">
+toast.info('This will stay for 2 seconds', 2000);<br>
+toast.success('This will stay for 8 seconds', 8000);<br>
+toast.warning('This stays until you close it', 0);
+            </div>
+        </div>
+
+        <!-- Custom Toast -->
+        <div class="demo-section">
+            <h2>Custom Toast with Title</h2>
+            <div class="button-group">
+                <button class="demo-btn btn-custom" onclick="toast.custom('Custom Title', 'This is a custom message with a custom title', 'success')">
+                    Custom Success
+                </button>
+                <button class="demo-btn btn-custom" onclick="toast.custom('Important Notice', 'Please read this carefully', 'warning')">
+                    Custom Warning
+                </button>
+            </div>
+            <div class="code-block">
+toast.custom('Custom Title', 'This is a custom message', 'success');<br>
+toast.custom('Important Notice', 'Please read this carefully', 'warning');
+            </div>
+        </div>
+
+        <!-- Multiple Toasts -->
+        <div class="demo-section">
+            <h2>Multiple Toasts</h2>
+            <div class="button-group">
+                <button class="demo-btn btn-info" onclick="showMultipleToasts()">
+                    Show 4 Toasts
+                </button>
+                <button class="demo-btn btn-error" onclick="toast.clearAll()">
+                    Clear All Toasts
+                </button>
+            </div>
+            <div class="code-block">
+function showMultipleToasts() {<br>
+&nbsp;&nbsp;toast.success('First notification');<br>
+&nbsp;&nbsp;setTimeout(() => toast.info('Second notification'), 300);<br>
+&nbsp;&nbsp;setTimeout(() => toast.warning('Third notification'), 600);<br>
+&nbsp;&nbsp;setTimeout(() => toast.error('Fourth notification'), 900);<br>
+}<br><br>
+toast.clearAll(); // Removes all toasts
+            </div>
+        </div>
+
+        <!-- Promise Toast -->
+        <div class="demo-section">
+            <h2>Promise-based Toast (Async Operations)</h2>
+            <div class="button-group">
+                <button class="demo-btn btn-success" onclick="simulateSuccessOperation()">
+                    Simulate Success
+                </button>
+                <button class="demo-btn btn-error" onclick="simulateFailureOperation()">
+                    Simulate Failure
+                </button>
+            </div>
+            <div class="code-block">
+await toast.promise(<br>
+&nbsp;&nbsp;fetchData(),<br>
+&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;loading: 'Loading data...',<br>
+&nbsp;&nbsp;&nbsp;&nbsp;success: 'Data loaded successfully!',<br>
+&nbsp;&nbsp;&nbsp;&nbsp;error: 'Failed to load data'<br>
+&nbsp;&nbsp;}<br>
+);
+            </div>
+        </div>
+
+        <!-- Real-world Examples -->
+        <div class="demo-section">
+            <h2>Real-world Examples</h2>
+            <div class="button-group">
+                <button class="demo-btn btn-success" onclick="simulateEmployeeCreation()">
+                    Create Employee
+                </button>
+                <button class="demo-btn btn-info" onclick="simulateDataExport()">
+                    Export Data
+                </button>
+                <button class="demo-btn btn-warning" onclick="simulateValidation()">
+                    Validation Warning
+                </button>
+                <button class="demo-btn btn-error" onclick="simulateNetworkError()">
+                    Network Error
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="scripts/toast.js"></script>
+    <script>
+        function showMultipleToasts() {
+            toast.success('First notification');
+            setTimeout(() => toast.info('Second notification'), 300);
+            setTimeout(() => toast.warning('Third notification'), 600);
+            setTimeout(() => toast.error('Fourth notification'), 900);
+        }
+
+        async function simulateSuccessOperation() {
+            const promise = new Promise(resolve => setTimeout(resolve, 2000));
+            await toast.promise(promise, {
+                loading: 'Processing your request...',
+                success: 'Operation completed successfully!',
+                error: 'Operation failed'
+            });
+        }
+
+        async function simulateFailureOperation() {
+            const promise = new Promise((resolve, reject) => 
+                setTimeout(() => reject(new Error('Something went wrong')), 2000)
+            );
+            try {
+                await toast.promise(promise, {
+                    loading: 'Processing your request...',
+                    success: 'Operation completed!',
+                    error: 'Operation failed! Please try again.'
+                });
+            } catch (e) {
+                // Error already handled by toast.promise
+            }
+        }
+
+        async function simulateEmployeeCreation() {
+            const promise = new Promise(resolve => setTimeout(resolve, 1500));
+            await toast.promise(promise, {
+                loading: 'Creating employee...',
+                success: 'Employee "John Doe" created successfully!',
+                error: 'Failed to create employee'
+            });
+        }
+
+        async function simulateDataExport() {
+            const promise = new Promise(resolve => setTimeout(resolve, 2500));
+            await toast.promise(promise, {
+                loading: 'Exporting data to Excel...',
+                success: 'Data exported successfully! Download started.',
+                error: 'Export failed'
+            });
+        }
+
+        function simulateValidation() {
+            toast.warning('Please fill in all required fields before submitting');
+        }
+
+        function simulateNetworkError() {
+            toast.error('Network connection lost. Please check your internet connection.');
+        }
+    </script>
+</body>
+</html>

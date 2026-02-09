@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance - HRMS</title>
+    <link rel="icon" type="image/png" href="../assets/logo.png">
+    <link rel="stylesheet" href="../styles/main.css">
+    <link rel="stylesheet" href="../styles/toast.css">
+    <link rel="stylesheet" href="../styles/attendance-grid.css">
+    <style>
+        .view-toggle {
+            display: flex;
+            gap: 8px;
+        }
+        .view-toggle-btn {
+            padding: 8px 16px;
+            border: 1px solid var(--border-color);
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+        .view-toggle-btn.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+        .attendance-list-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .attendance-list-table th {
+            background: var(--bg-secondary);
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.875rem;
+            border-bottom: 2px solid var(--border-color);
+        }
+        .attendance-list-table td {
+            padding: 12px;
+            border-bottom: 1px solid var(--border-light);
+        }
+        .attendance-list-table tr:hover {
+            background: var(--bg-hover);
+        }
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            display: inline-block;
+        }
+        .status-present { background: #d4edda; color: #155724; }
+        .status-absent { background: #f8d7da; color: #721c24; }
+        .status-half-day { background: #fff3cd; color: #856404; }
+        .status-late { background: #ffeaa7; color: #d63031; }
+        .status-on-leave { background: #d1ecf1; color: #0c5460; }
+        .btn-icon {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.2rem;
+            padding: 4px 8px;
+        }
+        .btn-icon:hover {
+            opacity: 0.7;
+        }
+    </style>
+</head>
+<body>
+    <script>
+        window.onerror = function(msg, url, line, col, error) {
+            alert("JS Error: " + msg + "\nURL: " + url + "\nLine: " + line);
+            return false;
+        };
+    </script>
+    <div class="app-container">
+        <!-- Sidebar Overlay -->
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <img src="../assets/logo.png" alt="Soleos Logo" class="sidebar-logo">
+                <button class="sidebar-close-btn" id="sidebarClose">&times;</button>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-item"><a href="../index.html" class="nav-link"><i>📊</i> Dashboard</a></div>
+                <div class="nav-item"><a href="employees.html" class="nav-link"><i>👥</i> Employees</a></div>
+                <div class="nav-item"><a href="attendance.html" class="nav-link active"><i>📅</i> Attendance</a></div>
+                <div class="nav-item"><a href="leaves.html" class="nav-link"><i>🏖️</i> Leaves</a></div>
+                <div class="nav-item"><a href="holidays.html" class="nav-link"><i>🎉</i> Holidays</a></div>
+                <div class="nav-item"><a href="payroll.html" class="nav-link"><i>💰</i> Payroll</a></div>
+                <div class="nav-item"><a href="employee-salary.html" class="nav-link"><i>💵</i> Employee Salary</a></div>
+                <div class="nav-item"><a href="departments.html" class="nav-link"><i>🏢</i> Departments</a></div>
+                <div class="nav-item"><a href="designations.html" class="nav-link"><i>💼</i> Designations</a></div>
+                <div class="nav-item"><a href="appreciations.html" class="nav-link"><i>🏆</i> Appreciations</a></div>
+                <div class="nav-item"><a href="note.html" class="nav-link"><i>📝</i> Note</a></div>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="header">
+                <div class="header-left">
+                    <button class="hamburger-btn" id="sidebarToggle">
+                        ☰
+                    </button>
+                    <div class="header-title"><h1>Attendance Management</h1></div>
+                </div>
+                <div class="header-actions">
+                    <div class="user-info">
+                        <div class="user-avatar" id="userAvatar">A</div>
+                        <div>
+                            <div style="font-weight: 600;" id="userName">Admin</div>
+                            <div style="font-size: 0.75rem; color: var(--text-secondary);" id="userRole">Admin</div>
+                        </div>
+                    </div>
+                    <button class="btn btn-outline btn-sm" onclick="auth.logout()">Logout</button>
+                </div>
+            </header>
+
+            <div class="attendance-container">
+                <!-- Toolbar -->
+                <div class="attendance-toolbar">
+                    <button class="btn btn-primary" onclick="openMarkAttendanceModal()" id="addBtn">
+                        <span>+</span> Mark Attendance
+                    </button>
+                    <button class="btn btn-secondary" onclick="window.location.href='attendance-by-member.html'">
+                        <span>👤</span> Attendance by Member
+                    </button>
+                    <button class="btn btn-outline" onclick="openImportModal()">
+                        <span>📥</span> Import
+                    </button>
+                    <button class="btn btn-outline" onclick="exportAttendance()">
+                        <span>📤</span> Export
+                    </button>
+                    <div style="margin-left: auto; display: flex; gap: 8px;">
+                        <button class="view-toggle-btn active" id="gridViewBtn" onclick="switchView('grid')">
+                            📊 Grid View
+                        </button>
+                        <button class="view-toggle-btn" id="listViewBtn" onclick="switchView('list')">
+                            📋 List View
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Status Filters -->
+                <div class="status-filters">
+                    <span class="filter-label">Note:</span>
+                    <button class="filter-btn active" data-status="all" onclick="applyFilter('all')">
+                        ⭐ All
+                    </button>
+                    <button class="filter-btn" data-status="Present" onclick="applyFilter('Present')">
+                        ✓ Present
+                    </button>
+                    <button class="filter-btn" data-status="Half Day" onclick="applyFilter('Half Day')">
+                        🔸 Half Day
+                    </button>
+                    <button class="filter-btn" data-status="Late" onclick="applyFilter('Late')">
+                        ⏰ Late
+                    </button>
+                    <button class="filter-btn" data-status="Absent" onclick="applyFilter('Absent')">
+                        ✗ Absent
+                    </button>
+                    <button class="filter-btn" data-status="On Leave" onclick="applyFilter('On Leave')">
+                        🏖️ On Leave
+                    </button>
+                    <button class="filter-btn" data-status="holiday" onclick="applyFilter('holiday')">
+                        🎉 Holiday
+                    </button>
+                </div>
+
+                <!-- Month Navigation -->
+                <div class="month-navigation">
+                    <div class="month-title" id="monthTitle">January 2026</div>
+                    <div class="month-nav-buttons">
+                        <button class="month-nav-btn" onclick="navigateMonth(-1)">← Previous</button>
+                        <button class="month-nav-btn" onclick="navigateMonth(0)">Today</button>
+                        <button class="month-nav-btn" onclick="navigateMonth(1)">Next →</button>
+                    </div>
+                </div>
+
+                <!-- Attendance Grid View -->
+                <div class="attendance-grid-container" id="gridViewContainer">
+                    <div id="gridLoading" class="grid-loading">
+                        <div class="grid-loading-spinner"></div>
+                        <p>Loading attendance data...</p>
+                    </div>
+                    <table class="attendance-grid" id="attendanceGrid" style="display: none;">
+                        <thead id="gridHeader">
+                            <!-- Dynamic header will be inserted here -->
+                        </thead>
+                        <tbody id="gridBody">
+                            <!-- Dynamic rows will be inserted here -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Attendance List View -->
+                <div class="attendance-list-container" id="listViewContainer" style="display: none;">
+                    <div id="listLoading" class="grid-loading">
+                        <div class="grid-loading-spinner"></div>
+                        <p>Loading attendance data...</p>
+                    </div>
+                    <table class="attendance-list-table" id="attendanceListTable" style="display: none;">
+                        <thead>
+                            <tr>
+                                <th>Employee</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                                <th>Check In</th>
+                                <th>Check In Location</th>
+                                <th>Working From</th>
+                                <th>Check Out</th>
+                                <th>Check Out Location</th>
+                                <th>Working From Out</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="listBody">
+                            <!-- Dynamic rows will be inserted here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Mark Attendance Modal -->
+    <div class="modal" id="attendanceModal">
+        <div class="modal-content modal-content-wide" style="max-width: 1800px;">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modalTitle">Mark Attendance</h3>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="attendanceForm">
+                    <input type="hidden" id="attendanceId">
+                    
+                    <!-- Section Header -->
+                    <div class="section-header">
+                        <h4>Attendance Details</h4>
+                    </div>
+
+                    <!-- Department and Employees Row -->
+                    <div class="form-row-2col">
+                        <div class="form-group">
+                            <label class="form-label">Department</label>
+                            <select id="departmentId" class="form-control" onchange="filterEmployeesByDepartment()">
+                                <option value="">--</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Employees *</label>
+                            <select id="employeeId" class="form-control" required>
+                                <option value="">Nothing selected</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Mark Attendance By Radio Buttons -->
+                    <div class="form-group">
+                        <label class="form-label">Mark Attendance By</label>
+                        <div class="radio-group">
+                            <label class="radio-label">
+                                <input type="radio" name="attendanceBy" value="month" checked onchange="toggleDateFields()">
+                                <span>Month</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="attendanceBy" value="date" onchange="toggleDateFields()">
+                                <span>Date</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Year and Month Row -->
+                    <div class="form-row-2col" id="monthFields">
+                        <div class="form-group">
+                            <label class="form-label">Year *</label>
+                            <select id="attendanceYear" class="form-control">
+                                <option value="2026">2026</option>
+                                <option value="2025">2025</option>
+                                <option value="2024">2024</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Month *</label>
+                            <select id="attendanceMonth" class="form-control">
+                                <option value="1">January</option>
+                                <option value="2">February</option>
+                                <option value="3">March</option>
+                                <option value="4">April</option>
+                                <option value="5">May</option>
+                                <option value="6">June</option>
+                                <option value="7">July</option>
+                                <option value="8">August</option>
+                                <option value="9">September</option>
+                                <option value="10">October</option>
+                                <option value="11">November</option>
+                                <option value="12">December</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Date Field (hidden by default) -->
+                    <div class="form-group" id="dateField" style="display: none;">
+                        <label class="form-label">Date *</label>
+                        <input type="date" id="attendanceDate" class="form-control">
+                    </div>
+
+                    <!-- Clock In and Location Row -->
+                    <div class="form-row-2col">
+                        <div class="form-group">
+                            <label class="form-label">Clock In *</label>
+                            <input type="time" id="checkInTime" class="form-control" value="08:00">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Location</label>
+                            <select id="checkInLocation" class="form-control">
+                                <option value="Worksite">Worksite</option>
+                                <option value="Office">Office</option>
+                                <option value="Remote">Remote</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Working From Row -->
+                    <div class="form-row-2col">
+                        <div class="form-group">
+                            <label class="form-label">Working From *</label>
+                            <select id="workingFrom" class="form-control">
+                                <option value="Office">Office</option>
+                                <option value="Home">Home</option>
+                                <option value="Client Site">Client Site</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <!-- Empty column for alignment -->
+                        </div>
+                    </div>
+
+                    <!-- Clock Out and Location Row -->
+                    <div class="form-row-2col">
+                        <div class="form-group">
+                            <label class="form-label">Clock Out</label>
+                            <input type="time" id="checkOutTime" class="form-control" value="18:00">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Location</label>
+                            <select id="checkOutLocation" class="form-control">
+                                <option value="Worksite">Worksite</option>
+                                <option value="Office">Office</option>
+                                <option value="Remote">Remote</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Working From Row (Clock Out) -->
+                    <div class="form-row-2col">
+                        <div class="form-group">
+                            <label class="form-label">Working From *</label>
+                            <select id="workingFromOut" class="form-control">
+                                <option value="Office">Office</option>
+                                <option value="Home">Home</option>
+                                <option value="Client Site">Client Site</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <!-- Empty column for alignment -->
+                        </div>
+                    </div>
+
+                    <!-- Status Dropdown -->
+                    <div class="form-group">
+                        <label class="form-label">Status *</label>
+                        <select id="attendanceStatus" class="form-control" required>
+                            <option value="Present">✓ Present</option>
+                            <option value="Half Day">◐ Half Day</option>
+                            <option value="Late">⏰ Late</option>
+                            <option value="Absent">✗ Absent</option>
+                            <option value="On Leave">🏖️ On Leave</option>
+                        </select>
+                    </div>
+
+                    <!-- Attendance Overwrite Checkbox -->
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="attendanceOverwrite">
+                            <span>Attendance Overwrite 
+                                <span class="info-icon" title="Check this to overwrite existing attendance records">ⓘ</span>
+                            </span>
+                        </label>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="saveAttendance()">✓ Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Import Modal -->
+    <div class="modal" id="importModal">
+        <div class="modal-content import-modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Import Attendance</h3>
+                <button class="modal-close" onclick="closeImportModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="file-upload-area" id="uploadArea" onclick="document.getElementById('csvFile').click()">
+                    <div class="upload-icon">📁</div>
+                    <div class="upload-text">Click to upload or drag and drop</div>
+                    <div class="upload-hint">CSV file (max 5MB)</div>
+                </div>
+                <input type="file" id="csvFile" accept=".csv" style="display: none;" onchange="handleFileSelect(event)">
+                <div id="fileInfo" style="display: none;" class="file-info">
+                    <div class="file-icon">📄</div>
+                    <div class="file-details">
+                        <div class="file-name" id="fileName"></div>
+                        <div class="file-size" id="fileSize"></div>
+                    </div>
+                </div>
+                <div style="margin-top: 1rem;">
+                    <a href="#" onclick="downloadSampleCSV()" style="color: var(--primary-color); text-decoration: none;">
+                        📥 Download Sample CSV Template
+                    </a>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeImportModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="processImport()" id="importBtn" disabled>Import</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="../scripts/toast.js"></script>
+    <script src="../scripts/auth.js"></script>
+    <script src="../scripts/sidebar.js"></script>
+    <script src="../scripts/role-manager.js"></script>
+    <script src="../scripts/api.js"></script>
+    <script src="../scripts/attendance-grid.js"></script>
+    <script src="../scripts/attendance-list-view.js"></script>
+</body>
+</html>

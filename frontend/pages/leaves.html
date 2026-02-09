@@ -1,0 +1,1296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leaves - HRMS</title>
+    <link rel="icon" type="image/png" href="../assets/logo.png">
+    <link rel="stylesheet" href="../styles/main.css">
+    <link rel="stylesheet" href="../styles/toast.css">
+    <link rel="stylesheet" href="../styles/role-selector.css">
+    <style>
+        /* Leaves Page Specific Styles */
+        .leaves-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-lg);
+            gap: var(--spacing-md);
+            flex-wrap: wrap;
+        }
+
+        .leaves-filters {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-md);
+            flex: 1;
+        }
+
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+        }
+
+        .filter-group label {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            white-space: nowrap;
+        }
+
+        .filter-group select,
+        .filter-group input {
+            padding: 0.5rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            font-size: 0.875rem;
+        }
+
+        .search-box {
+            position: relative;
+            flex: 1;
+            max-width: 300px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 0.5rem 0.5rem 0.5rem 2rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            font-size: 0.875rem;
+        }
+
+        .search-box::before {
+            content: "🔍";
+            position: absolute;
+            left: 0.5rem;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 0.875rem;
+        }
+
+        .leaves-actions {
+            display: flex;
+            gap: var(--spacing-sm);
+        }
+
+        /* Table Styles */
+        .leaves-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .leaves-table thead {
+            background-color: var(--bg-color);
+        }
+
+        .leaves-table th {
+            padding: var(--spacing-md);
+            text-align: left;
+            font-weight: 600;
+            color: var(--text-secondary);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .leaves-table td {
+            padding: var(--spacing-md);
+            border-bottom: 1px solid var(--border-color);
+            vertical-align: middle;
+        }
+
+        .leaves-table tbody tr:hover {
+            background-color: #f9fafb;
+        }
+
+        /* Checkbox */
+        .checkbox-cell {
+            width: 40px;
+            text-align: center;
+        }
+
+        .checkbox-cell input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+            accent-color: var(--primary-color);
+        }
+
+        /* Employee Cell */
+        .employee-cell {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-md);
+        }
+
+        .employee-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            background-color: var(--primary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.875rem;
+            flex-shrink: 0;
+        }
+
+        .employee-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .employee-name {
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .employee-role {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        /* Duration Badge */
+        .duration-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .duration-badge.half-day {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+
+        .duration-badge.full-day {
+            background-color: #dbeafe;
+            color: #1e40af;
+        }
+
+        /* Leave Type Badge */
+        .leave-type-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .leave-type-badge.sick {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+
+        .leave-type-badge.casual {
+            background-color: #dbeafe;
+            color: #1e40af;
+        }
+
+        .leave-type-badge.paid {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+
+        .leave-type-badge.unpaid {
+            background-color: #f3f4f6;
+            color: #4b5563;
+        }
+
+        /* Paid Icon */
+        .paid-icon {
+            font-size: 1.25rem;
+        }
+
+        .paid-icon.yes {
+            color: var(--secondary-color);
+        }
+
+        .paid-icon.no {
+            color: var(--danger-color);
+        }
+
+        /* Action Dropdown */
+        .action-dropdown {
+            position: relative;
+        }
+
+        .action-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0.25rem 0.5rem;
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            border-radius: var(--radius-sm);
+        }
+
+        .action-btn:hover {
+            background-color: var(--bg-color);
+        }
+
+        .action-menu {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 100%;
+            background-color: white;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-lg);
+            min-width: 150px;
+            z-index: 100;
+            margin-top: 0.25rem;
+        }
+
+        .action-menu.active {
+            display: block;
+        }
+
+        .action-menu-item {
+            padding: 0.625rem 1rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+            color: var(--text-primary);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+        }
+
+        .action-menu-item:last-child {
+            border-bottom: none;
+        }
+
+        .action-menu-item:hover {
+            background-color: var(--bg-color);
+        }
+
+        .action-menu-item.danger {
+            color: var(--danger-color);
+        }
+
+        .action-menu-item.success {
+            color: var(--secondary-color);
+        }
+
+        .action-menu-item.warning {
+            color: #f59e0b;
+        }
+
+        .action-menu-item svg {
+            flex-shrink: 0;
+        }
+
+        /* New Leave Form Styles */
+        .form-control-static {
+            padding: 0.625rem;
+            background-color: #f9fafb;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            color: var(--text-primary);
+            min-height: 42px;
+        }
+
+        .new-leave-modal .modal-content {
+            max-width: 1000px;
+        }
+
+        .section-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .form-row.three-col {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: var(--spacing-lg);
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .form-row.two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--spacing-lg);
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .required {
+            color: var(--danger-color);
+        }
+
+        .input-with-button {
+            display: flex;
+            gap: var(--spacing-sm);
+            align-items: center;
+        }
+
+        .input-with-button .form-control {
+            flex: 1;
+        }
+
+        .btn-add {
+            padding: 0.625rem 1rem;
+            background-color: white;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            font-size: 0.875rem;
+            color: var(--text-primary);
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+
+        .btn-add:hover {
+            background-color: var(--bg-color);
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .radio-group {
+            display: flex;
+            gap: var(--spacing-md);
+            flex-wrap: wrap;
+        }
+
+        .radio-label {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+            cursor: pointer;
+            font-size: 0.875rem;
+            color: var(--text-primary);
+        }
+
+        .radio-label input[type="radio"] {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+            accent-color: var(--primary-color);
+        }
+
+        .radio-label span {
+            user-select: none;
+        }
+
+        .date-input-wrapper {
+            position: relative;
+        }
+
+        .date-input {
+            padding-right: 2.5rem;
+        }
+
+        .calendar-icon {
+            position: absolute;
+            right: 0.875rem;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.125rem;
+            pointer-events: none;
+            color: var(--text-secondary);
+        }
+
+        .date-range-wrapper {
+            margin-top: var(--spacing-sm);
+        }
+
+        .date-range-inputs {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+        }
+
+        .date-separator {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        .textarea-wrapper {
+            position: relative;
+        }
+
+        .textarea-wrapper textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .btn-suggestions {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+            color: white;
+            border: none;
+            border-radius: var(--radius-md);
+            font-size: 0.75rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 2px 4px rgba(6, 182, 212, 0.2);
+        }
+
+        .btn-suggestions:hover {
+            background: linear-gradient(135deg, #0891b2 0%, #0e7490 100%);
+            box-shadow: 0 4px 8px rgba(6, 182, 212, 0.3);
+            transform: translateY(-1px);
+        }
+
+        .file-upload-zone {
+            position: relative;
+            border: 2px dashed var(--border-color);
+            border-radius: var(--radius-md);
+            padding: var(--spacing-xl);
+            text-align: center;
+            background-color: #fafafa;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .file-upload-zone:hover {
+            border-color: var(--primary-color);
+            background-color: #f0f9ff;
+        }
+
+        .file-upload-zone.drag-over {
+            border-color: var(--primary-color);
+            background-color: #dbeafe;
+        }
+
+        .file-input {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .file-upload-content {
+            pointer-events: none;
+        }
+
+        .file-upload-text {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            margin: 0;
+        }
+
+        .info-icon {
+            display: inline-block;
+            margin-left: var(--spacing-xs);
+            color: var(--text-secondary);
+            cursor: help;
+            font-size: 0.875rem;
+        }
+
+        .file-preview {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: var(--spacing-md);
+            background-color: white;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+        }
+
+        .file-info {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-md);
+        }
+
+        .file-icon {
+            font-size: 1.5rem;
+        }
+
+        .file-details {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .file-name {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .file-size {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .file-remove {
+            background: none;
+            border: none;
+            color: var(--danger-color);
+            cursor: pointer;
+            font-size: 1.25rem;
+            padding: 0.25rem;
+            transition: all 0.2s;
+        }
+
+        .file-remove:hover {
+            transform: scale(1.2);
+        }
+
+        .btn-icon {
+            margin-right: var(--spacing-xs);
+        }
+
+        .btn-text {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            padding: 0.625rem 1rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+
+        .btn-text:hover {
+            color: var(--text-primary);
+        }
+
+        @media (max-width: 768px) {
+            .form-row.three-col,
+            .form-row.two-col {
+                grid-template-columns: 1fr;
+            }
+            
+            .radio-group {
+                flex-direction: column;
+            }
+            
+            .btn-suggestions {
+                position: static;
+                margin-top: var(--spacing-sm);
+                width: 100%;
+            }
+        }
+
+        /* ========== MY LEAVES SECTION STYLES ========== */
+        
+        /* Profile Card */
+        .profile-card {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-lg);
+            padding: var(--spacing-xl);
+            background: white;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .profile-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .profile-avatar img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .profile-info {
+            flex: 1;
+        }
+
+        .profile-name {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .profile-role {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .profile-meta {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            margin-top: var(--spacing-sm);
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            flex-wrap: wrap;
+        }
+
+        .profile-meta-item {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+        }
+
+        /* Remaining Leaves Card */
+        .remaining-leaves-card {
+            background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+            color: white;
+            padding: var(--spacing-xl);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            text-align: center;
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .remaining-leaves-label {
+            font-size: 0.875rem;
+            opacity: 0.9;
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .remaining-leaves-count {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .remaining-leaves-icon {
+            font-size: 2rem;
+            margin-bottom: var(--spacing-sm);
+        }
+
+        /* Leave Quota Table */
+        .quota-table-container {
+            background: white;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+            overflow: hidden;
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .quota-table-header {
+            padding: var(--spacing-lg);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .quota-table-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .quota-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .quota-table thead {
+            background-color: #f9fafb;
+        }
+
+        .quota-table th {
+            padding: var(--spacing-md);
+            text-align: left;
+            font-weight: 600;
+            color: var(--text-secondary);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .quota-table td {
+            padding: var(--spacing-md);
+            border-bottom: 1px solid var(--border-color);
+            vertical-align: middle;
+        }
+
+        .quota-table tbody tr:hover {
+            background-color: #f9fafb;
+        }
+
+        .quota-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .leave-type-cell {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+        }
+
+        .leave-type-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .leave-type-indicator.casual {
+            background-color: #3b82f6;
+        }
+
+        .leave-type-indicator.sick {
+            background-color: #ef4444;
+        }
+
+        .leave-type-indicator.earned,
+        .leave-type-indicator.paid {
+            background-color: #10b981;
+        }
+
+        .leave-type-name {
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .quota-number {
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .quota-number.zero {
+            color: var(--text-secondary);
+        }
+
+        .quota-number.negative {
+            color: var(--danger-color);
+        }
+
+        .quota-number.positive {
+            color: var(--secondary-color);
+        }
+
+        /* Loading State */
+        .loading-state {
+            text-align: center;
+            padding: var(--spacing-xl);
+            color: var(--text-secondary);
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 4px solid var(--border-color);
+            border-top-color: var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: var(--spacing-xl);
+            color: var(--text-secondary);
+        }
+
+        .empty-state-icon {
+            font-size: 3rem;
+            margin-bottom: var(--spacing-md);
+        }
+
+        /* Responsive adjustments for My Leaves section */
+        @media (max-width: 768px) {
+            .profile-card {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .quota-table {
+                font-size: 0.875rem;
+            }
+
+            .quota-table th,
+            .quota-table td {
+                padding: var(--spacing-sm);
+            }
+
+            .remaining-leaves-count {
+                font-size: 2rem;
+            }
+        }
+        
+        /* Hide sidebar and header when in iframe */
+        body.in-iframe .sidebar,
+        body.in-iframe .sidebar-overlay,
+        body.in-iframe .header {
+            display: none !important;
+        }
+
+        body.in-iframe .main-content {
+            margin-left: 0 !important;
+            width: 100% !important;
+        }
+
+        body.in-iframe .content-area {
+            padding-top: 0 !important;
+        }
+    </style>
+    <script>
+        // Detect if page is loaded in iframe
+        if (window.self !== window.top) {
+            document.addEventListener('DOMContentLoaded', function() {
+                document.body.classList.add('in-iframe');
+            });
+        }
+    </script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Overlay -->
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <img src="../assets/logo.png" alt="Soleos Logo" class="sidebar-logo">
+                <button class="sidebar-close-btn" id="sidebarClose">&times;</button>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-item"><a href="../index.html" class="nav-link"><i>📊</i> Dashboard</a></div>
+                <div class="nav-item"><a href="employees.html" class="nav-link"><i>👥</i> Employees</a></div>
+                <div class="nav-item"><a href="attendance.html" class="nav-link"><i>📅</i> Attendance</a></div>
+                <div class="nav-item"><a href="leaves.html" class="nav-link active"><i>🏖️</i> Leaves</a></div>
+                <div class="nav-item"><a href="holidays.html" class="nav-link"><i>🎉</i> Holidays</a></div>
+                <div class="nav-item"><a href="payroll.html" class="nav-link"><i>💰</i> Payroll</a></div>
+                <div class="nav-item"><a href="employee-salary.html" class="nav-link"><i>💵</i> Employee Salary</a></div>
+                <div class="nav-item"><a href="departments.html" class="nav-link"><i>🏢</i> Departments</a></div>
+                <div class="nav-item"><a href="designations.html" class="nav-link"><i>💼</i> Designations</a></div>
+                <div class="nav-item"><a href="appreciations.html" class="nav-link"><i>🏆</i> Appreciations</a></div>
+                <div class="nav-item"><a href="note.html" class="nav-link"><i>📝</i> Note</a></div>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="header">
+                <div class="header-left">
+                    <button class="hamburger-btn" id="sidebarToggle">
+                        ☰
+                    </button>
+                    <div class="header-title"><h1>Leave Management</h1></div>
+                </div>
+                <div class="header-actions">
+                    <div class="role-selector">
+                        <label for="roleDropdown">Current Role:</label>
+                        <select id="roleDropdown">
+                            <option value="admin">Admin</option>
+                            <option value="hr">HR</option>
+                            <option value="manager">Manager</option>
+                            <option value="employee">Employee</option>
+                        </select>
+                    </div>
+                    <span class="role-badge" id="roleBadge">Employee</span>
+                </div>
+            </header>
+
+            <div class="content-area">
+                <!-- ========== MY LEAVES SECTION (Hidden by default) ========== -->
+                <div id="myLeavesSection" style="display:none;">
+                    
+                    <!-- Profile Card -->
+                    <div class="card profile-card" id="profileCard">
+                        <div class="profile-avatar" id="profileAvatar">
+                            <!-- Will be populated by JS -->
+                        </div>
+                        <div class="profile-info">
+                            <div class="profile-name" id="profileName">Loading...</div>
+                            <div class="profile-role" id="profileRole">Loading...</div>
+                            <div class="profile-meta">
+                                <div class="profile-meta-item">
+                                    <span>📧</span>
+                                    <span id="profileEmail">-</span>
+                                </div>
+                                <div class="profile-meta-item">
+                                    <span>📞</span>
+                                    <span id="profilePhone">-</span>
+                                </div>
+                                <div class="profile-meta-item">
+                                    <span>📅</span>
+                                    <span>Last login at <span id="profileLastLogin">-</span></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Remaining Leaves Card -->
+                    <div class="card remaining-leaves-card">
+                        <div class="remaining-leaves-icon">🏖️</div>
+                        <div class="remaining-leaves-label">Remaining Leaves</div>
+                        <div class="remaining-leaves-count" id="remainingLeavesCount">-</div>
+                    </div>
+
+                    <!-- Leaves Quota Table -->
+                    <div class="card quota-table-container">
+                        <div class="quota-table-header">
+                            <h3 class="quota-table-title">Leaves Quota</h3>
+                        </div>
+                        <div class="table-container">
+                            <table class="quota-table">
+                                <thead>
+                                    <tr>
+                                        <th>Leave Type</th>
+                                        <th>No of Leaves</th>
+                                        <th>Monthly Limit</th>
+                                        <th>Total Leaves Taken</th>
+                                        <th>Remaining Leaves</th>
+                                        <th>Over Utilized</th>
+                                        <th>Unused Leaves</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="quotaTableBody">
+                                    <tr>
+                                        <td colspan="7" class="loading-state">
+                                            <div class="loading-spinner"></div>
+                                            <div style="margin-top: var(--spacing-md);">Loading leave quota...</div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+                <!-- ========== END MY LEAVES SECTION ========== -->
+
+                <!-- ========== LEAVE MANAGEMENT SECTION ========== -->
+                
+                <!-- Toolbar -->
+                <div class="card">
+                    <div class="leaves-toolbar">
+                        <div class="leaves-filters">
+                            <div class="filter-group">
+                                <label>Duration:</label>
+                                <input type="date" id="filterFromDate" class="form-control" onchange="loadLeaves()">
+                                <span style="color: var(--text-secondary);">To</span>
+                                <input type="date" id="filterToDate" class="form-control" onchange="loadLeaves()">
+                            </div>
+                            <div class="search-box">
+                                <input type="text" id="searchInput" placeholder="Start typing to search" onkeyup="handleSearch()">
+                            </div>
+                        </div>
+                        <div class="leaves-actions">
+                            <button class="btn btn-secondary" onclick="scrollToMyLeaves()">📋 My Leaves</button>
+                            <button class="btn btn-primary" onclick="openNewLeaveModal()">+ New Leave</button>
+                            <button class="btn btn-outline" onclick="exportLeaves()">📤 Export</button>
+                        </div>
+                    </div>
+
+                    <!-- Additional Filters (Always Visible) -->
+                    <div id="additionalFilters" style="margin-top: var(--spacing-md); padding-top: var(--spacing-md); border-top: 1px solid var(--border-color);">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Status</label>
+                                <select id="filterStatus" class="form-control" onchange="loadLeaves()">
+                                    <option value="">All Status</option>
+                                    <option value="Pending">Pending</option>
+                                    <option value="Approved">Approved</option>
+                                    <option value="Rejected">Rejected</option>
+                                </select>
+                            </div>
+                            <div class="form-group hr-only">
+                                <label class="form-label">Employee</label>
+                                <select id="filterEmployee" class="form-control" onchange="loadLeaves()">
+                                    <option value="">All Employees</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Leave Type</label>
+                                <select id="filterLeaveType" class="form-control" onchange="loadLeaves()">
+                                    <option value="">All Types</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Leaves Table -->
+                <div class="card">
+                    <div class="table-container">
+                        <table class="leaves-table">
+                            <thead>
+                                <tr>
+                                    <th class="checkbox-cell">
+                                        <input type="checkbox" id="selectAll" onchange="toggleSelectAll()">
+                                    </th>
+                                    <th>Employee</th>
+                                    <th>Leave Date</th>
+                                    <th>Duration</th>
+                                    <th>Leave Status</th>
+                                    <th>Leave Type</th>
+                                    <th>Paid</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="leavesTable">
+                                <tr><td colspan="8" class="text-center">Loading...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Apply Leave Modal -->
+    <div class="modal" id="leaveModal">
+        <div class="modal-content" style="width: 1200px" >
+            <div class="modal-header">
+                <h3 class="modal-title">Apply Leave</h3>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="leaveForm">
+                    <div class="form-group">
+                        <label class="form-label">Employee *</label>
+                        <select id="employeeId" class="form-control" required>
+                            <option value="">Select Employee</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Leave Type *</label>
+                        <select id="leaveTypeId" class="form-control" required>
+                            <option value="">Select Leave Type</option>
+                        </select>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">From Date *</label>
+                            <input type="date" id="fromDate" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">To Date *</label>
+                            <input type="date" id="toDate" class="form-control" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Reason *</label>
+                        <textarea id="reason" class="form-control" rows="3" required></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="saveLeave()">Apply</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Approve/Reject Modal -->
+    <div class="modal" id="statusModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Update Leave Status</h3>
+                <button class="modal-close" onclick="closeStatusModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="statusForm">
+                    <input type="hidden" id="statusLeaveId">
+                    <div class="form-group">
+                        <label class="form-label">Status *</label>
+                        <select id="leaveStatus" class="form-control" required>
+                            <option value="Approved">Approve</option>
+                            <option value="Rejected">Reject</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Rejection Reason (if rejecting)</label>
+                        <textarea id="rejectionReason" class="form-control" rows="3"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeStatusModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="updateStatus()">Update</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- New Leave Modal -->
+    <div class="modal new-leave-modal" id="newLeaveModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Assign Leave</h3>
+                <button class="modal-close" onclick="closeNewLeaveModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="newLeaveForm">
+                    <input type="hidden" id="newLeaveId">
+                    <!-- Row 1: Member, Leave Type, Status -->
+                    <div class="form-row three-col">
+                        <div class="form-group">
+                            <label class="form-label">Choose Member <span class="required">*</span></label>
+                            <select id="newMemberId" class="form-control" required>
+                                <option value="">--</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Leave Type <span class="required">*</span></label>
+                            <div class="input-with-button">
+                                <select id="newLeaveTypeId" class="form-control" required>
+                                    <option value="">--</option>
+                                </select>
+                                <button type="button" class="btn-add" onclick="addLeaveType()">Add</button>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Status</label>
+                            <select id="newLeaveStatus" class="form-control">
+                                <option value="Pending">Pending</option>
+                                <option value="Approved">Approved</option>
+                                <option value="Rejected">Rejected</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Row 2: Duration and Date -->
+                    <div class="form-row two-col">
+                        <div class="form-group">
+                            <label class="form-label">Select Duration</label>
+                            <div class="radio-group">
+                                <label class="radio-label">
+                                    <input type="radio" name="newDuration" value="full-day" checked onchange="handleNewDurationChange()">
+                                    <span>Full Day</span>
+                                </label>
+                                <label class="radio-label">
+                                    <input type="radio" name="newDuration" value="multiple" onchange="handleNewDurationChange()">
+                                    <span>Multiple</span>
+                                </label>
+                                <label class="radio-label">
+                                    <input type="radio" name="newDuration" value="first-half" onchange="handleNewDurationChange()">
+                                    <span>First Half</span>
+                                </label>
+                                <label class="radio-label">
+                                    <input type="radio" name="newDuration" value="second-half" onchange="handleNewDurationChange()">
+                                    <span>Second Half</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Date</label>
+                            <div class="date-input-wrapper" id="newSingleDateWrapper">
+                                <input type="date" id="newSingleDate" class="form-control date-input" required>
+                                <span class="calendar-icon">📅</span>
+                            </div>
+                            
+                            <!-- Date range for multiple days (hidden by default) -->
+                            <div id="newDateRangeWrapper" class="date-range-wrapper" style="display: none;">
+                                <div class="date-range-inputs">
+                                    <input type="date" id="newFromDate" class="form-control date-input">
+                                    <span class="date-separator">to</span>
+                                    <input type="date" id="newToDate" class="form-control date-input">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Row 3: Reason -->
+                    <div class="form-group">
+                        <label class="form-label">Reason for absence <span class="required">*</span></label>
+                        <div class="textarea-wrapper">
+                            <textarea id="newReason" class="form-control" rows="4" placeholder="e.g. Feeling not well" required></textarea>
+                            
+                        </div>
+                    </div>
+
+                    <!-- Row 4: File Upload -->
+                    <div class="form-group">
+                        <label class="form-label">
+                            Add File 
+                            <span class="info-icon" title="Upload supporting documents (max 5MB)">ℹ️</span>
+                        </label>
+                        <div class="file-upload-zone" id="newFileUploadZone">
+                            <input type="file" id="newFileInput" class="file-input" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" onchange="handleNewFileSelect(event)">
+                            <div class="file-upload-content" id="newFileUploadContent">
+                                <p class="file-upload-text">Choose a file</p>
+                            </div>
+                            <div id="newFilePreview" class="file-preview" style="display: none;"></div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-text" onclick="closeNewLeaveModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="saveNewLeave()">
+                    <span class="btn-icon">✓</span> Save
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="../scripts/toast.js"></script>
+
+    <!-- View Leave Modal -->
+    <div class="modal" id="viewLeaveModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Leave Details</h3>
+                <button class="modal-close" onclick="closeViewModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-row two-col">
+                    <div class="form-group">
+                        <label class="form-label">Employee</label>
+                        <div id="viewEmployeeName" class="form-control-static"></div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Leave Type</label>
+                        <div id="viewLeaveType" class="form-control-static"></div>
+                    </div>
+                </div>
+                <div class="form-row two-col">
+                    <div class="form-group">
+                        <label class="form-label">From Date</label>
+                        <div id="viewFromDate" class="form-control-static"></div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">To Date</label>
+                        <div id="viewToDate" class="form-control-static"></div>
+                    </div>
+                </div>
+                <div class="form-row two-col">
+                    <div class="form-group">
+                        <label class="form-label">Duration</label>
+                        <div id="viewDuration" class="form-control-static"></div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Status</label>
+                        <div id="viewStatus" class="form-control-static"></div>
+                    </div>
+                </div>
+                 <div class="form-group">
+                    <label class="form-label">Reason</label>
+                    <div id="viewReason" class="form-control-static" style="min-height: 80px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="../scripts/toast.js"></script>
+    <script src="../scripts/sidebar.js"></script>
+    <script src="../scripts/role-manager.js"></script>
+    <script src="../scripts/auth.js"></script>
+    <script src="../scripts/api.js"></script>
+    <script src="../scripts/leaves.js"></script>
+</body>
+</html>

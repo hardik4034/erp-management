@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - HRMS</title>
+    <link rel="icon" type="image/png" href="assets/logo.png">
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/toast.css">
+    <link rel="stylesheet" href="styles/role-selector.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Overlay -->
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <img src="assets/logo.png" alt="Soleos Logo" class="sidebar-logo">
+                <button class="sidebar-close-btn" id="sidebarClose">&times;</button>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-item">
+                    <a href="/index.html" class="nav-link active">
+                        <i>📊</i> Dashboard
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="/pages/employees.html" class="nav-link">
+                        <i>👥</i> Employees
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="/pages/attendance.html" class="nav-link">
+                        <i>📅</i> Attendance
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="/pages/leaves.html" class="nav-link">
+                        <i>🏖️</i> Leaves
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="/pages/holidays.html" class="nav-link">
+                        <i>🎉</i> Holidays
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="/pages/payroll.html" class="nav-link">
+                        <i>💰</i> Payroll
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="/pages/employee-salary.html" class="nav-link">
+                        <i>💵</i> Employee Salary
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="/pages/departments.html" class="nav-link">
+                        <i>🏢</i> Departments
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="/pages/designations.html" class="nav-link">
+                        <i>💼</i> Designations
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="/pages/appreciations.html" class="nav-link">
+                        <i>🏆</i> Appreciations
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="/pages/note.html" class="nav-link">
+                        <i>📝</i> Note
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="/pages/biometric-settings.html" class="nav-link">
+                        <i>🔐</i> Biometric Settings
+                    </a>
+                </div>
+
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="header">
+                <div class="header-left">
+                    <button class="hamburger-btn" id="sidebarToggle">
+                        ☰
+                    </button>
+                    <div class="header-title">
+                        <h1>Dashboard</h1>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <div class="role-selector">
+                        <label for="roleDropdown">Current Role:</label>
+                        <select id="roleDropdown">
+                            <option value="admin">Admin</option>
+                            <option value="hr">HR</option>
+                            <option value="manager">Manager</option>
+                            <option value="employee">Employee</option>
+                        </select>
+                    </div>
+                    <span class="role-badge" id="roleBadge">Employee</span>
+                </div>
+            </header>
+
+            <!-- Content Area -->
+            <div class="content-area">
+                <!-- Stats Cards -->
+                <div class="stats-grid" id="statsGrid">
+                    <div class="stat-card" id="cardEmployees">
+                        <div class="stat-value" id="totalEmployees">0</div>
+                        <div class="stat-label" id="labelEmployees">Total Employees</div>
+                    </div>
+                    <div class="stat-card success" id="cardAttendance">
+                        <div class="stat-value" id="presentToday">0</div>
+                        <div class="stat-label" id="labelAttendance">Present Today</div>
+                    </div>
+                    <div class="stat-card warning" id="cardLeaves">
+                        <div class="stat-value" id="pendingLeaves">0</div>
+                        <div class="stat-label" id="labelLeaves">Pending Leaves</div>
+                    </div>
+                    <div class="stat-card danger" id="cardDepartments">
+                        <div class="stat-value" id="totalDepartments">0</div>
+                        <div class="stat-label">Departments</div>
+                    </div>
+                </div>
+
+                <!-- Recent Employees -->
+                <div class="card" id="sectionRecentEmployees">
+                    <div class="card-header">
+                        <h3 class="card-title" id="titleRecentEmployees">Recent Employees</h3>
+                        <a href="/pages/employees.html" class="btn btn-primary btn-sm">View All</a>
+                    </div>
+                    <div class="table-container">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Employee Code</th>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Department</th>
+                                    <th>Designation</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recentEmployeesTable">
+                                <tr>
+                                    <td colspan="6" class="text-center">Loading...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Pending Leaves -->
+                <div class="card" id="sectionPendingLeaves">
+                    <div class="card-header">
+                        <h3 class="card-title" id="titlePendingLeaves">Pending Leave Requests</h3>
+                        <a href="/pages/leaves.html" class="btn btn-primary btn-sm">View All</a>
+                    </div>
+                    <div class="table-container">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Employee</th>
+                                    <th>Leave Type</th>
+                                    <th>From Date</th>
+                                    <th>To Date</th>
+                                    <th>Reason</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="pendingLeavesTable">
+                                <tr>
+                                    <td colspan="6" class="text-center">Loading...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="scripts/toast.js"></script>
+    <script src="scripts/sidebar.js"></script>
+    <script src="scripts/role-manager.js"></script>
+    <script src="scripts/api.js"></script>
+    <script>
+        // Initialize Role Change Listener
+        window.addEventListener('roleChanged', () => {
+            console.log('🔄 Dashboard: Role changed, reloading data...');
+            loadDashboard();
+        });
+
+        // Load dashboard data
+        async function loadDashboard() {
+            // Ensure utils is available
+            const utils = window.utils || {
+                showAlert: (msg) => alert(msg),
+                formatDate: (d) => new Date(d).toLocaleDateString()
+            };
+            
+            try {
+                const role = window.roleManager ? window.roleManager.getCurrentRole() : 'employee';
+                const currentEmployeeId = window.roleManager ? window.roleManager.getCurrentEmployeeId() : null;
+                const dataScope = window.roleManager ? window.roleManager.getDataScope() : 'own';
+
+                console.log(`📊 Loading Dashboard for Role: ${role} (Scope: ${dataScope})`);
+
+                // Define employees variable at function scope so it's available for all sections
+                let employees = [];
+
+                // --- 1. Employees Logic ---
+                console.log('👉 Loading Employees...');
+                const cardEmployees = document.getElementById('cardEmployees');
+                const labelEmployees = document.getElementById('labelEmployees');
+                const sectionRecentEmployees = document.getElementById('sectionRecentEmployees');
+
+                if (role === 'employee') {
+                    // Employee: Hide Employees Card & Recent Employees Section
+                    cardEmployees.style.display = 'none';
+                    sectionRecentEmployees.style.display = 'none';
+                } else {
+                    cardEmployees.style.display = 'block';
+                    sectionRecentEmployees.style.display = 'block';
+                    
+                    if (!window.endpoints || !window.endpoints.employees) {
+                        throw new Error('Endpoints not initialized');
+                    }
+
+                    const employeesData = await endpoints.employees.getAll();
+                    employees = employeesData.data || [];
+                    console.log(`   Fetched ${employees.length} employees`);
+
+                    if (role === 'manager') {
+                        // Manager: Show Team Count only
+                        labelEmployees.textContent = 'My Team';
+                        employees = employees.filter(e => e.ReportingTo == currentEmployeeId || e.EmployeeId == currentEmployeeId);
+                    } else {
+                        // Admin/HR: Show Total Count
+                        labelEmployees.textContent = 'Total Employees';
+                    }
+                    
+                    document.getElementById('totalEmployees').textContent = employees.length;
+
+                    // Recent Employees Table
+                    const recentEmployees = employees.slice(0, 5);
+                    const employeesTableBody = document.getElementById('recentEmployeesTable');
+                    
+                    if (recentEmployees.length === 0) {
+                        employeesTableBody.innerHTML = '<tr><td colspan="6" class="text-center">No employees found</td></tr>';
+                    } else {
+                        employeesTableBody.innerHTML = recentEmployees.map(emp => `
+                            <tr>
+                                <td>${emp.EmployeeCode}</td>
+                                <td>${emp.FirstName} ${emp.LastName}</td>
+                                <td>${emp.Email}</td>
+                                <td>${emp.DepartmentName || 'N/A'}</td>
+                                <td>${emp.DesignationName || 'N/A'}</td>
+                                <td><span class="badge badge-success">${emp.Status}</span></td>
+                            </tr>
+                        `).join('');
+                    }
+                }
+
+                // --- 2. Attendance Logic ---
+                console.log('👉 Loading Attendance...');
+                const today = new Date().toISOString().split('T')[0];
+                const attendanceData = await endpoints.attendance.getAll({ fromDate: today, toDate: today });
+                let attendance = attendanceData.data || [];
+                console.log(`   Fetched ${attendance.length} attendance records`);
+                const labelAttendance = document.getElementById('labelAttendance');
+
+                if (role === 'employee') {
+                    labelAttendance.textContent = 'My Attendance';
+                    
+                    // Check if *I* am present
+                    const myAttendance = attendance.find(a => a.EmployeeId == currentEmployeeId);
+                    document.getElementById('presentToday').textContent = myAttendance ? myAttendance.Status : 'Absent';
+                } else {
+                    if (role === 'manager') {
+                        labelAttendance.textContent = 'Team Present Today';
+                        // Filter attendance for team
+                        if (employees && employees.length > 0) {
+                            const teamIds = employees.map(e => e.EmployeeId);
+                            attendance = attendance.filter(a => teamIds.includes(a.EmployeeId));
+                        }
+                    } else {
+                        labelAttendance.textContent = 'Present Today';
+                    }
+                    
+                    const presentCount = attendance.filter(a => a.Status === 'Present').length;
+                    document.getElementById('presentToday').textContent = presentCount;
+                }
+
+                // --- 3. Leaves Logic ---
+                console.log('👉 Loading Leaves...');
+                // Fetch pending leaves
+                const leavesParams = { status: 'Pending' };
+                if (role === 'employee') {
+                    leavesParams.employeeId = currentEmployeeId;
+                }
+                const leavesData = await endpoints.leaves.getAll(leavesParams);
+                let leaves = leavesData.data || [];
+                console.log(`   Fetched ${leaves.length} pending leaves`);
+                
+                const labelLeaves = document.getElementById('labelLeaves');
+                const titlePendingLeaves = document.getElementById('titlePendingLeaves');
+
+                if (role === 'manager') {
+                     // Filter for team
+                     if (employees && employees.length > 0) {
+                        const teamIds = employees.map(e => e.EmployeeId);
+                        leaves = leaves.filter(l => teamIds.includes(l.EmployeeId));
+                     }
+                }
+
+                if (role === 'employee') {
+                    labelLeaves.textContent = 'My Pending Requests';
+                    titlePendingLeaves.textContent = 'My Pending Leave Requests';
+                } else {
+                    labelLeaves.textContent = 'Pending Leaves';
+                    titlePendingLeaves.textContent = 'Pending Team Requests';
+                }
+
+                document.getElementById('pendingLeaves').textContent = leaves.length;
+
+                // Display leaves table
+                const recentLeaves = leaves.slice(0, 5);
+                const leavesTableBody = document.getElementById('pendingLeavesTable');
+                
+                if (recentLeaves.length === 0) {
+                    leavesTableBody.innerHTML = '<tr><td colspan="6" class="text-center">No pending leaves</td></tr>';
+                } else {
+                    leavesTableBody.innerHTML = recentLeaves.map(leave => `
+                        <tr>
+                            <td>${leave.FirstName} ${leave.LastName}</td>
+                            <td>${leave.LeaveType}</td>
+                            <td>${utils.formatDate(leave.FromDate)}</td>
+                            <td>${utils.formatDate(leave.ToDate)}</td>
+                            <td>${leave.Reason}</td>
+                            <td><span class="badge badge-pending">${leave.Status}</span></td>
+                        </tr>
+                    `).join('');
+                }
+
+                // --- 4. Departments Logic ---
+                console.log('👉 Loading Departments...');
+                const cardDepartments = document.getElementById('cardDepartments');
+                if (role === 'employee') {
+                    cardDepartments.style.display = 'none';
+                } else {
+                    cardDepartments.style.display = 'block';
+                    const departmentsData = await endpoints.departments.getAll();
+                    const departments = departmentsData.data || [];
+                    document.getElementById('totalDepartments').textContent = departments.length;
+                    console.log(`   Fetched ${departments.length} departments`);
+                }
+
+                console.log('✅ Dashboard loaded successfully');
+
+            } catch (error) {
+                console.error('❌ Error loading dashboard:', error);
+                
+                // Show error in the tables so user can see it
+                const errorHtml = `<tr><td colspan="6" class="text-center text-danger">Error: ${error.message}</td></tr>`;
+                
+                const empTable = document.getElementById('recentEmployeesTable');
+                if (empTable) empTable.innerHTML = errorHtml;
+                
+                const leaveTable = document.getElementById('pendingLeavesTable');
+                if (leaveTable) leaveTable.innerHTML = errorHtml;
+
+                // Also try native alert
+                if (window.utils && window.utils.showAlert) {
+                    window.utils.showAlert('Failed to load dashboard: ' + error.message, 'error');
+                } else {
+                    alert('Dashboard Error: ' + error.message);
+                }
+            }
+        }
+
+        // Load dashboard on page load
+        loadDashboard();
+    </script>
+</body>
+</html>

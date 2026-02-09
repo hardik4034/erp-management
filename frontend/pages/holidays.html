@@ -1,0 +1,1286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Holidays - HRMS</title>
+    <link rel="icon" type="image/png" href="../assets/logo.png">
+    <link rel="stylesheet" href="../styles/main.css">
+    <link rel="stylesheet" href="../styles/toast.css">
+    <link rel="stylesheet" href="../styles/role-selector.css">
+    <style>
+        /* Holidays Page Specific Styles */
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .breadcrumb a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .breadcrumb a:hover {
+            color: var(--primary-color);
+        }
+
+        .breadcrumb-separator {
+            color: var(--text-secondary);
+        }
+
+        .breadcrumb-current {
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .holidays-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-lg);
+            gap: var(--spacing-md);
+            flex-wrap: wrap;
+        }
+
+        .holidays-filters {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-md);
+            flex: 1;
+        }
+
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+        }
+
+        .filter-group label {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            white-space: nowrap;
+        }
+
+        .filter-group select,
+        .filter-group input {
+            padding: 0.5rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            font-size: 0.875rem;
+            min-width: 120px;
+        }
+
+        .search-box {
+            position: relative;
+            flex: 1;
+            max-width: 300px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 0.5rem 0.5rem 0.5rem 2rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            font-size: 0.875rem;
+        }
+
+        .search-box::before {
+            content: "🔍";
+            position: absolute;
+            left: 0.5rem;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 0.875rem;
+        }
+
+        .holidays-actions {
+            display: flex;
+            gap: var(--spacing-sm);
+            align-items: center;
+        }
+
+        .view-toggle {
+            display: flex;
+            gap: 0.25rem;
+            background-color: var(--bg-color);
+            padding: 0.25rem;
+            border-radius: var(--radius-md);
+        }
+
+        .view-toggle-btn {
+            padding: 0.5rem;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            border-radius: var(--radius-sm);
+            color: var(--text-secondary);
+            transition: all 0.2s;
+        }
+
+        .view-toggle-btn:hover {
+            background-color: white;
+            color: var(--primary-color);
+        }
+
+        .view-toggle-btn.active {
+            background-color: white;
+            color: var(--primary-color);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .holidays-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .holidays-table thead {
+            background-color: var(--bg-color);
+        }
+
+        .holidays-table th {
+            padding: var(--spacing-md);
+            text-align: left;
+            font-weight: 600;
+            color: var(--text-secondary);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .holidays-table td {
+            padding: var(--spacing-md);
+            border-bottom: 1px solid var(--border-color);
+            vertical-align: middle;
+        }
+
+        .holidays-table tbody tr:hover {
+            background-color: #f9fafb;
+        }
+
+        .checkbox-cell {
+            width: 40px;
+            text-align: center;
+        }
+
+        .checkbox-cell input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+            accent-color: var(--primary-color);
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: var(--spacing-lg);
+            padding-top: var(--spacing-md);
+            border-top: 1px solid var(--border-color);
+        }
+
+        .pagination-info {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .pagination-controls {
+            display: flex;
+            gap: var(--spacing-sm);
+        }
+
+        .pagination-btn {
+            padding: 0.5rem 0.75rem;
+            border: 1px solid var(--border-color);
+            background-color: white;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+
+        .pagination-btn:hover:not(:disabled) {
+            background-color: var(--bg-color);
+            border-color: var(--primary-color);
+        }
+
+        .pagination-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Modal Form Styles */
+        .form-row.two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--spacing-lg);
+            margin-bottom: var(--spacing-md);
+        }
+
+        .add-link {
+            display: inline-flex;
+            align-items: center;
+            color: var(--primary-color);
+            text-decoration: none;
+            font-size: 0.875rem;
+            margin-bottom: var(--spacing-md);
+            transition: opacity 0.2s;
+        }
+
+        .add-link:hover {
+            opacity: 0.8;
+        }
+
+        .add-link svg {
+            flex-shrink: 0;
+        }
+
+        /* Grid View Styles */
+        .holidays-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: var(--spacing-lg);
+            padding: var(--spacing-md);
+        }
+
+        .holiday-card {
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-lg);
+            transition: all 0.3s;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .holiday-card:hover {
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+            border-color: var(--primary-color);
+        }
+
+        .holiday-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: var(--spacing-md);
+        }
+
+        .holiday-card-checkbox {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: var(--primary-color);
+        }
+
+        .holiday-card-date {
+            text-align: center;
+            padding: var(--spacing-md);
+            background: linear-gradient(135deg, var(--primary-color), #ff6b35);
+            border-radius: var(--radius-md);
+            color: white;
+            margin-bottom: var(--spacing-md);
+        }
+
+        .holiday-card-day {
+            font-size: 2rem;
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        .holiday-card-month {
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            opacity: 0.9;
+            margin-top: 0.25rem;
+        }
+
+        .holiday-card-year {
+            font-size: 0.75rem;
+            opacity: 0.8;
+        }
+
+        .holiday-card-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .holiday-card-info {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-xs);
+            margin-bottom: var(--spacing-md);
+        }
+
+        .holiday-card-info-item {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .holiday-card-info-label {
+            font-weight: 500;
+            min-width: 100px;
+        }
+
+        .holiday-card-actions {
+            display: flex;
+            gap: var(--spacing-sm);
+            padding-top: var(--spacing-md);
+            border-top: 1px solid var(--border-color);
+        }
+
+        .view-container {
+            display: none;
+        }
+
+        .view-container.active {
+            display: block;
+        }
+
+        /* Multiple Holiday Entry Styles */
+        .holiday-entries-container {
+            margin-bottom: var(--spacing-md);
+        }
+
+        .holiday-entry-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr auto;
+            gap: var(--spacing-md);
+            margin-bottom: var(--spacing-sm);
+            align-items: end;
+        }
+
+        .remove-entry-btn {
+            padding: 0.5rem;
+            background: transparent;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            color: var(--danger-color);
+            cursor: pointer;
+            transition: all 0.2s;
+            height: 38px;
+            width: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .remove-entry-btn:hover {
+            background-color: var(--danger-color);
+            color: white;
+            border-color: var(--danger-color);
+        }
+
+        @media (max-width: 768px) {
+            .holidays-toolbar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .holidays-filters {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .search-box {
+                max-width: 100%;
+            }
+
+            .form-row.two-col {
+                grid-template-columns: 1fr;
+            }
+
+            .holidays-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* Hide sidebar and header when in iframe */
+        body.in-iframe .sidebar,
+        body.in-iframe .sidebar-overlay,
+        body.in-iframe .header {
+            display: none !important;
+        }
+
+        body.in-iframe .main-content {
+            margin-left: 0 !important;
+            width: 100% !important;
+        }
+
+        body.in-iframe .content-area {
+            padding-top: 0 !important;
+        }
+    </style>
+    <script>
+        // Detect if page is loaded in iframe
+        if (window.self !== window.top) {
+            document.addEventListener('DOMContentLoaded', function() {
+                document.body.classList.add('in-iframe');
+            });
+        }
+    </script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Overlay -->
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <img src="../assets/logo.png" alt="Soleos Logo" class="sidebar-logo">
+                <button class="sidebar-close-btn" id="sidebarClose">&times;</button>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-item"><a href="../index.html" class="nav-link"><i>📊</i> Dashboard</a></div>
+                <div class="nav-item"><a href="employees.html" class="nav-link"><i>👥</i> Employees</a></div>
+                <div class="nav-item"><a href="attendance.html" class="nav-link"><i>📅</i> Attendance</a></div>
+                <div class="nav-item"><a href="leaves.html" class="nav-link"><i>🏖️</i> Leaves</a></div>
+                <div class="nav-item"><a href="holidays.html" class="nav-link active"><i>🎉</i> Holidays</a></div>
+                <div class="nav-item"><a href="payroll.html" class="nav-link"><i>💰</i> Payroll</a></div>
+                <div class="nav-item"><a href="employee-salary.html" class="nav-link"><i>💵</i> Employee Salary</a></div>
+                <div class="nav-item"><a href="departments.html" class="nav-link"><i>🏢</i> Departments</a></div>
+                <div class="nav-item"><a href="designations.html" class="nav-link"><i>💼</i> Designations</a></div>
+                <div class="nav-item"><a href="appreciations.html" class="nav-link"><i>🏆</i> Appreciations</a></div>
+                <div class="nav-item"><a href="note.html" class="nav-link"><i>📝</i> Note</a></div>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="header">
+                <div class="header-left">
+                    <button class="hamburger-btn" id="sidebarToggle">
+                        ☰
+                    </button>
+                    <div class="header-title"><h1>Holidays</h1></div>
+                </div>
+                <div class="header-actions">
+                    <div class="role-selector">
+                        <label for="roleDropdown">Current Role:</label>
+                        <select id="roleDropdown">
+                            <option value="admin">Admin</option>
+                            <option value="hr">HR</option>
+                            <option value="manager">Manager</option>
+                            <option value="employee">Employee</option>
+                        </select>
+                    </div>
+                    <span class="role-badge" id="roleBadge">Employee</span>
+
+                    <div class="user-info">
+                        <div class="user-avatar" id="userAvatar">A</div>
+                        <div>
+                            <div style="font-weight: 600;" id="userName">Admin</div>
+                            <div style="font-size: 0.75rem; color: var(--text-secondary);" id="userRole">Admin</div>
+                        </div>
+                    </div>
+                    <button class="btn btn-outline btn-sm" onclick="auth.logout()">Logout</button>
+                </div>
+            </header>
+
+            <div class="content-area">
+                <!-- Breadcrumb -->
+                <div class="breadcrumb">
+                    <a href="../index.html">Home</a>
+                    <span class="breadcrumb-separator">›</span>
+                    <a href="holidays.html">Holidays</a>
+                    <span class="breadcrumb-separator">›</span>
+                    <span class="breadcrumb-current">List View</span>
+                </div>
+
+                <!-- Toolbar -->
+                <div class="holidays-toolbar">
+                    <div class="holidays-filters">
+                        <div class="filter-group">
+                            <label>Month:</label>
+                            <select id="filterMonth" class="form-control" onchange="loadHolidays()">
+                                <option value="">All</option>
+                                <option value="1">January</option>
+                                <option value="2">February</option>
+                                <option value="3">March</option>
+                                <option value="4">April</option>
+                                <option value="5">May</option>
+                                <option value="6">June</option>
+                                <option value="7">July</option>
+                                <option value="8">August</option>
+                                <option value="9">September</option>
+                                <option value="10">October</option>
+                                <option value="11">November</option>
+                                <option value="12">December</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label>Year:</label>
+                            <select id="filterYear" class="form-control" onchange="loadHolidays()">
+                                <option value="">All</option>
+                            </select>
+                        </div>
+                        <div class="search-box">
+                            <input type="text" id="searchInput" placeholder="Start typing to search" oninput="filterHolidays()">
+                        </div>
+                    </div>
+                    <div class="holidays-actions">
+                        <button class="btn btn-primary add-btn" onclick="openAddModal()" id="addBtn">+ Add Holiday</button>
+                        <button class="btn btn-outline add-btn" onclick="markDefaultHolidays()" id="defaultBtn">Mark Default Holidays</button>
+                        <button class="btn btn-outline" onclick="exportHolidays()">📤 Export</button>
+                        <div class="view-toggle">
+                            <button class="view-toggle-btn" onclick="switchView('grid')" title="Grid View">
+                                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                                    <rect x="1" y="1" width="6" height="6" rx="1"/>
+                                    <rect x="9" y="1" width="6" height="6" rx="1"/>
+                                    <rect x="1" y="9" width="6" height="6" rx="1"/>
+                                    <rect x="9" y="9" width="6" height="6" rx="1"/>
+                                </svg>
+                            </button>
+                            <button class="view-toggle-btn active" onclick="switchView('list')" title="List View">
+                                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                                    <rect x="1" y="2" width="14" height="2" rx="1"/>
+                                    <rect x="1" y="7" width="14" height="2" rx="1"/>
+                                    <rect x="1" y="12" width="14" height="2" rx="1"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- List View -->
+                <div class="view-container active" id="listView">
+                    <div class="card">
+                        <div class="table-container">
+                            <table class="holidays-table">
+                                <thead>
+                                    <tr>
+                                        <th class="checkbox-cell">
+                                            <input type="checkbox" id="selectAll" onchange="toggleSelectAll()">
+                                        </th>
+                                        <th>Date</th>
+                                        <th>Occasion</th>
+                                        <th>Day</th>
+                                        <th>Department</th>
+                                        <th>Designation</th>
+                                        <th>Employment Type</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="holidaysTable">
+                                    <tr><td colspan="8" class="text-center">Loading...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <!-- Pagination -->
+                        <div class="pagination">
+                            <div class="pagination-info">
+                                Showing <span id="showingStart">0</span> to <span id="showingEnd">0</span> of <span id="totalEntries">0</span> entries
+                            </div>
+                            <div class="pagination-controls">
+                                <button class="pagination-btn" onclick="previousPage()" id="prevBtn">Previous</button>
+                                <button class="pagination-btn" onclick="nextPage()" id="nextBtn">Next</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Grid View -->
+                <div class="view-container" id="gridView">
+                    <div class="card">
+                        <div class="holidays-grid" id="holidaysGrid">
+                            <!-- Grid cards will be inserted here -->
+                        </div>
+                        
+                        <!-- Pagination -->
+                        <div class="pagination">
+                            <div class="pagination-info">
+                                Showing <span id="showingStartGrid">0</span> to <span id="showingEndGrid">0</span> of <span id="totalEntriesGrid">0</span> entries
+                            </div>
+                            <div class="pagination-controls">
+                                <button class="pagination-btn" onclick="previousPage()" id="prevBtnGrid">Previous</button>
+                                <button class="pagination-btn" onclick="nextPage()" id="nextBtnGrid">Next</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal" id="holidayModal">
+        <div class="modal-content" style="max-width: 1800px; width: 90%;">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modalTitle">Add Holiday</h3>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="holidayForm">
+                    <input type="hidden" id="holidayId">
+                    
+                    <!-- Multiple Holiday Entries Container -->
+                    <div class="holiday-entries-container" id="holidayEntriesContainer">
+                        <!-- First entry row -->
+                        <div class="holiday-entry-row" data-entry-index="0">
+                            <div class="form-group">
+                                <label class="form-label">Date *</label>
+                                <input type="date" class="form-control holiday-date" placeholder="Date" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Occasion *</label>
+                                <input type="text" class="form-control holiday-name" placeholder="Occasion" required>
+                            </div>
+                            <button type="button" class="remove-entry-btn" onclick="removeHolidayEntry(0)" style="display: none;">
+                                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                                    <path d="M2 2l12 12M14 2L2 14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Add Link -->
+                    <div class="form-group">
+                        <a href="#" class="add-link" onclick="addHolidayEntry(event)">
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" style="vertical-align: middle; margin-right: 4px;">
+                                <circle cx="8" cy="8" r="7" stroke="currentColor" fill="none" stroke-width="1.5"/>
+                                <path d="M8 4v8M4 8h8" stroke="currentColor" stroke-width="1.5"/>
+                            </svg>
+                            Add
+                        </a>
+                    </div>
+
+                    <!-- Department and Designation Row -->
+                    <div class="form-row two-col">
+                        <div class="form-group">
+                            <label class="form-label">Department</label>
+                            <select id="holidayDepartment" class="form-control">
+                                <option value="">Nothing selected</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Designation</label>
+                            <select id="holidayDesignation" class="form-control">
+                                <option value="">Nothing selected</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Employment Type -->
+                    <div class="form-group">
+                        <label class="form-label">Employment Type</label>
+                        <select id="holidayEmploymentType" class="form-control">
+                            <option value="">Nothing selected</option>
+                            <option value="Full-time">Full-time</option>
+                            <option value="Part-time">Part-time</option>
+                            <option value="Contract">Contract</option>
+                            <option value="Intern">Intern</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="saveHoliday()">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" style="vertical-align: middle; margin-right: 4px;">
+                        <path d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z"/>
+                    </svg>
+                    Save
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="../scripts/toast.js"></script>
+    <script src="../scripts/auth.js"></script>
+    <script src="../scripts/sidebar.js"></script>
+    <script src="../scripts/role-manager.js"></script>
+    <script src="../scripts/api.js"></script>
+    <script>
+        auth.requireAuth();
+        auth.initAuth();
+        
+        // Role change listener to reload UI permissions
+        window.addEventListener('roleChanged', () => {
+            console.log('🔄 Role changed, reapplying permissions...');
+            // Re-apply permissions to hide/show buttons
+            if (window.roleManager) {
+                window.roleManager.applyRolePermissions();
+                renderTable(); // Re-render table to hide/show actions column
+            }
+        });
+
+        let holidays = [];
+        let filteredHolidays = [];
+        let selectedHolidays = new Set();
+        let departments = [];
+        let designations = [];
+        const canManage = auth.hasRole('Admin', 'HR');
+        
+        // Pagination
+        let currentPage = 1;
+        const itemsPerPage = 10;
+        
+        // Removed static check - handled by RoleManager via .add-btn class
+        // if (!canManage) {
+        //     document.getElementById('addBtn').style.display = 'none';
+        //     document.getElementById('defaultBtn').style.display = 'none';
+        // }
+
+        // Load departments and designations
+        async function loadDepartmentsAndDesignations() {
+            try {
+                const [deptResponse, desigResponse] = await Promise.all([
+                    endpoints.departments.getAll(),
+                    endpoints.designations.getAll()
+                ]);
+                departments = deptResponse.data || [];
+                designations = desigResponse.data || [];
+            } catch (error) {
+                console.error('Error loading departments/designations:', error);
+            }
+        }
+
+        // Populate year filter
+        const currentYear = new Date().getFullYear();
+        const yearSelect = document.getElementById('filterYear');
+        for (let year = currentYear - 2; year <= currentYear + 2; year++) {
+            const option = document.createElement('option');
+            option.value = year;
+            option.textContent = year;
+            if (year === currentYear) option.selected = true;
+            yearSelect.appendChild(option);
+        }
+
+        async function loadHolidays() {
+            try {
+                const params = {};
+                const year = document.getElementById('filterYear').value;
+                if (year) params.year = year;
+
+                const response = await endpoints.holidays.getAll(params);
+                holidays = response.data || [];
+                filterHolidays();
+            } catch (error) {
+                console.error('Error loading holidays:', error);
+                utils.showAlert('Failed to load holidays', 'error');
+            }
+        }
+
+        function filterHolidays() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const month = document.getElementById('filterMonth').value;
+            
+            filteredHolidays = holidays.filter(holiday => {
+                const matchesSearch = !searchTerm || 
+                    holiday.HolidayName.toLowerCase().includes(searchTerm) ||
+                    (holiday.Description && holiday.Description.toLowerCase().includes(searchTerm));
+                
+                const matchesMonth = !month || new Date(holiday.HolidayDate).getMonth() + 1 === parseInt(month);
+                
+                return matchesSearch && matchesMonth;
+            });
+            
+            currentPage = 1;
+            renderTable();
+        }
+
+        function getDayName(dateString) {
+            const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+            const date = new Date(dateString);
+            return days[date.getDay()];
+        }
+
+        function getDepartmentName(id) {
+            if (!id) return 'All';
+            const dept = departments.find(d => d.DepartmentId === id);
+            return dept ? dept.DepartmentName : 'All';
+        }
+
+        function getDesignationName(id) {
+            if (!id) return 'All';
+            const desig = designations.find(d => d.DesignationId === id);
+            return desig ? desig.DesignationName : 'All';
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('holidaysTable');
+            
+            if (filteredHolidays.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" class="text-center">No data available in table</td></tr>';
+                updatePaginationInfo(0, 0, 0);
+                return;
+            }
+
+            // Calculate pagination
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = Math.min(startIndex + itemsPerPage, filteredHolidays.length);
+            const pageHolidays = filteredHolidays.slice(startIndex, endIndex);
+
+            // Check permissions dynamically
+            const isManager = window.roleManager && 
+                             (window.roleManager.isRole('admin') || window.roleManager.isRole('hr'));
+
+            tbody.innerHTML = pageHolidays.map(holiday => `
+                <tr>
+                    <td class="checkbox-cell">
+                        <input type="checkbox" 
+                            ${selectedHolidays.has(holiday.HolidayId) ? 'checked' : ''} 
+                            onchange="toggleSelect(${holiday.HolidayId})">
+                    </td>
+                    <td>${utils.formatDate(holiday.HolidayDate)}</td>
+                    <td><strong>${holiday.HolidayName}</strong></td>
+                    <td>${getDayName(holiday.HolidayDate)}</td>
+                    <td>All</td>
+                    <td>All</td>
+                    <td>All</td>
+                    <td>
+                        ${isManager ? `
+                            <button class="btn btn-sm btn-outline" onclick="editHoliday(${holiday.HolidayId})">Edit</button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteHoliday(${holiday.HolidayId})">Delete</button>
+                        ` : ''} <!-- Hide delete/edit for non-managers -->
+                    </td>
+                </tr>
+            `).join('');
+            
+            // Hide/Show header column for Actions if needed (optional, or just leave empty column)
+            // But better to hide the Actions elements themselves as done above.
+
+            updatePaginationInfo(startIndex + 1, endIndex, filteredHolidays.length);
+            updatePaginationButtons();
+            
+            // Apply global UI permissions (hides Top Buttons)
+            if (window.roleManager) {
+                window.roleManager.applyRolePermissions();
+            }
+        }
+
+        function previousPage() {
+            if (currentPage > 1) {
+                currentPage--;
+                renderTable();
+            }
+        }
+
+        function nextPage() {
+            const totalPages = Math.ceil(filteredHolidays.length / itemsPerPage);
+            if (currentPage < totalPages) {
+                currentPage++;
+                renderTable();
+            }
+        }
+
+        function toggleSelectAll() {
+            const selectAll = document.getElementById('selectAll').checked;
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = Math.min(startIndex + itemsPerPage, filteredHolidays.length);
+            const pageHolidays = filteredHolidays.slice(startIndex, endIndex);
+            
+            if (selectAll) {
+                pageHolidays.forEach(h => selectedHolidays.add(h.HolidayId));
+            } else {
+                pageHolidays.forEach(h => selectedHolidays.delete(h.HolidayId));
+            }
+            renderTable();
+        }
+
+        function toggleSelect(id) {
+            if (selectedHolidays.has(id)) {
+                selectedHolidays.delete(id);
+            } else {
+                selectedHolidays.add(id);
+            }
+        }
+
+        function switchView(view) {
+            const buttons = document.querySelectorAll('.view-toggle-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            event.target.closest('.view-toggle-btn').classList.add('active');
+            
+            const listView = document.getElementById('listView');
+            const gridView = document.getElementById('gridView');
+            
+            if (view === 'grid') {
+                listView.classList.remove('active');
+                gridView.classList.add('active');
+                renderGrid();
+            } else {
+                gridView.classList.remove('active');
+                listView.classList.add('active');
+                renderTable();
+            }
+        }
+
+        function renderGrid() {
+            const grid = document.getElementById('holidaysGrid');
+            
+            if (filteredHolidays.length === 0) {
+                grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 2rem; color: var(--text-secondary);">No data available</div>';
+                updatePaginationInfo(0, 0, 0, true);
+                return;
+            }
+
+            // Calculate pagination
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = Math.min(startIndex + itemsPerPage, filteredHolidays.length);
+            const pageHolidays = filteredHolidays.slice(startIndex, endIndex);
+
+            // Calculate permissions dynamically
+            const canManage = window.roleManager && 
+                             (window.roleManager.isRole('admin') || window.roleManager.isRole('hr'));
+
+            grid.innerHTML = pageHolidays.map(holiday => {
+                const date = new Date(holiday.HolidayDate);
+                const day = date.getDate();
+                const month = date.toLocaleDateString('en-US', { month: 'short' });
+                const year = date.getFullYear();
+                const dayName = getDayName(holiday.HolidayDate);
+
+                return `
+                    <div class="holiday-card">
+                        <div class="holiday-card-header">
+                            <input type="checkbox" 
+                                class="holiday-card-checkbox"
+                                ${selectedHolidays.has(holiday.HolidayId) ? 'checked' : ''} 
+                                onchange="toggleSelect(${holiday.HolidayId})">
+                        </div>
+                        
+                        <div class="holiday-card-date">
+                            <div class="holiday-card-day">${day}</div>
+                            <div class="holiday-card-month">${month}</div>
+                            <div class="holiday-card-year">${year}</div>
+                        </div>
+                        
+                        <div class="holiday-card-title">${holiday.HolidayName}</div>
+                        
+                        <div class="holiday-card-info">
+                            <div class="holiday-card-info-item">
+                                <span class="holiday-card-info-label">Day:</span>
+                                <span>${dayName}</span>
+                            </div>
+                            <div class="holiday-card-info-item">
+                                <span class="holiday-card-info-label">Department:</span>
+                                <span>All</span>
+                            </div>
+                            <div class="holiday-card-info-item">
+                                <span class="holiday-card-info-label">Designation:</span>
+                                <span>All</span>
+                            </div>
+                            <div class="holiday-card-info-item">
+                                <span class="holiday-card-info-label">Employment Type:</span>
+                                <span>All</span>
+                            </div>
+                        </div>
+                        
+                        ${canManage ? `
+                            <div class="holiday-card-actions">
+                                <button class="btn btn-sm btn-outline edit-btn" onclick="editHoliday(${holiday.HolidayId})">Edit</button>
+                                <button class="btn btn-sm btn-danger delete-btn" onclick="deleteHoliday(${holiday.HolidayId})">Delete</button>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            }).join('');
+
+            updatePaginationInfo(startIndex + 1, endIndex, filteredHolidays.length, true);
+            updatePaginationButtons(true);
+        }
+
+        function updatePaginationInfo(start, end, total, isGrid = false) {
+            if (isGrid) {
+                document.getElementById('showingStartGrid').textContent = start;
+                document.getElementById('showingEndGrid').textContent = end;
+                document.getElementById('totalEntriesGrid').textContent = total;
+            } else {
+                document.getElementById('showingStart').textContent = start;
+                document.getElementById('showingEnd').textContent = end;
+                document.getElementById('totalEntries').textContent = total;
+            }
+        }
+
+        function updatePaginationButtons(isGrid = false) {
+            const totalPages = Math.ceil(filteredHolidays.length / itemsPerPage);
+            if (isGrid) {
+                document.getElementById('prevBtnGrid').disabled = currentPage === 1;
+                document.getElementById('nextBtnGrid').disabled = currentPage >= totalPages;
+            } else {
+                document.getElementById('prevBtn').disabled = currentPage === 1;
+                document.getElementById('nextBtn').disabled = currentPage >= totalPages;
+            }
+        }
+
+
+
+        async function deleteHoliday(id) {
+            if (!confirm('Are you sure you want to delete this holiday?')) return;
+            try {
+                await endpoints.holidays.delete(id);
+                utils.showAlert('Holiday deleted successfully', 'success');
+                loadHolidays();
+            } catch (error) {
+                console.error('Error deleting holiday:', error);
+                utils.showAlert('Failed to delete holiday', 'error');
+            }
+        }
+
+        function markDefaultHolidays() {
+            const year = document.getElementById('filterYear').value || currentYear;
+            if (!confirm(`Add default holidays for ${year}?`)) return;
+            
+            const defaultHolidays = [
+                { name: 'New Year\'s Day', date: `${year}-01-01`, description: 'New Year celebration' },
+                { name: 'Republic Day', date: `${year}-01-26`, description: 'Republic Day of India' },
+                { name: 'Independence Day', date: `${year}-08-15`, description: 'Independence Day of India' },
+                { name: 'Gandhi Jayanti', date: `${year}-10-02`, description: 'Birthday of Mahatma Gandhi' },
+                { name: 'Christmas', date: `${year}-12-25`, description: 'Christmas Day' }
+            ];
+            
+            Promise.all(defaultHolidays.map(h => 
+                endpoints.holidays.create({
+                    holidayName: h.name,
+                    holidayDate: h.date,
+                    description: h.description
+                }).catch(err => console.log('Holiday may already exist:', h.name))
+            )).then(() => {
+                utils.showAlert('Default holidays added successfully', 'success');
+                loadHolidays();
+            }).catch(error => {
+                utils.showAlert('Some holidays could not be added', 'warning');
+                loadHolidays();
+            });
+        }
+
+        function exportHolidays() {
+            if (filteredHolidays.length === 0) {
+                utils.showAlert('No holidays to export', 'warning');
+                return;
+            }
+            
+            const csv = [
+                ['Date', 'Occasion', 'Day', 'Description', 'Year'],
+                ...filteredHolidays.map(h => [
+                    utils.formatDate(h.HolidayDate),
+                    h.HolidayName,
+                    getDayName(h.HolidayDate),
+                    h.Description || '',
+                    h.Year
+                ])
+            ].map(row => row.join(',')).join('\n');
+            
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `holidays_${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+            
+            utils.showAlert('Holidays exported successfully', 'success');
+        }
+
+        function closeModal() {
+            document.getElementById('holidayModal').classList.remove('active');
+        }
+
+        let entryCounter = 0;
+
+        function addHolidayEntry(event) {
+            event.preventDefault();
+            entryCounter++;
+            
+            const container = document.getElementById('holidayEntriesContainer');
+            const newRow = document.createElement('div');
+            newRow.className = 'holiday-entry-row';
+            newRow.setAttribute('data-entry-index', entryCounter);
+            newRow.innerHTML = `
+                <div class="form-group">
+                    <label class="form-label">Date *</label>
+                    <input type="date" class="form-control holiday-date" placeholder="Date" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Occasion *</label>
+                    <input type="text" class="form-control holiday-name" placeholder="Occasion" required>
+                </div>
+                <button type="button" class="remove-entry-btn" onclick="removeHolidayEntry(${entryCounter})">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                        <path d="M2 2l12 12M14 2L2 14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                </button>
+            `;
+            
+            container.appendChild(newRow);
+            updateRemoveButtons();
+        }
+
+        function removeHolidayEntry(index) {
+            const row = document.querySelector(`[data-entry-index="${index}"]`);
+            if (row) {
+                row.remove();
+                updateRemoveButtons();
+            }
+        }
+
+        function updateRemoveButtons() {
+            const rows = document.querySelectorAll('.holiday-entry-row');
+            rows.forEach((row, index) => {
+                const removeBtn = row.querySelector('.remove-entry-btn');
+                if (removeBtn) {
+                    removeBtn.style.display = rows.length > 1 ? 'flex' : 'none';
+                }
+            });
+        }
+
+        function openAddModal() {
+            document.getElementById('modalTitle').textContent = 'Add Holiday';
+            document.getElementById('holidayForm').reset();
+            document.getElementById('holidayId').value = '';
+            
+            // Reset to single entry
+            const container = document.getElementById('holidayEntriesContainer');
+            container.innerHTML = `
+                <div class="holiday-entry-row" data-entry-index="0">
+                    <div class="form-group">
+                        <label class="form-label">Date *</label>
+                        <input type="date" class="form-control holiday-date" placeholder="Date" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Occasion *</label>
+                        <input type="text" class="form-control holiday-name" placeholder="Occasion" required>
+                    </div>
+                    <button type="button" class="remove-entry-btn" onclick="removeHolidayEntry(0)" style="display: none;">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                            <path d="M2 2l12 12M14 2L2 14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                    </button>
+                </div>
+            `;
+            entryCounter = 0;
+            
+            // Populate department dropdown
+            const deptSelect = document.getElementById('holidayDepartment');
+            deptSelect.innerHTML = '<option value="">Nothing selected</option>';
+            departments.forEach(dept => {
+                const option = document.createElement('option');
+                option.value = dept.DepartmentId;
+                option.textContent = dept.DepartmentName;
+                deptSelect.appendChild(option);
+            });
+            
+            // Populate designation dropdown
+            const desigSelect = document.getElementById('holidayDesignation');
+            desigSelect.innerHTML = '<option value="">Nothing selected</option>';
+            designations.forEach(desig => {
+                const option = document.createElement('option');
+                option.value = desig.DesignationId;
+                option.textContent = desig.DesignationName;
+                desigSelect.appendChild(option);
+            });
+            
+            document.getElementById('holidayModal').classList.add('active');
+        }
+
+        async function editHoliday(id) {
+            const holiday = holidays.find(h => h.HolidayId === id);
+            if (!holiday) return;
+
+            document.getElementById('modalTitle').textContent = 'Edit Holiday';
+            document.getElementById('holidayId').value = holiday.HolidayId;
+            
+            // Reset to single entry with existing data
+            const container = document.getElementById('holidayEntriesContainer');
+            container.innerHTML = `
+                <div class="holiday-entry-row" data-entry-index="0">
+                    <div class="form-group">
+                        <label class="form-label">Date *</label>
+                        <input type="date" class="form-control holiday-date" placeholder="Date" required value="${holiday.HolidayDate.split('T')[0]}">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Occasion *</label>
+                        <input type="text" class="form-control holiday-name" placeholder="Occasion" required value="${holiday.HolidayName}">
+                    </div>
+                    <button type="button" class="remove-entry-btn" onclick="removeHolidayEntry(0)" style="display: none;">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                            <path d="M2 2l12 12M14 2L2 14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                    </button>
+                </div>
+            `;
+            entryCounter = 0;
+            
+            // Populate dropdowns
+            openAddModal();
+            
+            // Restore values
+            container.querySelector('.holiday-date').value = holiday.HolidayDate.split('T')[0];
+            container.querySelector('.holiday-name').value = holiday.HolidayName;
+            document.getElementById('holidayId').value = holiday.HolidayId;
+            document.getElementById('modalTitle').textContent = 'Edit Holiday';
+        }
+
+        async function saveHoliday() {
+            const form = document.getElementById('holidayForm');
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+
+            const id = document.getElementById('holidayId').value;
+            const entries = document.querySelectorAll('.holiday-entry-row');
+            
+            try {
+                if (id) {
+                    // Edit mode - single entry
+                    const dateInput = entries[0].querySelector('.holiday-date');
+                    const nameInput = entries[0].querySelector('.holiday-name');
+                    
+                    const data = {
+                        holidayName: nameInput.value,
+                        holidayDate: dateInput.value
+                    };
+                    
+                    await endpoints.holidays.update(id, data);
+                    utils.showAlert('Holiday updated successfully', 'success');
+                } else {
+                    // Add mode - multiple entries
+                    const holidays = [];
+                    entries.forEach(entry => {
+                        const dateInput = entry.querySelector('.holiday-date');
+                        const nameInput = entry.querySelector('.holiday-name');
+                        
+                        if (dateInput.value && nameInput.value) {
+                            holidays.push({
+                                holidayName: nameInput.value,
+                                holidayDate: dateInput.value
+                            });
+                        }
+                    });
+                    
+                    // Save all holidays
+                    for (const holiday of holidays) {
+                        await endpoints.holidays.create(holiday);
+                    }
+                    
+                    utils.showAlert(`${holidays.length} holiday(s) created successfully`, 'success');
+                }
+                closeModal();
+                loadHolidays();
+            } catch (error) {
+                console.error('Error saving holiday:', error);
+                utils.showAlert(error.message || 'Failed to save holiday', 'error');
+            }
+        }
+
+        // Initialize page
+        (async () => {
+            await loadDepartmentsAndDesignations();
+            loadHolidays();
+        })();
+
+     </script>
+    </body>
+</html>

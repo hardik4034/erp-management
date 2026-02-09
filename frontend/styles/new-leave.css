@@ -1,0 +1,365 @@
+/* New Leave Page Styles */
+
+.new-leave-card {
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.section-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-lg);
+    padding-bottom: var(--spacing-md);
+    border-bottom: 1px solid var(--border-color);
+}
+
+/* Form Layout */
+.form-row.three-col {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--spacing-lg);
+    margin-bottom: var(--spacing-lg);
+}
+
+.form-row.two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-lg);
+    margin-bottom: var(--spacing-lg);
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-label {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin-bottom: var(--spacing-xs);
+    font-weight: 500;
+}
+
+.required {
+    color: var(--danger-color);
+}
+
+.form-control {
+    padding: 0.625rem 0.875rem;
+    border: 1px solid #d1d5db;
+    border-radius: var(--radius-md);
+    font-size: 0.875rem;
+    color: var(--text-primary);
+    background-color: white;
+    transition: all 0.2s;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.form-control::placeholder {
+    color: #9ca3af;
+}
+
+/* Input with Button (Leave Type + Add) */
+.input-with-button {
+    display: flex;
+    gap: var(--spacing-sm);
+    align-items: center;
+}
+
+.input-with-button .form-control {
+    flex: 1;
+}
+
+.btn-add {
+    padding: 0.625rem 1rem;
+    background-color: white;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    font-size: 0.875rem;
+    color: var(--text-primary);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s;
+}
+
+.btn-add:hover {
+    background-color: var(--bg-color);
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+
+/* Radio Group */
+.radio-group {
+    display: flex;
+    gap: var(--spacing-md);
+    flex-wrap: wrap;
+}
+
+.radio-label {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    cursor: pointer;
+    font-size: 0.875rem;
+    color: var(--text-primary);
+}
+
+.radio-label input[type="radio"] {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    accent-color: var(--primary-color);
+}
+
+.radio-label span {
+    user-select: none;
+}
+
+/* Date Input */
+.date-input-wrapper {
+    position: relative;
+}
+
+.date-input {
+    padding-right: 2.5rem;
+}
+
+.calendar-icon {
+    position: absolute;
+    right: 0.875rem;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1.125rem;
+    pointer-events: none;
+    color: var(--text-secondary);
+}
+
+.date-range-wrapper {
+    margin-top: var(--spacing-sm);
+}
+
+.date-range-inputs {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.date-separator {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+}
+
+/* Textarea with Button */
+.textarea-wrapper {
+    position: relative;
+}
+
+.textarea-wrapper textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+.btn-suggestions {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+    color: white;
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: 0.75rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 2px 4px rgba(6, 182, 212, 0.2);
+}
+
+.btn-suggestions:hover {
+    background: linear-gradient(135deg, #0891b2 0%, #0e7490 100%);
+    box-shadow: 0 4px 8px rgba(6, 182, 212, 0.3);
+    transform: translateY(-1px);
+}
+
+/* File Upload Zone */
+.file-upload-zone {
+    position: relative;
+    border: 2px dashed var(--border-color);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-xl);
+    text-align: center;
+    background-color: #fafafa;
+    transition: all 0.2s;
+    cursor: pointer;
+}
+
+.file-upload-zone:hover {
+    border-color: var(--primary-color);
+    background-color: #f0f9ff;
+}
+
+.file-upload-zone.drag-over {
+    border-color: var(--primary-color);
+    background-color: #dbeafe;
+}
+
+.file-input {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.file-upload-content {
+    pointer-events: none;
+}
+
+.file-upload-text {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    margin: 0;
+}
+
+.info-icon {
+    display: inline-block;
+    margin-left: var(--spacing-xs);
+    color: var(--text-secondary);
+    cursor: help;
+    font-size: 0.875rem;
+}
+
+/* File Preview */
+.file-preview {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--spacing-md);
+    background-color: white;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    margin-top: var(--spacing-md);
+}
+
+.file-info {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+}
+
+.file-icon {
+    font-size: 1.5rem;
+}
+
+.file-details {
+    display: flex;
+    flex-direction: column;
+}
+
+.file-name {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.file-size {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+}
+
+.file-remove {
+    background: none;
+    border: none;
+    color: var(--danger-color);
+    cursor: pointer;
+    font-size: 1.25rem;
+    padding: 0.25rem;
+    transition: all 0.2s;
+}
+
+.file-remove:hover {
+    transform: scale(1.2);
+}
+
+/* Form Footer */
+.form-footer {
+    display: flex;
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-xl);
+    padding-top: var(--spacing-lg);
+    border-top: 1px solid var(--border-color);
+}
+
+.btn-icon {
+    margin-right: var(--spacing-xs);
+}
+
+.btn-text {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    padding: 0.625rem 1rem;
+    cursor: pointer;
+    font-size: 0.875rem;
+    transition: all 0.2s;
+}
+
+.btn-text:hover {
+    color: var(--text-primary);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .form-row.three-col {
+        grid-template-columns: 1fr;
+    }
+    
+    .form-row.two-col {
+        grid-template-columns: 1fr;
+    }
+    
+    .radio-group {
+        flex-direction: column;
+    }
+    
+    .btn-suggestions {
+        position: static;
+        margin-top: var(--spacing-sm);
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .new-leave-card {
+        padding: var(--spacing-md);
+    }
+    
+    .input-with-button {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .btn-add {
+        width: 100%;
+    }
+    
+    .date-range-inputs {
+        flex-direction: column;
+    }
+    
+    .form-footer {
+        flex-direction: column-reverse;
+    }
+    
+    .form-footer .btn {
+        width: 100%;
+    }
+}

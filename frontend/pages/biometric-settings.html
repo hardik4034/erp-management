@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Biometric Settings - HRMS</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 25px 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 28px;
+            margin-bottom: 5px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .card-title {
+            font-size: 20px;
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(56, 239, 125, 0.4);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(235, 51, 73, 0.4);
+        }
+
+        .alert {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border-left: 4px solid #28a745;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border-left: 4px solid #dc3545;
+        }
+
+        .alert-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border-left: 4px solid #17a2b8;
+        }
+
+        .devices-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .devices-table thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .devices-table th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        .devices-table td {
+            padding: 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .devices-table tbody tr:hover {
+            background: #f8f9fa;
+        }
+
+        .status-badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-active {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-inactive {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        .empty-state svg {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 15px;
+            opacity: 0.3;
+        }
+
+        .spinner {
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top: 3px solid white;
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .info-box {
+            background: #e7f3ff;
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .info-box h4 {
+            color: #1976D2;
+            margin-bottom: 8px;
+        }
+
+        .info-box p {
+            color: #555;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #667eea;
+            text-decoration: none;
+            margin-bottom: 20px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .back-link:hover {
+            gap: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <a href="../index.html" class="back-link">
+                ← Back to Dashboard
+            </a>
+            <div class="header-left">
+                    <button class="hamburger-btn" id="sidebarToggle">
+                        ☰
+                    </button>
+                    <div class="header-title">
+                        <h1>🔐 Biometric Settings</h1>
+                    </div>
+                </div>
+            <p>Connect and manage eSSL biometric devices</p>
+        </div>
+
+        <!-- Alert Messages -->
+        <div id="alertBox" class="alert"></div>
+
+        <!-- Info Box -->
+        <div class="card">
+            <div class="info-box">
+                <h4>📌 How Device Connection Works</h4>
+                <p>
+                    Simply enter your eSSL Device ID (Serial Number) and click Connect. 
+                    Your device must be registered in your eSSL ADMS cloud account. 
+                    No IP address or network configuration required!
+                </p>
+            </div>
+        </div>
+
+        <!-- Connect Device Card -->
+        <div class="card">
+            <h2 class="card-title">Connect New Device</h2>
+            
+            <form id="connectDeviceForm">
+                <div class="form-group">
+                    <label for="deviceId">eSSL Device ID / Serial Number *</label>
+                    <input 
+                        type="text" 
+                        id="deviceId" 
+                        name="deviceId" 
+                        placeholder="e.g., ESSL123456789"
+                        required
+                    >
+                </div>
+
+                <button type="submit" class="btn btn-primary" id="connectBtn">
+                    <span id="connectBtnText">Connect Device</span>
+                    <div id="connectSpinner" class="spinner" style="display: none;"></div>
+                </button>
+            </form>
+        </div>
+
+        <!-- Connected Devices Card -->
+        <div class="card">
+            <h2 class="card-title">Connected Devices</h2>
+            
+            <div id="devicesContainer">
+                <div class="empty-state">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <p>Loading devices...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:3000/api';
+
+        // Show alert message
+        function showAlert(message, type = 'info') {
+            const alertBox = document.getElementById('alertBox');
+            alertBox.className = `alert alert-${type}`;
+            alertBox.textContent = message;
+            alertBox.style.display = 'block';
+
+            setTimeout(() => {
+                alertBox.style.display = 'none';
+            }, 5000);
+        }
+
+        // Connect device form submission
+        document.getElementById('connectDeviceForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const deviceId = document.getElementById('deviceId').value.trim();
+            const connectBtn = document.getElementById('connectBtn');
+            const connectBtnText = document.getElementById('connectBtnText');
+            const connectSpinner = document.getElementById('connectSpinner');
+
+            if (!deviceId) {
+                showAlert('Please enter a Device ID', 'error');
+                return;
+            }
+
+            // Show loading state
+            connectBtn.disabled = true;
+            connectBtnText.textContent = 'Connecting...';
+            connectSpinner.style.display = 'block';
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/biometric/connect`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ deviceId })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showAlert(data.message || 'Device connected successfully!', 'success');
+                    document.getElementById('deviceId').value = '';
+                    loadDevices(); // Refresh device list
+                } else {
+                    showAlert(data.message || 'Failed to connect device', 'error');
+                }
+
+            } catch (error) {
+                console.error('Error connecting device:', error);
+                showAlert('Network error. Please check your connection.', 'error');
+            } finally {
+                // Reset button state
+                connectBtn.disabled = false;
+                connectBtnText.textContent = 'Connect Device';
+                connectSpinner.style.display = 'none';
+            }
+        });
+
+        // Load connected devices
+        async function loadDevices() {
+            const container = document.getElementById('devicesContainer');
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/biometric/devices`);
+                const data = await response.json();
+
+                if (data.success && data.devices.length > 0) {
+                    container.innerHTML = `
+                        <table class="devices-table">
+                            <thead>
+                                <tr>
+                                    <th>Device ID</th>
+                                    <th>Device Name</th>
+                                    <th>Status</th>
+                                    <th>Last Sync</th>
+                                    <th>Logs</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${data.devices.map(device => `
+                                    <tr>
+                                        <td><strong>${device.device_id}</strong></td>
+                                        <td>${device.device_name || 'N/A'}</td>
+                                        <td>
+                                            <span class="status-badge status-${device.status}">
+                                                ${device.status}
+                                            </span>
+                                        </td>
+                                        <td>${device.last_sync ? new Date(device.last_sync).toLocaleString() : 'Never'}</td>
+                                        <td>${device.log_count || 0} logs</td>
+                                        <td>
+                                            <button class="btn btn-success" onclick="syncDevice('${device.device_id}')" style="padding: 8px 15px; font-size: 13px;">
+                                                Sync Now
+                                            </button>
+                                            <button class="btn btn-danger" onclick="deleteDevice('${device.device_id}')" style="padding: 8px 15px; font-size: 13px;">
+                                                Delete
+                                            </button>
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    `;
+                } else {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            <p>No devices connected yet. Connect your first device above!</p>
+                        </div>
+                    `;
+                }
+
+            } catch (error) {
+                console.error('Error loading devices:', error);
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <p style="color: #dc3545;">Failed to load devices. Please refresh the page.</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Sync device attendance
+        async function syncDevice(deviceId) {
+            if (!confirm(`Sync attendance logs from device ${deviceId}?`)) {
+                return;
+            }
+
+            showAlert('Syncing attendance logs...', 'info');
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/biometric/sync/${deviceId}`, {
+                    method: 'POST'
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showAlert(`${data.message} (${data.count} new logs)`, 'success');
+                    loadDevices(); // Refresh to show updated last_sync
+                } else {
+                    showAlert(data.message || 'Sync failed', 'error');
+                }
+
+            } catch (error) {
+                console.error('Error syncing device:', error);
+                showAlert('Network error during sync', 'error');
+            }
+        }
+
+        // Delete device
+        async function deleteDevice(deviceId) {
+            if (!confirm(`Are you sure you want to delete device ${deviceId}? This will also delete all associated logs.`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/biometric/devices/${deviceId}`, {
+                    method: 'DELETE'
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showAlert(data.message || 'Device deleted successfully', 'success');
+                    loadDevices();
+                } else {
+                    showAlert(data.message || 'Failed to delete device', 'error');
+                }
+
+            } catch (error) {
+                console.error('Error deleting device:', error);
+                showAlert('Network error during deletion', 'error');
+            }
+        }
+
+        // Load devices on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            loadDevices();
+        });
+    </script>
+    <script src="../scripts/sidebar.js"></script>
+</body>
+</html>

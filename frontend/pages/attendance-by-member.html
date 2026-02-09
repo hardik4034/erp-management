@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance by Member - HRMS</title>
+    <link rel="icon" type="image/png" href="../assets/logo.png">
+    <link rel="stylesheet" href="../styles/main.css">
+    <link rel="stylesheet" href="../styles/toast.css">
+    <link rel="stylesheet" href="../styles/role-selector.css">
+    <style>
+        /* Summary Cards Grid */
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .summary-card {
+            background: white;
+            border-radius: 8px;
+            padding: 1.25rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border-left: 4px solid;
+        }
+
+        .summary-card.working-days { border-left-color: #3b82f6; }
+        .summary-card.present { border-left-color: #10b981; }
+        .summary-card.late { border-left-color: #f59e0b; }
+        .summary-card.half-day { border-left-color: #8b5cf6; }
+        .summary-card.absent { border-left-color: #ef4444; }
+        .summary-card.holidays { border-left-color: #06b6d4; }
+
+        .summary-card-title {
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .summary-card-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #111827;
+        }
+
+        /* Filter Section */
+        .filter-section {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .filter-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .employee-select {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.625rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            background: white;
+            cursor: pointer;
+        }
+
+        .employee-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #ea580c;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+
+        .employee-avatar img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        /* Attendance Table */
+        .attendance-table-container {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .attendance-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .attendance-table thead {
+            background: #f9fafb;
+        }
+
+        .attendance-table th {
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.875rem;
+            color: #374151;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        .attendance-table td {
+            padding: 1rem;
+            border-bottom: 1px solid #f3f4f6;
+            font-size: 0.875rem;
+        }
+
+        .attendance-table tbody tr:hover {
+            background: #f9fafb;
+        }
+
+        .date-cell {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .date-day {
+            font-weight: 600;
+            color: #111827;
+        }
+
+        .date-weekday {
+            font-size: 0.75rem;
+            color: #6b7280;
+        }
+
+        /* Status Badges */
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            display: inline-block;
+        }
+
+        .status-present { background: #d1fae5; color: #065f46; }
+        .status-absent { background: #fee2e2; color: #991b1b; }
+        .status-late { background: #fef3c7; color: #92400e; }
+        .status-half-day { background: #e0e7ff; color: #3730a3; }
+        .status-on-leave { background: #dbeafe; color: #1e40af; }
+        .status-holiday { background: #dbeafe; color: #1e40af; }
+
+        .time-cell {
+            color: #374151;
+        }
+
+        .empty-cell {
+            color: #9ca3af;
+        }
+
+        /* Breadcrumb */
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin-bottom: 0.5rem;
+        }
+
+        .breadcrumb a {
+            color: #6b7280;
+            text-decoration: none;
+        }
+
+        .breadcrumb a:hover {
+            color: #ea580c;
+        }
+
+        .breadcrumb-separator {
+            color: #d1d5db;
+        }
+        
+        /* Hide sidebar and header when in iframe */
+        body.in-iframe .sidebar,
+        body.in-iframe .sidebar-overlay,
+        body.in-iframe .header {
+            display: none !important;
+        }
+
+        body.in-iframe .main-content {
+            margin-left: 0 !important;
+            width: 100% !important;
+        }
+
+        body.in-iframe .content-area {
+            padding-top: 0 !important;
+        }
+    </style>
+    <script>
+        // Detect if page is loaded in iframe
+        if (window.self !== window.top) {
+            document.addEventListener('DOMContentLoaded', function() {
+                document.body.classList.add('in-iframe');
+            });
+        }
+    </script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Overlay -->
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <img src="../assets/logo.png" alt="Soleos Logo" class="sidebar-logo">
+                <button class="sidebar-close-btn" id="sidebarClose">&times;</button>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-item"><a href="../index.html" class="nav-link"><i>📊</i> Dashboard</a></div>
+                <div class="nav-item"><a href="employees.html" class="nav-link"><i>👥</i> Employees</a></div>
+                <div class="nav-item"><a href="attendance.html" class="nav-link"><i>📅</i> Attendance</a></div>
+                <div class="nav-item"><a href="attendance-by-member.html" class="nav-link active"><i>👤</i> Attendance by Member</a></div>
+                <div class="nav-item"><a href="leaves.html" class="nav-link"><i>🏖️</i> Leaves</a></div>
+                <div class="nav-item"><a href="holidays.html" class="nav-link"><i>🎉</i> Holidays</a></div>
+                <div class="nav-item"><a href="payroll.html" class="nav-link"><i>💰</i> Payroll</a></div>
+                <div class="nav-item"><a href="employee-salary.html" class="nav-link"><i>💵</i> Employee Salary</a></div>
+                <div class="nav-item"><a href="departments.html" class="nav-link"><i>🏢</i> Departments</a></div>
+                <div class="nav-item"><a href="designations.html" class="nav-link"><i>💼</i> Designations</a></div>
+                <div class="nav-item"><a href="appreciations.html" class="nav-link"><i>🏆</i> Appreciations</a></div>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="header">
+                <div class="header-left">
+                    <button class="hamburger-btn" id="sidebarToggle">
+                        ☰
+                    </button>
+                    <div class="header-title">
+                    <div class="breadcrumb">
+                        <a href="../index.html">Home</a>
+                        <span class="breadcrumb-separator">›</span>
+                        <a href="attendance.html">Attendances</a>
+                        <span class="breadcrumb-separator">›</span>
+                        <span>Attendance by Member</span>
+                    </div>
+                    <h1>Attendance by Member</h1>
+                </div>
+                </div>
+                <div class="header-actions">
+                    <div class="role-selector">
+                        <label for="roleDropdown">Current Role:</label>
+                        <select id="roleDropdown">
+                            <option value="admin">Admin</option>
+                            <option value="hr">HR</option>
+                            <option value="manager">Manager</option>
+                            <option value="employee">Employee</option>
+                        </select>
+                    </div>
+                    <span class="role-badge" id="roleBadge">Employee</span>
+                </div>
+            </header>
+
+            <div class="content-area">
+                <!-- Filter Section -->
+                <div class="filter-section">
+                    <div class="filter-row">
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label class="form-label">Employee</label>
+                            <select id="employeeFilter" class="form-control">
+                                <option value="">Select Employee</option>
+                                <!-- Will be populated dynamically -->
+                            </select>
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label class="form-label">Month</label>
+                            <select id="monthFilter" class="form-control">
+                                <option value="1">January</option>
+                                <option value="2">February</option>
+                                <option value="3">March</option>
+                                <option value="4">April</option>
+                                <option value="5">May</option>
+                                <option value="6">June</option>
+                                <option value="7">July</option>
+                                <option value="8">August</option>
+                                <option value="9">September</option>
+                                <option value="10">October</option>
+                                <option value="11">November</option>
+                                <option value="12">December</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label class="form-label">Year</label>
+                            <select id="yearFilter" class="form-control">
+                                <!-- Will be populated dynamically -->
+                            </select>
+                        </div>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="btn btn-primary" id="markAttendanceBtn" onclick="openMarkAttendanceModal()">
+                            + Mark Attendance
+                        </button>
+                        <button class="btn btn-outline" onclick="importAttendance()">
+                            Import
+                        </button>
+                        <button class="btn btn-outline" onclick="exportAttendance()">
+                            Export
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Summary Cards -->
+                <div class="summary-cards">
+                    <div class="summary-card working-days">
+                        <div class="summary-card-title">
+                            <span>📅</span>
+                            <span>Working Days</span>
+                        </div>
+                        <div class="summary-card-value" id="workingDaysCount">0</div>
+                    </div>
+                    <div class="summary-card present">
+                        <div class="summary-card-title">
+                            <span>✓</span>
+                            <span>Days Present</span>
+                        </div>
+                        <div class="summary-card-value" id="presentCount">0</div>
+                    </div>
+                    <div class="summary-card late">
+                        <div class="summary-card-title">
+                            <span>⏰</span>
+                            <span>Late</span>
+                        </div>
+                        <div class="summary-card-value" id="lateCount">0</div>
+                    </div>
+                    <div class="summary-card half-day">
+                        <div class="summary-card-title">
+                            <span>◐</span>
+                            <span>Half Day</span>
+                        </div>
+                        <div class="summary-card-value" id="halfDayCount">0</div>
+                    </div>
+                    <div class="summary-card absent">
+                        <div class="summary-card-title">
+                            <span>✗</span>
+                            <span>Absent</span>
+                        </div>
+                        <div class="summary-card-value" id="absentCount">0</div>
+                    </div>
+                    <div class="summary-card holidays">
+                        <div class="summary-card-title">
+                            <span>🎉</span>
+                            <span>Holidays</span>
+                        </div>
+                        <div class="summary-card-value" id="holidaysCount">0</div>
+                    </div>
+                </div>
+
+                <!-- Attendance Table -->
+                <div class="attendance-table-container">
+                    <table class="attendance-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Status</th>
+                                <th>Clock In</th>
+                                <th>Clock Out</th>
+                                <th>Total</th>
+                                <th>Others</th>
+                            </tr>
+                        </thead>
+                        <tbody id="attendanceTableBody">
+                            <!-- Will be populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Mark Attendance Modal -->
+    <div class="modal" id="attendanceModal">
+        
+        <div class="modal-content modal-content-wide" style="max-width: 1200px;">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modalTitle">Mark Attendance</h3>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="attendanceForm">
+                    <input type="hidden" id="attendanceId">
+                    <input type="hidden" id="employeeId">
+
+                    <!-- Employee Name (Read-only) -->
+                    <div class="form-group">
+                        <label class="form-label">Employee</label>
+                        <input type="text" id="employeeName" class="form-control" readonly>
+                    </div>
+
+                    <!-- Attendance Date -->
+                    <div class="form-group">
+                        <label class="form-label">Date *</label>
+                        <input type="date" id="attendanceDate" class="form-control" required>
+                    </div>
+
+                    <!-- Status Dropdown -->
+                    <div class="form-group">
+                        <label class="form-label">Status *</label>
+                        <select id="attendanceStatus" class="form-control" required>
+                            <option value="Present">✓ Present</option>
+                            <option value="Half Day">◐ Half Day</option>
+                            <option value="Late">⏰ Late</option>
+                            <option value="Absent">✗ Absent</option>
+                            <option value="On Leave">🏖️ On Leave</option>
+                        </select>
+                    </div>
+
+                    <!-- Time Fields Row -->
+                    <div class="form-row-2col">
+                        <div class="form-group">
+                            <label class="form-label">Check In Time</label>
+                            <input type="time" id="checkInTime" class="form-control" value="08:00">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Check Out Time</label>
+                            <input type="time" id="checkOutTime" class="form-control" value="18:00">
+                        </div>
+                    </div>
+
+                    <!-- Location Fields Row -->
+                    <div class="form-row-2col">
+                        <div class="form-group">
+                            <label class="form-label">Check In Location</label>
+                            <input type="text" id="checkInLocation" class="form-control" placeholder="e.g., Office">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Check Out Location</label>
+                            <input type="text" id="checkOutLocation" class="form-control" placeholder="e.g., Office">
+                        </div>
+                    </div>
+
+                    <!-- Working From Fields Row -->
+                    <div class="form-row-2col">
+                        <div class="form-group">
+                            <label class="form-label">Working From (In)</label>
+                            <input type="text" id="workingFrom" class="form-control" placeholder="e.g., Office">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Working From (Out)</label>
+                            <input type="text" id="workingFromOut" class="form-control" placeholder="e.g., Office">
+                        </div>
+                    </div>
+
+                    <!-- Attendance Overwrite Checkbox -->
+                    <div class="checkbox-label">
+                        <input type="checkbox" id="attendanceOverwrite">
+                        <span>Attendance Overwrite (if record exists)</span>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline" onclick="closeModal()">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="saveAttendance()">Save Attendance</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toast-container"></div>
+
+    <!-- Scripts -->
+    <script src="../scripts/toast.js"></script>
+    <script src="../scripts/sidebar.js"></script>
+    <script src="../scripts/role-manager.js"></script>
+    <script src="../scripts/auth.js"></script>
+    <script src="../scripts/api.js"></script>
+    <script src="../scripts/attendance-by-member.js"></script>
+</body>
+</html>

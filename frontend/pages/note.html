@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Notes - HRMS</title>
+    <link rel="icon" type="image/png" href="../assets/logo.png">
+    <link rel="stylesheet" href="../styles/main.css">
+    <link rel="stylesheet" href="../styles/toast.css">
+    <link rel="stylesheet" href="../styles/role-selector.css">
+    <style>
+        /* Specific Styles for Employee Notes */
+        .notes-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+
+        @media (min-width: 1024px) {
+            .notes-container {
+                grid-template-columns: 350px 1fr;
+            }
+        }
+
+        /* Form Section */
+        .note-form-card {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 100px; /* Sticky form on desktop */
+            height: fit-content;
+        }
+
+        .note-form-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #111827;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        /* Notes List Section */
+        .notes-list-card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden; /* For table border radius */
+        }
+
+        .notes-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .notes-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #111827;
+        }
+
+        .notes-filters {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .view-toggle {
+            display: flex;
+            background: #f3f4f6;
+            border-radius: 6px;
+            padding: 2px;
+        }
+
+        .view-btn {
+            border: none;
+            background: transparent;
+            padding: 0.4rem 0.6rem;
+            border-radius: 4px;
+            cursor: pointer;
+            color: #6b7280;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .view-btn.active {
+            background: white;
+            color: #ea580c;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+
+        /* Generic Table Styles */
+        .notes-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .notes-table th {
+            text-align: left;
+            padding: 1rem 1.5rem;
+            background-color: #f9fafb;
+            font-weight: 600;
+            color: #374151;
+            font-size: 0.875rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .notes-table td {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #e5e7eb;
+            color: #111827;
+            font-size: 0.875rem;
+            vertical-align: top;
+        }
+        
+        .notes-table tr:hover {
+            background-color: #f9fafb;
+        }
+
+        .notes-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Card View Styles */
+        .notes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1rem;
+            padding: 1.5rem;
+        }
+
+        .note-card {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 1rem;
+            transition: all 0.2s;
+        }
+
+        .note-card:hover {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            border-color: #d1d5db;
+        }
+
+        .note-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.75rem;
+        }
+
+        .note-card-meta {
+            margin-bottom: 0.75rem;
+            font-size: 0.8125rem;
+            color: #6b7280;
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .note-content {
+            font-size: 0.875rem;
+            color: #374151;
+            line-height: 1.5;
+            white-space: pre-wrap; /* Maintain formatting of textarea */
+        }
+
+        /* Note Type Badges */
+        .badge-general { background-color: #f3f4f6; color: #374151; border: 1px solid #e5e7eb; }
+        .badge-warning { background-color: #fffbeb; color: #b45309; border: 1px solid #fcd34d; }
+        .badge-appreciation { background-color: #ecfdf5; color: #047857; border: 1px solid #6ee7b7; }
+        .badge-performance { background-color: #f5f3ff; color: #6d28d9; border: 1px solid #c4b5fd; }
+        .badge-salary { background-color: #eef2ff; color: #4338ca; border: 1px solid #a5b4fc; }
+        .badge-disciplinary { background-color: #fef2f2; color: #b91c1c; border: 1px solid #fca5a5; }
+
+        .hidden { display: none; }
+        
+        .empty-state {
+            padding: 3rem;
+            text-align: center;
+            color: #6b7280;
+        }
+
+        .required-mark {
+            color: #ef4444;
+            margin-left: 2px;
+        }
+    </style>
+</head>
+<body
+>
+    <div class="app-container">
+        <!-- Sidebar Overlay -->
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+        <!-- Sidebar will be same as other pages -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <img src="../assets/logo.png" alt="Soleos Logo" class="sidebar-logo">
+                <button class="sidebar-close-btn" id="sidebarClose">&times;</button>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-item"><a href="../index.html" class="nav-link"><i>📊</i> Dashboard</a></div>
+                <div class="nav-item"><a href="employees.html" class="nav-link"><i>👥</i> Employees</a></div>
+                <div class="nav-item"><a href="attendance.html" class="nav-link"><i>📅</i> Attendance</a></div>
+                <div class="nav-item"><a href="attendance-by-member.html" class="nav-link"><i>👤</i> Attendance by Member</a></div>
+                <div class="nav-item"><a href="leaves.html" class="nav-link"><i>🏖️</i> Leaves</a></div>
+                <div class="nav-item"><a href="holidays.html" class="nav-link"><i>🎉</i> Holidays</a></div>
+                <div class="nav-item"><a href="payroll.html" class="nav-link"><i>💰</i> Payroll</a></div>
+                <div class="nav-item"><a href="employee-salary.html" class="nav-link"><i>💵</i> Employee Salary</a></div>
+                <div class="nav-item"><a href="departments.html" class="nav-link"><i>🏢</i> Departments</a></div>
+                <div class="nav-item"><a href="designations.html" class="nav-link"><i>💼</i> Designations</a></div>
+                <div class="nav-item"><a href="appreciations.html" class="nav-link"><i>🏆</i> Appreciations</a></div>
+                <div class="nav-item"><a href="employee-notes.html" class="nav-link active"><i>📝</i> Employee Notes</a></div>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="header">
+                <div class="header-left">
+                    <button class="hamburger-btn" id="sidebarToggle">
+                        ☰
+                    </button>
+                    <div class="header-title">
+                    <div class="breadcrumb">
+                        <a href="../index.html">Home</a>
+                        <span class="breadcrumb-separator">›</span>
+                        <span>Employee Notes</span>
+                    </div>
+                    <h1>Employee Notes Management</h1>
+                </div>
+                </div>
+                <div class="header-actions">
+                    <div class="role-selector">
+                        <label for="roleDropdown">Current Role:</label>
+                        <select id="roleDropdown">
+                            <option value="admin">Admin</option>
+                            <option value="hr">HR</option>
+                            <option value="manager">Manager</option>
+                            <option value="employee">Employee</option>
+                        </select>
+                    </div>
+                    <span class="role-badge" id="roleBadge">HR</span>
+                </div>
+            </header>
+
+            <div class="content-area">
+                <div class="notes-container">
+                    
+                    <!-- Left Column: Add Note Form -->
+                    <div class="note-form-column">
+                        <div class="note-form-card">
+                            <h2 class="note-form-title">Add New Note</h2>
+                            <form id="addNoteForm">
+                                <!-- Employee Select -->
+                                <div class="form-group">
+                                    <label class="form-label" for="employeeSelect">Employee Name <span class="required-mark">*</span></label>
+                                    <select id="employeeSelect" class="form-control" required>
+                                        <option value="">Select Employee</option>
+                                        <!-- Dynamically populated -->
+                                    </select>
+                                </div>
+
+                                <!-- Note Type -->
+                                <div class="form-group">
+                                    <label class="form-label" for="noteType">Note Type <span class="required-mark">*</span></label>
+                                    <select id="noteType" class="form-control" required>
+                                        <option value="">Select Type</option>
+                                        <option value="General">General</option>
+                                        <option value="Warning">Warning</option>
+                                        <option value="Appreciation">Appreciation</option>
+                                        <option value="Performance">Performance</option>
+                                        <option value="Salary Discussion">Salary Discussion</option>
+                                        <option value="Disciplinary Action">Disciplinary Action</option>
+                                    </select>
+                                </div>
+
+                                <!-- Visibility -->
+                                <div class="form-group">
+                                    <label class="form-label" for="visibility">Visibility Control <span class="required-mark">*</span></label>
+                                    <select id="visibility" class="form-control" required>
+                                        <option value="HR Only">Sirf HR (HR Only)</option>
+                                        <option value="HR + Manager">HR + Manager</option>
+                                        <option value="Manager Only">Manager Only</option>
+                                    </select>
+                                </div>
+
+                                <!-- Description -->
+                                <div class="form-group">
+                                    <label class="form-label" for="noteDescription">Note Description <span class="required-mark">*</span></label>
+                                    <textarea id="noteDescription" class="form-control" rows="5" placeholder="Employee ko late aane ke liye verbal warning di gayi" required></textarea>
+                                </div>
+
+                                <!-- Actions -->
+                                <div class="form-actions" style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                                    <button type="submit" class="btn btn-primary" style="flex: 1;">Save Note</button>
+                                    <button type="button" class="btn btn-outline" id="resetFormBtn" style="flex: 1;">Cancel</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Right Column: Notes List -->
+                    <div class="notes-list-column">
+                        <div class="notes-list-card">
+                            <div class="notes-header">
+                                <h3 class="notes-title">Recent Notes</h3>
+                                
+                                <div class="notes-filters">
+                                    <!-- Simple Filter Inputs -->
+                                    <input type="text" id="searchFilter" class="form-control" style="width: 200px; padding: 0.4rem;" placeholder="Search notes...">
+                                    
+                                    <select id="typeFilter" class="form-control" style="width: 150px; padding: 0.4rem;">
+                                        <option value="All">All Types</option>
+                                        <option value="General">General</option>
+                                        <option value="Warning">Warning</option>
+                                        <option value="Appreciation">Appreciation</option>
+                                        <option value="Performance">Performance</option>
+                                        <option value="Salary Discussion">Salary Discussion</option>
+                                        <option value="Disciplinary Action">Disciplinary Action</option>
+                                    </select>
+                                    
+                                    <input type="date" id="dateStartFilter" class="form-control" style="width: 130px; padding: 0.4rem;" title="Start Date">
+                                    <input type="date" id="dateEndFilter" class="form-control" style="width: 130px; padding: 0.4rem;" title="End Date">
+
+                                    <!-- View Toggle -->
+                                    <div class="view-toggle">
+                                        <button class="view-btn active" id="tableViewBtn" title="Table View">
+                                            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path></svg>
+                                        </button>
+                                        <button class="view-btn" id="cardViewBtn" title="Grid View">
+                                            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Table View -->
+                            <div id="notesTableView" class="table-container">
+                                <table class="notes-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Employee Name</th>
+                                            <th>Note Type</th>
+                                            <th>Feedback/Note</th>
+                                            <th>Visibility</th>
+                                            <th>Date</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="notesTableBody">
+                                        <!-- Dynamic Content -->
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <!-- Grid View (Hidden by default) -->
+                            <div id="notesGridView" class="notes-grid hidden">
+                                <!-- Dynamic Content -->
+                            </div>
+
+                            <!-- Empty State -->
+                            <div id="emptyState" class="empty-state hidden">
+                                <p>No notes found matching your criteria.</p>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toast-container"></div>
+
+    <!-- Scripts -->
+    <script src="../scripts/toast.js"></script>
+    <script src="../scripts/sidebar.js"></script>
+    <script src="../scripts/role-manager.js"></script>
+    <script src="../scripts/auth.js"></script>
+    <script src="../scripts/api.js"></script>
+    <script src="../scripts/employee-notes.js"></script>
+</body>
+</html>

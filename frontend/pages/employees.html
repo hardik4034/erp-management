@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employees - HRMS</title>
+    <link rel="icon" type="image/png" href="../assets/logo.png">
+    <link rel="stylesheet" href="../styles/main.css">
+    <link rel="stylesheet" href="../styles/toast.css">
+    <link rel="stylesheet" href="../styles/role-selector.css">
+    <style>
+        /* Hover effects for employee links */
+        .table td a:hover {
+            text-decoration: underline !important;
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Overlay -->
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <img src="../assets/logo.png" alt="Soleos Logo" class="sidebar-logo">
+                <button class="sidebar-close-btn" id="sidebarClose">&times;</button>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-item">
+                    <a href="../index.html" class="nav-link">
+                        <i>📊</i> Dashboard
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="employees.html" class="nav-link active">
+                        <i>👥</i> Employees
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="attendance.html" class="nav-link">
+                        <i>📅</i> Attendance
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="leaves.html" class="nav-link">
+                        <i>🏖️</i> Leaves
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="holidays.html" class="nav-link">
+                        <i>🎉</i> Holidays
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="payroll.html" class="nav-link">
+                        <i>💰</i> Payroll
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="employee-salary.html" class="nav-link">
+                        <i>💵</i> Employee Salary
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="departments.html" class="nav-link">
+                        <i>🏢</i> Departments
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="designations.html" class="nav-link">
+                        <i>💼</i> Designations
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="appreciations.html" class="nav-link">
+                        <i>🏆</i> Appreciations
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="note.html" class="nav-link">
+                        <i>📝</i> Note
+                    </a>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="header">
+                 <div class="header-left">
+                    <button class="hamburger-btn" id="sidebarToggle">
+                        ☰
+                    </button>
+                    <div class="header-title"><h1>Employees</h1></div>
+                </div>
+                <div class="header-actions">
+                    <div class="role-selector">
+                        <label for="roleDropdown">Current Role:</label>
+                        <select id="roleDropdown">
+                            <option value="admin">Admin</option>
+                            <option value="hr">HR</option>
+                            <option value="manager">Manager</option>
+                            <option value="employee">Employee</option>
+                        </select>
+                    </div>
+                    <span class="role-badge" id="roleBadge">Employee</span>
+                </div>
+            </header>
+
+            <!-- Content Area -->
+            <div class="content-area">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Employee Management</h3>
+                        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                            <button class="btn btn-primary create-btn" onclick="openAddModal()" id="addEmployeeBtn">
+                                + Add Employee
+                            </button>
+                           
+                            <button class="btn admin-only" onclick="openImportModal()" id="ImportEmployeeBtn">
+                                + Import
+                            </button>
+                            <button class="btn admin-only" onclick="openExportModal()" id="ExportEmployeeBtn">
+                                + Export
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="table-container">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 40px;"><input type="checkbox" id="selectAll"></th>
+                                    <th>Employee ID</th>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>User Role</th>
+                                    <th>Reporting To</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="employeesTable">
+                                <tr>
+                                    <td colspan="9" class="text-center">Loading...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    </div>
+
+    <!-- Global Action Menu -->
+    <!-- Global Action Menu Removed -->
+
+    <!-- Add/Edit Employee Modal -->
+    <div class="modal" id="employeeModal">
+        <div class="modal-content" style="max-width: 1500px; width: 95%;">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modalTitle">Add Employee</h3>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="employeeForm">
+                    <input type="hidden" id="employeeId">
+                    
+                    <!-- Account Details -->
+                    <h4 class="section-title">Account Details</h4>
+                    
+                    <!-- Employee ID Field -->
+                    <div class="form-row">
+                        <div class="form-group col-md-12">
+                            <label class="form-label" for="employeeCode">Employee ID *</label>
+                            <input type="text" id="employeeCode" class="form-control" required placeholder="e.g. EMP2026001">
+                            <small class="text-muted">Unique identifier for the employee. Cannot be changed after creation.</small>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group col-md-2">
+                            <label class="form-label" for="salutation">Salutation</label>
+                            <select id="salutation" class="form-control">
+                                <option value="">--</option>
+                                <option value="Mr.">Mr.</option>
+                                <option value="Mrs.">Mrs.</option>
+                                <option value="Ms.">Ms.</option>
+                                <option value="Dr.">Dr.</option>
+                            </select>
+                        </div>
+                        <div class="form-group col-md-5">
+                            <label class="form-label" for="firstName">First Name *</label>
+                            <input type="text" id="firstName" class="form-control" required placeholder="e.g. John">
+                        </div>
+                        <div class="form-group col-md-5">
+                            <label class="form-label" for="lastName">Last Name *</label>
+                            <input type="text" id="lastName" class="form-control" required placeholder="e.g. Doe">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label class="form-label" for="email">Employee Email *</label>
+                            <input type="email" id="email" class="form-control" required placeholder="e.g. johndoe@example.com">
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label class="form-label" for="password">Password</label>
+                            <input type="password" id="password" class="form-control" placeholder="Minimum 8 characters">
+                            <small class="text-muted">Leave blank to keep current password when editing.</small>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label class="form-label" for="designationId">Designation *</label>
+                            <select id="designationId" class="form-control" required>
+                                <option value="">Select Designation</option>
+                            </select>
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label class="form-label" for="departmentId">Department *</label>
+                            <select id="departmentId" class="form-control" required>
+                                <option value="">Select Department</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label class="form-label" for="country">Country</label>
+                            <select id="country" class="form-control">
+                                <option value="">Select Country</option>
+                                <option value="USA">USA</option>
+                                <option value="UK">UK</option>
+                                <option value="India">India</option>
+                                <option value="Canada">Canada</option>
+                                <option value="Australia">Australia</option>
+                            </select>
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label class="form-label" for="phone">Mobile</label>
+                            <input type="tel" id="phone" class="form-control" placeholder="e.g. 1234567890">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group col-md-4">
+                            <label class="form-label" for="gender">Gender</label>
+                            <select id="gender" class="form-control">
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label class="form-label" for="dateOfJoining">Joining Date *</label>
+                            <input type="date" id="dateOfJoining" class="form-control" required>
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label class="form-label" for="dateOfBirth">Date of Birth</label>
+                            <input type="date" id="dateOfBirth" class="form-control">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group col-md-4">
+                            <label class="form-label" for="reportingTo">Reporting To</label>
+                            <select id="reportingTo" class="form-control">
+                                <option value="">Select Supervisor</option>
+                            </select>
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label class="form-label" for="language">Language</label>
+                            <select id="language" class="form-control">
+                                <option value="English">English</option>
+                                <option value="Spanish">Spanish</option>
+                                <option value="French">French</option>
+                                <option value="German">German</option>
+                            </select>
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label class="form-label" for="userRole">User Role</label>
+                            <select id="userRole" class="form-control">
+                                <option value="">Select Role</option>
+                                <option value="Employee">Employee</option>
+                                <option value="Admin">Admin</option>
+                                <option value="HR">HR</option>
+                                <option value="Manager">Manager</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="address">Address</label>
+                        <textarea id="address" class="form-control" rows="2" placeholder="e.g. 132, My Street, Kingston, New York 12401"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="about">About</label>
+                        <textarea id="about" class="form-control" rows="2"></textarea>
+                    </div>
+
+                    <hr>
+
+                    <!-- Other Details -->
+                    <h4 class="section-title">Other Details</h4>
+                    
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label class="form-label">Login Allowed?</label>
+                            <div>
+                                <label><input type="radio" name="loginAllowed" value="true" checked> Yes</label>
+                                <label><input type="radio" name="loginAllowed" value="false"> No</label>
+                            </div>
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label class="form-label">Receive email notifications?</label>
+                            <div>
+                                <label><input type="radio" name="receiveEmailNotifications" value="true" checked> Yes</label>
+                                <label><input type="radio" name="receiveEmailNotifications" value="false"> No</label>
+                            </div>
+                        </div>
+                    </div>
+
+                   
+
+                    <div class="form-group">
+                        <label class="form-label" for="skills">Skills</label>
+                        <input type="text" id="skills" class="form-control" placeholder="e.g. communication, ReactJS">
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group col-md-4">
+                            <label class="form-label" for="probationEndDate">Probation End Date</label>
+                            <input type="date" id="probationEndDate" class="form-control">
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label class="form-label" for="noticePeriodStartDate">Notice Period Start Date</label>
+                            <input type="date" id="noticePeriodStartDate" class="form-control">
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label class="form-label" for="noticePeriodEndDate">Notice Period End Date</label>
+                            <input type="date" id="noticePeriodEndDate" class="form-control">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label class="form-label" for="employmentType">Employment Type</label>
+                            <select id="employmentType" class="form-control">
+                                <option value="">--</option>
+                                <option value="Full Time">Full Time</option>
+                                <option value="Part Time">Part Time</option>
+                                <option value="Contract">Contract</option>
+                                <option value="Internship">Internship</option>
+                            </select>
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label class="form-label" for="maritalStatus">Marital Status</label>
+                            <select id="maritalStatus" class="form-control">
+                                <option value="">--</option>
+                                <option value="Single">Single</option>
+                                <option value="Married">Married</option>
+                                <option value="Widowed">Widowed</option>
+                                <option value="Divorced">Divorced</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="businessAddress">Business Address</label>
+                        <input type="text" id="businessAddress" class="form-control" placeholder="Worksuite">
+                    </div>
+
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="saveEmployee()">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="../scripts/toast.js"></script>
+    <script src="../scripts/sidebar.js"></script>
+    <script src="../scripts/role-manager.js"></script>
+    <script src="../scripts/auth.js"></script>
+    <script src="../scripts/api.js"></script>
+    <script>
+        // Initialize Auth
+        auth.initAuth();
+        const canManage = auth.hasRole('Admin', 'HR');
+
+        let employees = [];
+        let departments = [];
+        let designations = [];
+
+        // Load employees with role-based filtering
+        async function loadEmployees() {
+            try {
+                const response = await endpoints.employees.getAll();
+                let allEmployees = response.data || [];
+                
+                // Filter employees based on role
+                const dataScope = window.roleManager.getDataScope();
+                const currentEmployeeId = window.roleManager.getCurrentEmployeeId();
+                
+                console.log('🔍 Filtering Debug:', { 
+                    role: window.roleManager.getCurrentRole(),
+                    dataScope, 
+                    currentEmployeeId,
+                    firstEmployeeId: allEmployees[0]?.EmployeeId,
+                    firstEmployeeIdType: typeof allEmployees[0]?.EmployeeId
+                });
+
+                if (dataScope === 'own' && currentEmployeeId) {
+                    // Employee role: show only their own data
+                    // Use loose equality (==) to match string/number IDs
+                    employees = allEmployees.filter(emp => emp.EmployeeId == currentEmployeeId);
+                    console.log(`📊 Filtered to own data: ${employees.length} employee(s)`);
+                } else if (dataScope === 'team' && currentEmployeeId) {
+                    // Manager role: show their team (employees reporting to them)
+                    employees = allEmployees.filter(emp => 
+                        emp.ReportingTo == currentEmployeeId || emp.EmployeeId == currentEmployeeId
+                    );
+                    console.log(`📊 Filtered to team data: ${employees.length} employee(s)`);
+                } else {
+                    // Admin/HR role: show all data
+                    employees = allEmployees;
+                    console.log(`📊 Showing all data: ${employees.length} employee(s)`);
+                }
+                
+                renderEmployees();
+                updateReportingToDropdown();
+                
+                // Re-apply UI permissions to ensure buttons are hidden/shown correctly
+                window.roleManager.applyRolePermissions();
+            } catch (error) {
+                console.error('Error loading employees:', error);
+                utils.showAlert('Failed to load employees', 'error');
+            }
+        }
+
+        // Listen for role changes and reload data
+        window.addEventListener('roleChanged', (event) => {
+            console.log(`🔄 Role changed, reloading employee data...`);
+            loadEmployees();
+        });
+
+        // Render employees table
+        function renderEmployees() {
+            const tbody = document.getElementById('employeesTable');
+            
+            if (employees.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" class="text-center">No employees found</td></tr>';
+                return;
+            }
+
+            // Create a lookup map for faster reporting supervisor finding
+            const employeeMap = {};
+            employees.forEach(e => { employeeMap[e.EmployeeId] = e; });
+
+            tbody.innerHTML = employees.map(emp => {
+                let reportingToName = '-';
+                if (emp.ReportingTo && employeeMap[emp.ReportingTo]) {
+                    const supervisor = employeeMap[emp.ReportingTo];
+                    reportingToName = `${supervisor.FirstName} ${supervisor.LastName}`;
+                }
+
+                return `
+                <tr>
+                    <td><input type="checkbox" class="emp-checkbox" value="${emp.EmployeeId}"></td>
+                    <td><a href="profile.html?id=${emp.EmployeeId}" style="color: #667eea; text-decoration: none; font-weight: 500;">${emp.EmployeeCode || '-'}</a></td>
+                    <td>
+                        <div style="display: flex; align-items: center;">
+                            <div style="width: 32px; height: 32px; border-radius: 50%; background-color: #ddd; margin-right: 10px; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #555;">
+                                ${emp.FirstName.charAt(0)}${emp.LastName.charAt(0)}
+                            </div>
+                            <div>
+                                <div style="font-weight: 500;"><a href="profile.html?id=${emp.EmployeeId}" style="color: #333; text-decoration: none;">${emp.FirstName} ${emp.LastName}</a></div>
+                                <div style="font-size: 12px; color: #888;">${emp.DesignationName || 'No Designation'}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>${emp.Email}</td>
+                    <td><span class="badge badge-info">${emp.UserRole || 'Employee'}</span></td>
+                    <td>
+                        <div style="display: flex; align-items: center;">
+                             <div style="width: 24px; height: 24px; border-radius: 50%; background-color: #eee; margin-right: 5px; display: flex; align-items: center; justify-content: center; font-size: 10px;">
+                                ${reportingToName !== '-' ? reportingToName.charAt(0) : '-'}
+                            </div>
+                            <span>${reportingToName}</span>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">${emp.Status || 'Active'}</span></td>
+                    <td>
+                        <div class="action-buttons" style="display: flex; gap: 5px;">
+                            <button class="btn btn-sm btn-outline-primary" title="View" onclick="viewEmployee(${emp.EmployeeId})">
+                                <span style="font-size: 1.2em;">👁️</span>
+                            </button>
+                            ${canManage ? `
+                                <button class="btn btn-sm btn-outline-secondary edit-btn" title="Edit" onclick="editEmployee(${emp.EmployeeId})">
+                                    <span style="font-size: 1.2em;">✏️</span>
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger delete-btn" title="Delete" onclick="deleteEmployee(${emp.EmployeeId})">
+                                    <span style="font-size: 1.2em;">🗑️</span>
+                                </button>
+                            ` : ''}
+                        </div>
+                    </td>
+                </tr>
+            `}).join('');
+        }
+
+        // Global Action Menu Logic Removed - Replaced with inline buttons
+        // Keeping this comment block to indicate removal spot
+
+
+        // Load departments and designations
+        async function loadDropdowns() {
+            try {
+                const [deptResponse, desigResponse] = await Promise.all([
+                    endpoints.departments.getAll(),
+                    endpoints.designations.getAll()
+                ]);
+
+                departments = deptResponse.data || [];
+                designations = desigResponse.data || [];
+
+                const deptSelect = document.getElementById('departmentId');
+                deptSelect.innerHTML = '<option value="">Select Department</option>' +
+                    departments.map(d => `<option value="${d.DepartmentId}">${d.DepartmentName}</option>`).join('');
+
+                const desigSelect = document.getElementById('designationId');
+                desigSelect.innerHTML = '<option value="">Select Designation</option>' +
+                    designations.map(d => `<option value="${d.DesignationId}">${d.DesignationName}</option>`).join('');
+            } catch (error) {
+                console.error('Error loading dropdowns:', error);
+            }
+        }
+
+        function updateReportingToDropdown() {
+             const reportingSelect = document.getElementById('reportingTo');
+             reportingSelect.innerHTML = '<option value="">Select Supervisor</option>' +
+                    employees.map(e => `<option value="${e.EmployeeId}">${e.FirstName} ${e.LastName} (${e.EmployeeCode})</option>`).join('');
+        }
+
+        // Open add modal
+        function openAddModal() {
+            resetModalState();
+            document.getElementById('modalTitle').textContent = 'Add Employee';
+            document.getElementById('employeeForm').reset();
+            document.getElementById('employeeId').value = '';
+            document.getElementById('employeeCode').disabled = false; // Enable for new employee
+            document.getElementById('employeeModal').classList.add('active');
+            updateReportingToDropdown();
+        }
+
+        // Edit employee (Helper to get value safely)
+        const getVal = (val, defaultVal = '') => val !== null && val !== undefined ? val : defaultVal;
+        const getDateVal = (val) => val ? val.split('T')[0] : '';
+
+        async function editEmployee(id) {
+             resetModalState();
+             // Fetch latest details (since list might not have all fields if we didn't update list query fully, but we did)
+             // However, let's use the local object if it has everything, or fetch by ID to be safe
+             try {
+                const response = await endpoints.employees.getById(id);
+                const employee = response.data;
+                
+                document.getElementById('modalTitle').textContent = 'Edit Employee';
+                document.getElementById('employeeId').value = employee.EmployeeId;
+                
+                // Account Details
+                document.getElementById('employeeCode').value = employee.EmployeeCode;
+                document.getElementById('employeeCode').disabled = true; // Cannot change Employee ID
+                document.getElementById('salutation').value = getVal(employee.Salutation);
+                document.getElementById('firstName').value = employee.FirstName;
+                document.getElementById('lastName').value = employee.LastName;
+                document.getElementById('email').value = employee.Email;
+                document.getElementById('password').value = ''; // Don't show password
+                document.getElementById('designationId').value = employee.DesignationId;
+                document.getElementById('departmentId').value = employee.DepartmentId;
+                document.getElementById('country').value = getVal(employee.Country);
+                document.getElementById('phone').value = getVal(employee.Phone);
+                document.getElementById('gender').value = getVal(employee.Gender, 'Male');
+                document.getElementById('dateOfJoining').value = getDateVal(employee.DateOfJoining);
+                document.getElementById('dateOfBirth').value = getDateVal(employee.DateOfBirth);
+                
+                updateReportingToDropdown(); // Ensure list is populated
+                // Use setTimeout to ensure dropdown is ready if it wasn't
+                document.getElementById('reportingTo').value = getVal(employee.ReportingTo);
+                
+                document.getElementById('language').value = getVal(employee.Language, 'English');
+                document.getElementById('userRole').value = getVal(employee.UserRole) || 'Employee';
+                document.getElementById('address').value = getVal(employee.Address);
+                document.getElementById('about').value = getVal(employee.About);
+
+                // Other Details
+                document.querySelector(`input[name="loginAllowed"][value="${employee.LoginAllowed !== false ? 'true' : 'false'}"]`).checked = true;
+                document.querySelector(`input[name="receiveEmailNotifications"][value="${employee.ReceiveEmailNotifications !== false ? 'true' : 'false'}"]`).checked = true;
+                
+                
+                document.getElementById('skills').value = getVal(employee.Skills);
+                document.getElementById('probationEndDate').value = getDateVal(employee.ProbationEndDate);
+                document.getElementById('noticePeriodStartDate').value = getDateVal(employee.NoticePeriodStartDate);
+                document.getElementById('noticePeriodEndDate').value = getDateVal(employee.NoticePeriodEndDate);
+                document.getElementById('employmentType').value = getVal(employee.EmploymentType);
+                document.getElementById('maritalStatus').value = getVal(employee.MaritalStatus);
+                document.getElementById('businessAddress').value = getVal(employee.BusinessAddress);
+
+                document.getElementById('employeeModal').classList.add('active');
+             } catch(error) {
+                 console.error("Error fetching employee details", error);
+                 utils.showAlert("Failed to fetch employee details", "error");
+             }
+        }
+
+        // View Employee (Read-only)
+        async function viewEmployee(id) {
+            try {
+                // Reuse edit logic to populate form
+                await editEmployee(id);
+                
+                document.getElementById('modalTitle').textContent = 'View Employee';
+                
+                // Disable all inputs
+                const form = document.getElementById('employeeForm');
+                const inputs = form.querySelectorAll('input, select, textarea');
+                inputs.forEach(input => input.disabled = true);
+                
+                // Hide Save button
+                document.querySelector('.modal-footer .btn-primary').style.display = 'none';
+                
+            } catch (error) {
+                console.error("Error viewing employee", error);
+                utils.showAlert("Failed to view employee", "error");
+            }
+        }
+
+        // Helper to reset modal state (enable inputs, show save button)
+        function resetModalState() {
+            const form = document.getElementById('employeeForm');
+            const inputs = form.querySelectorAll('input, select, textarea');
+            inputs.forEach(input => input.disabled = false);
+            document.querySelector('.modal-footer .btn-primary').style.display = 'inline-block';
+        }
+
+        // Save employee
+        async function saveEmployee() {
+            const form = document.getElementById('employeeForm');
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+
+            const employeeId = document.getElementById('employeeId').value;
+            
+            const getRadioVal = (name) => document.querySelector(`input[name="${name}"]:checked`).value === 'true';
+
+            const data = {
+                employeeCode: document.getElementById('employeeCode').value, // Add Employee Code
+                firstName: document.getElementById('firstName').value,
+                lastName: document.getElementById('lastName').value,
+                email: document.getElementById('email').value,
+                phone: document.getElementById('phone').value,
+                departmentId: parseInt(document.getElementById('departmentId').value),
+                designationId: parseInt(document.getElementById('designationId').value),
+                dateOfJoining: document.getElementById('dateOfJoining').value,
+                // New Fields
+                salutation: document.getElementById('salutation').value,
+                password: document.getElementById('password').value || undefined, // Send only if not empty
+                country: document.getElementById('country').value,
+                gender: document.getElementById('gender').value,
+                dateOfBirth: document.getElementById('dateOfBirth').value || null,
+                reportingTo: document.getElementById('reportingTo').value ? parseInt(document.getElementById('reportingTo').value) : null,
+                language: document.getElementById('language').value,
+                userRole: document.getElementById('userRole').value,
+                address: document.getElementById('address').value,
+                about: document.getElementById('about').value,
+                loginAllowed: getRadioVal('loginAllowed'),
+                receiveEmailNotifications: getRadioVal('receiveEmailNotifications'),
+                skills: document.getElementById('skills').value,
+                probationEndDate: document.getElementById('probationEndDate').value || null,
+                noticePeriodStartDate: document.getElementById('noticePeriodStartDate').value || null,
+                noticePeriodEndDate: document.getElementById('noticePeriodEndDate').value || null,
+                employmentType: document.getElementById('employmentType').value,
+                maritalStatus: document.getElementById('maritalStatus').value,
+                businessAddress: document.getElementById('businessAddress').value,
+            };
+
+            try {
+                if (employeeId) {
+                    await endpoints.employees.update(employeeId, data);
+                    utils.showAlert('Employee updated successfully', 'success');
+                } else {
+                    await endpoints.employees.create(data);
+                    utils.showAlert('Employee created successfully', 'success');
+                }
+                closeModal();
+                loadEmployees();
+            } catch (error) {
+                console.error('Error saving employee:', error);
+                utils.showAlert(error.message || 'Failed to save employee', 'error');
+            }
+        }
+
+        // Delete employee
+        async function deleteEmployee(id) {
+            if (!confirm('Are you sure you want to delete this employee?')) return;
+
+            try {
+                await endpoints.employees.delete(id);
+                utils.showAlert('Employee deleted successfully', 'success');
+                loadEmployees();
+            } catch (error) {
+                console.error('Error deleting employee:', error);
+                utils.showAlert('Failed to delete employee', 'error');
+            }
+        }
+
+        // Close modal
+        function closeModal() {
+            document.getElementById('employeeModal').classList.remove('active');
+        }
+
+        // Placeholder for Invite Modal
+
+
+        function openImportModal() {
+            utils.showAlert('import feature coming soon', 'info');
+        }
+
+        function openExportModal() {
+            utils.showAlert('export feature coming soon', 'info');
+        }
+
+        // Initialize
+        loadEmployees();
+        loadDropdowns();
+    </script>
+</body>
+</html>

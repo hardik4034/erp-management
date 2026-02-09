@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Designations - HRMS</title>
+    <link rel="icon" type="image/png" href="../assets/logo.png">
+    <link rel="stylesheet" href="../styles/main.css">
+    <link rel="stylesheet" href="../styles/toast.css">
+    <link rel="stylesheet" href="../styles/role-selector.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Overlay -->
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <img src="../assets/logo.png" alt="Soleos Logo" class="sidebar-logo">
+                <button class="sidebar-close-btn" id="sidebarClose">&times;</button>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-item"><a href="../index.html" class="nav-link"><i>📊</i> Dashboard</a></div>
+                <div class="nav-item"><a href="employees.html" class="nav-link"><i>👥</i> Employees</a></div>
+                <div class="nav-item"><a href="attendance.html" class="nav-link"><i>📅</i> Attendance</a></div>
+                <div class="nav-item"><a href="leaves.html" class="nav-link"><i>🏖️</i> Leaves</a></div>
+                <div class="nav-item"><a href="holidays.html" class="nav-link"><i>🎉</i> Holidays</a></div>
+                <div class="nav-item"><a href="payroll.html" class="nav-link"><i>💰</i> Payroll</a></div>
+                <div class="nav-item"><a href="employee-salary.html" class="nav-link"><i>💵</i> Employee Salary</a></div>
+                <div class="nav-item"><a href="departments.html" class="nav-link"><i>🏢</i> Departments</a></div>
+                <div class="nav-item"><a href="designations.html" class="nav-link active"><i>💼</i> Designations</a></div>
+                <div class="nav-item"><a href="appreciations.html" class="nav-link"><i>🏆</i> Appreciations</a></div>
+                <div class="nav-item"><a href="note.html" class="nav-link"><i>📝</i> Note</a></div>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="header">
+                <div class="header-left">
+                    <button class="hamburger-btn" id="sidebarToggle">
+                        ☰
+                    </button>
+                    <div class="header-title"><h1>Designation Management</h1></div>
+                </div>
+                <div class="header-actions">
+                    <div class="role-selector">
+                        <label for="roleDropdown">Current Role:</label>
+                        <select id="roleDropdown">
+                            <option value="admin">Admin</option>
+                            <option value="hr">HR</option>
+                            <option value="manager">Manager</option>
+                            <option value="employee">Employee</option>
+                        </select>
+                    </div>
+                    <span class="role-badge" id="roleBadge">Employee</span>
+                </div>
+            </header>
+
+            <div class="content-area">
+                <!-- Filter -->
+                <div class="card">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Filter by Department</label>
+                            <select id="filterDepartment" class="form-control" onchange="loadDesignations()">
+                                <option value="">All Departments</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Designations</h3>
+                        <button class="btn btn-primary admin-only create-btn" onclick="openAddModal()" id="addBtn">+ Add Designation</button>
+                    </div>
+                    <div class="table-container">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Designation Name</th>
+                                    <th>Department</th>
+                                    <th>Description</th>
+                                    <th>Employee Count</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="designationsTable">
+                                <tr><td colspan="6" class="text-center">Loading...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal" id="designationModal">
+        <div class="modal-content" style="max-width: 1000px; width: 90%;">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modalTitle">Add Designation</h3>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="designationForm">
+                    <input type="hidden" id="designationId">
+                    <div class="form-group">
+                        <label class="form-label">Designation Name *</label>
+                        <input type="text" id="designationName" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Department *</label>
+                        <select id="departmentId" class="form-control" required>
+                            <option value="">Select Department</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Description</label>
+                        <textarea id="description" class="form-control" rows="3"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="saveDesignation()">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="../scripts/toast.js"></script>
+    <script src="../scripts/sidebar.js"></script>
+    <script src="../scripts/role-manager.js"></script>
+    <script src="../scripts/auth.js"></script>
+    <script src="../scripts/api.js"></script>
+    <script>
+        auth.requireAuth();
+        auth.initAuth();
+
+        let designations = [];
+        let departments = [];
+        const canManage = auth.hasRole('Admin', 'HR');
+        
+        if (!canManage) {
+            document.getElementById('addBtn').style.display = 'none';
+        }
+
+        async function loadDesignations() {
+            try {
+                const params = {};
+                const deptId = document.getElementById('filterDepartment').value;
+                if (deptId) params.departmentId = deptId;
+
+                const response = await endpoints.designations.getAll(params);
+                designations = response.data || [];
+                renderTable();
+            } catch (error) {
+                console.error('Error loading designations:', error);
+                utils.showAlert('Failed to load designations', 'error');
+            }
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('designationsTable');
+            if (designations.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center">No designations found</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = designations.map(desig => `
+                <tr>
+                    <td><strong>${desig.DesignationName}</strong></td>
+                    <td>${desig.DepartmentName}</td>
+                    <td>${desig.Description || '-'}</td>
+                    <td><span class="badge badge-info">${desig.EmployeeCount || 0} employees</span></td>
+                    <td><span class="badge badge-success">${desig.Status}</span></td>
+                    <td>
+                        ${canManage ? `
+                            <button class="btn btn-sm btn-outline" onclick="editDesignation(${desig.DesignationId})">Edit</button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteDesignation(${desig.DesignationId})">Delete</button>
+                        ` : ''}
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        async function loadDepartments() {
+            try {
+                const response = await endpoints.departments.getAll();
+                departments = response.data || [];
+                
+                const selects = [document.getElementById('departmentId'), document.getElementById('filterDepartment')];
+                selects.forEach((select, idx) => {
+                    const options = idx === 1 ? '<option value="">All Departments</option>' : '<option value="">Select Department</option>';
+                    select.innerHTML = options + departments.map(d => 
+                        `<option value="${d.DepartmentId}">${d.DepartmentName}</option>`
+                    ).join('');
+                });
+            } catch (error) {
+                console.error('Error loading departments:', error);
+            }
+        }
+
+        function openAddModal() {
+            document.getElementById('modalTitle').textContent = 'Add Designation';
+            document.getElementById('designationForm').reset();
+            document.getElementById('designationId').value = '';
+            document.getElementById('designationModal').classList.add('active');
+        }
+
+        async function editDesignation(id) {
+            const desig = designations.find(d => d.DesignationId === id);
+            if (!desig) return;
+
+            document.getElementById('modalTitle').textContent = 'Edit Designation';
+            document.getElementById('designationId').value = desig.DesignationId;
+            document.getElementById('designationName').value = desig.DesignationName;
+            document.getElementById('departmentId').value = desig.DepartmentId;
+            document.getElementById('description').value = desig.Description || '';
+            document.getElementById('designationModal').classList.add('active');
+        }
+
+        async function saveDesignation() {
+            const form = document.getElementById('designationForm');
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+
+            const id = document.getElementById('designationId').value;
+            const data = {
+                designationName: document.getElementById('designationName').value,
+                departmentId: parseInt(document.getElementById('departmentId').value),
+                description: document.getElementById('description').value || null
+            };
+
+            try {
+                if (id) {
+                    await endpoints.designations.update(id, data);
+                    utils.showAlert('Designation updated successfully', 'success');
+                } else {
+                    await endpoints.designations.create(data);
+                    utils.showAlert('Designation created successfully', 'success');
+                }
+                closeModal();
+                loadDesignations();
+            } catch (error) {
+                console.error('Error saving designation:', error);
+                utils.showAlert(error.message || 'Failed to save designation', 'error');
+            }
+        }
+
+        async function deleteDesignation(id) {
+            if (!confirm('Are you sure you want to delete this designation?')) return;
+            try {
+                await endpoints.designations.delete(id);
+                utils.showAlert('Designation deleted successfully', 'success');
+                loadDesignations();
+            } catch (error) {
+                console.error('Error deleting designation:', error);
+                utils.showAlert('Failed to delete designation', 'error');
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('designationModal').classList.remove('active');
+        }
+
+        loadDepartments();
+        loadDesignations();
+    </script>
+</body>
+</html>

@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Appreciations - HRMS</title>
+        <link rel="icon" type="image/png" href="../assets/logo.png">
+    <link rel="stylesheet" href="../styles/main.css">
+    <link rel="stylesheet" href="../styles/toast.css">
+    <link rel="stylesheet" href="../styles/role-selector.css">
+    <!-- Quill.js CSS -->
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <style>
+        /* Custom Quill Editor Styling */
+        #editor-container {
+            min-height: 200px;
+        }
+        
+        #editor-container .ql-toolbar {
+            background: #f8f9fa;
+            border-bottom: 1px solid var(--border-color);
+            border-radius: var(--radius-md) var(--radius-md) 0 0;
+        }
+        
+        #editor-container .ql-container {
+            border: none;
+            font-family: inherit;
+            font-size: 0.95rem;
+        }
+
+        .action-bar {
+          display: flex;
+          justify-content: flex-end;
+          margin-bottom: 10px;
+        }
+        
+        #editor-container .ql-editor {
+            min-height: 150px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        #editor-container .ql-editor.ql-blank::before {
+            color: #9ca3af;
+            font-style: normal;
+        }
+        
+        /* Hide sidebar and header when in iframe */
+        body.in-iframe .sidebar,
+        body.in-iframe .sidebar-overlay,
+        body.in-iframe .header {
+            display: none !important;
+        }
+
+        body.in-iframe .main-content {
+            margin-left: 0 !important;
+            width: 100% !important;
+        }
+
+        body.in-iframe .content-area {
+            padding-top: 0 !important;
+        }
+    </style>
+    <script>
+        // Detect if page is loaded in iframe
+        if (window.self !== window.top) {
+            document.addEventListener('DOMContentLoaded', function() {
+                document.body.classList.add('in-iframe');
+            });
+        }
+    </script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Overlay -->
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <img src="../assets/logo.png" alt="Soleos Logo" class="sidebar-logo">
+                <button class="sidebar-close-btn" id="sidebarClose">&times;</button>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-item"><a href="../index.html" class="nav-link"><i>📊</i> Dashboard</a></div>
+                <div class="nav-item"><a href="employees.html" class="nav-link"><i>👥</i> Employees</a></div>
+                <div class="nav-item"><a href="attendance.html" class="nav-link"><i>📅</i> Attendance</a></div>
+                <div class="nav-item"><a href="leaves.html" class="nav-link"><i>🏖️</i> Leaves</a></div>
+                <div class="nav-item"><a href="holidays.html" class="nav-link"><i>🎉</i> Holidays</a></div>
+                <div class="nav-item"><a href="payroll.html" class="nav-link"><i>💰</i> Payroll</a></div>
+                <div class="nav-item"><a href="employee-salary.html" class="nav-link"><i>💵</i> Employee Salary</a></div>
+                <div class="nav-item"><a href="departments.html" class="nav-link"><i>🏢</i> Departments</a></div>
+                <div class="nav-item"><a href="designations.html" class="nav-link"><i>💼</i> Designations</a></div>
+                <div class="nav-item"><a href="appreciations.html" class="nav-link active"><i>🏆</i> Appreciations</a></div>
+                <div class="nav-item"><a href="note.html" class="nav-link"><i>📝</i> Note</a></div>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header class="header">
+                <div class="header-left">
+                    <button class="hamburger-btn" id="sidebarToggle">
+                        ☰
+                    </button>
+                    <div class="header-title"><h1>Employee Appreciations</h1></div>
+                </div>
+                <div class="header-actions">
+                    <div class="role-selector">
+                        <label for="roleDropdown">Current Role:</label>
+                        <select id="roleDropdown">
+                            <option value="admin">Admin</option>
+                            <option value="hr">HR</option>
+                            <option value="manager">Manager</option>
+                            <option value="employee">Employee</option>
+                        </select>
+                    </div>
+                    <span class="role-badge" id="roleBadge">Employee</span>
+                </div>
+            </header>
+
+            <div class="content-area">
+                <!-- Toolbar -->
+                <div class="toolbar-container">
+                    <div class="filter-bar">
+                        <div class="filter-left">
+                            <div class="filter-item">
+                                <span class="filter-label">Filter by</span>
+                                <select id="filterEmployee" class="filter-select" onchange="loadAppreciations()">
+                                    <option value="">All Employees</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="search-box-wrapper">
+                            <i class="search-icon">🔍</i>
+                            <input type="text" class="search-input" placeholder="Search..." id="searchInput" onkeyup="filterAppreciations()">
+                        </div>
+                    </div>
+                    <div class="action-bar">
+                        <button class="btn btn-primary" onclick="openAddModal()" id="addBtn">+ Add Appreciation</button>
+                    </div>
+                </div>
+
+                <!-- Table -->
+                <div class="card" style="padding: 0; overflow: hidden;">
+                    <div class="table-container">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 40px;"><input type="checkbox"></th>
+                                    <th>Given To</th>
+                                    <th>Award Name</th>
+                                    <th>Award By</th>
+                                    <th>Given On</th>
+                                    <th id="actionHeader">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="appreciationsTable">
+                                <tr><td colspan="6" class="text-center">Loading...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Add/Edit Modal -->
+    <div class="modal" id="appreciationModal">
+        <div class="modal-content" style="max-width: 1800px; width: 95%;">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modalTitle">Add Appreciation</h3>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="appreciationForm">
+                    <input type="hidden" id="appreciationId">
+                    
+                    <!-- Row 1: Award, Given To, Award By, Date -->
+                    <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 20px; align-items: start;">
+                        <div class="form-group">
+                            <label class="form-label" style="font-size: 0.85rem; color: var(--text-secondary);">Award *</label>
+                            <div style="display: flex;">
+                                <input type="text" id="title" class="form-control" required placeholder="Best User" list="awardSuggestions" style="border-top-right-radius: 0; border-bottom-right-radius: 0;">
+                                <datalist id="awardSuggestions"></datalist>
+                                <button type="button" id="addAwardBtn" class="btn btn-outline" style="border-top-left-radius: 0; border-bottom-left-radius: 0; border-left: none; padding: 0 10px; color: var(--primary-color);">Add</button>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" style="font-size: 0.85rem; color: var(--text-secondary);">Given To *</label>
+                            <select id="employeeId" class="form-control" required>
+                                <option value="">Select Employee</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" style="font-size: 0.85rem; color: var(--text-secondary);">Award By</label>
+                            <input type="text" id="awardedBy" class="form-control" placeholder="Enter name">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" style="font-size: 0.85rem; color: var(--text-secondary);">Date *</label>
+                            <input type="date" id="appreciationDate" class="form-control" required>
+                        </div>
+                    </div>
+
+                    <!-- Row 2: Summary with Rich Text Editor -->
+                    <div class="form-group">
+                        <label class="form-label" style="font-size: 0.85rem; color: var(--text-secondary);">Summary</label>
+                        <div id="editor-container" style="border: 1px solid var(--border-color); border-radius: var(--radius-md); overflow: hidden; background: white;">
+                            <!-- Quill editor will be initialized here -->
+                        </div>
+                        <input type="hidden" id="description">
+                    </div>
+
+                    <!-- Row 3: Photo Dropzone -->
+                    <div class="form-group">
+                        <label class="form-label" style="font-size: 0.85rem; color: var(--text-secondary);">Photo <span title="Optional" style="cursor: help;">❓</span></label>
+                        <div id="photoDropzone" style="border: 2px dashed #e5e7eb; border-radius: var(--radius-md); padding: 40px; text-align: center; background-color: #f9fafb; cursor: pointer; transition: 0.2s;" onmouseover="this.style.borderColor='var(--primary-color)'" onmouseout="this.style.borderColor='#e5e7eb'">
+                            <div id="dropzoneContent">
+                                <div style="font-size: 2rem; color: #d1d5db; margin-bottom: 10px;">☁️</div>
+                                <div style="font-size: 0.9rem; color: var(--text-secondary);">Choose a file</div>
+                            </div>
+                            <input type="file" id="photoInput" accept="image/*" style="position: absolute; opacity: 0; cursor: pointer; height: 0; width: 0;">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer" style="justify-content: flex-start; padding-left: 30px;">
+                <button class="btn btn-primary" onclick="saveAppreciation()" style="min-width: 100px;">✔ Save</button>
+                <button class="btn btn-outline" onclick="closeModal()" style="border: none;">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Global Action Menu -->
+    <!-- Global Action Menu Removed -->
+
+    <!-- View Modal -->
+    <div class="modal" id="viewModal">
+        <div class="modal-content" style="max-width: 900px; width: 95%;">
+            <div class="modal-header">
+                <h3 class="modal-title">Appreciation Details</h3>
+                <div style="display: flex; gap: 15px; align-items: center;">
+                    <button class="btn btn-outline" style="border: none; font-size: 1.2rem; color: var(--text-secondary);">⋮</button>
+                    <button class="modal-close" onclick="closeViewModal()">&times;</button>
+                </div>
+            </div>
+            <div class="modal-body" style="padding: 30px;">
+                <div style="display: grid; grid-template-columns: 200px 1fr; gap: 20px; row-gap: 30px; align-items: start;">
+                    
+                    <!-- Award Row -->
+                    <div style="color: var(--text-secondary); font-size: 0.9rem;">Award</div>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <div style="width: 40px; height: 40px; background: #f3f4f6; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: #4b5563; font-size: 1.2rem;">
+                            🏆
+                        </div>
+                        <span id="viewTitle" style="font-weight: 500;">Title</span>
+                    </div>
+
+                    <!-- Date Row -->
+                    <div style="color: var(--text-secondary); font-size: 0.9rem;">Award Date</div>
+                    <div id="viewDate" style="color: var(--text-primary);">Date</div>
+
+                    <!-- Summary Row -->
+                    <div style="color: var(--text-secondary); font-size: 0.9rem;">Summary</div>
+                    <div id="viewDescription" style="color: var(--text-primary); line-height: 1.5;">--</div>
+
+                    <!-- Award By Row -->
+                    <div style="color: var(--text-secondary); font-size: 0.9rem;">Award By</div>
+                    <div id="viewAwardedBy" style="color: var(--text-primary);">--</div>
+
+                    <!-- Given To Row -->
+                    <div style="color: var(--text-secondary); font-size: 0.9rem;">Given To</div>
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <div class="user-avatar" id="viewAvatar" style="width: 40px; height: 40px; font-size: 1rem;">A</div>
+                        <div>
+                            <div style="font-weight: 600;" id="viewEmpName">Name</div>
+                            <div style="font-size: 0.8rem; color: var(--text-secondary);" id="viewEmpCode">Role</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Photo Row (Hidden if no photo) -->
+                    <div id="viewPhotoLabel" style="color: var(--text-secondary); font-size: 0.9rem; display: none;">Photo</div>
+                    <div id="viewPhotoContainer" style="display: none;">
+                        <img id="viewPhoto" src="" alt="Appreciation Photo" style="max-width: 100%; border-radius: 8px; border: 1px solid #e5e7eb;">
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../scripts/toast.js"></script>
+    <script src="../scripts/sidebar.js"></script>
+    <script src="../scripts/role-manager.js"></script>
+    <script src="../scripts/api.js"></script>
+    <!-- Quill.js JS -->
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+    <script>
+        // Initialize Role System
+        window.addEventListener('roleChanged', () => {
+            console.log('🔄 Dashboard: Role changed, reloading data...');
+            applyRolePermissions();
+            loadAppreciations();
+        });
+
+        let appreciations = [];
+        let employees = [];
+
+        async function applyRolePermissions() {
+            if (!window.roleManager) return;
+            
+            const role = window.roleManager.getCurrentRole();
+            const canManage = window.roleManager.isRole('admin') || window.roleManager.isRole('hr') || window.roleManager.isRole('manager');
+            const canEdit = window.roleManager.isRole('admin') || window.roleManager.isRole('hr'); // Only Admin/HR can edit globally
+
+            console.log(`Applying permissions for role: ${role}`);
+
+            // Toggle Add Button
+            // Admin/HR/Manager can add appreciations
+            const addBtn = document.getElementById('addBtn');
+            if (addBtn) addBtn.style.display = canManage ? 'inline-block' : 'none';
+            
+            // Toggle Action Header (hide column if no actions available)
+            // But checking per row is better, so we'll keep header and hide buttons in row
+        }
+
+        // Initialize Quill Rich Text Editor
+        let quill;
+        const toolbarOptions = [
+            [{ 'header': [1, 2, 3, 4, 5, false] }],
+            ['bold', 'italic', 'underline', 'strike'],
+            [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+            [{ 'align': [] }],
+            ['link', 'image'],
+            [{ 'color': [] }, { 'background': [] }],
+            ['clean']
+        ];
+
+        // Wait for DOM to be ready before initializing Quill
+        document.addEventListener('DOMContentLoaded', function() {
+            quill = new Quill('#editor-container', {
+                theme: 'snow',
+                modules: {
+                    toolbar: toolbarOptions
+                },
+                placeholder: 'Enter summary...'
+            });
+            
+            // Intial Load
+            applyRolePermissions();
+            loadEmployees(); // Load dropdowns first
+            loadAppreciations();
+        });
+
+        // Award Suggestions Management
+        let awardSuggestions = JSON.parse(localStorage.getItem('awardSuggestions') || '["Employee of the Month", "Outstanding Performance", "Team Player", "Innovation Award", "Customer Service Excellence"]');
+        
+        function loadAwardSuggestions() {
+            const datalist = document.getElementById('awardSuggestions');
+            if(datalist) datalist.innerHTML = awardSuggestions.map(award => `<option value="${award}">`).join('');
+        }
+        
+        function addAwardSuggestion() {
+            const titleInput = document.getElementById('title');
+            const newAward = titleInput.value.trim();
+            
+            if (!newAward) {
+                if(window.utils) utils.showAlert('Please enter an award name', 'error');
+                return;
+            }
+            
+            if (awardSuggestions.includes(newAward)) {
+                if(window.utils) utils.showAlert('This award already exists in suggestions', 'info');
+                return;
+            }
+            
+            awardSuggestions.push(newAward);
+            localStorage.setItem('awardSuggestions', JSON.stringify(awardSuggestions));
+            loadAwardSuggestions();
+            if(window.utils) utils.showAlert('Award added to suggestions', 'success');
+        }
+        
+        // Initialize award suggestions on page load (called in DOMContentLoaded via logic if needed, but safe here too)
+        loadAwardSuggestions();
+        
+        // Add event listener to Add button
+        const addAwardBtn = document.getElementById('addAwardBtn');
+        if(addAwardBtn) addAwardBtn.addEventListener('click', addAwardSuggestion);
+
+        document.getElementById('appreciationDate').value = new Date().toISOString().split('T')[0];
+
+        async function loadAppreciations() {
+            try {
+                const params = {};
+                // Filter by employee selection
+                const filterEmpId = document.getElementById('filterEmployee').value;
+                if (filterEmpId) params.employeeId = filterEmpId;
+
+                // API Fetch
+                const response = await endpoints.appreciations.getAll(params);
+                let allAppreciations = response.data || [];
+                
+                // Role-Based Filtering
+                if (window.roleManager) {
+                    const role = window.roleManager.getCurrentRole();
+                    const currentEmpId = window.roleManager.getCurrentEmployeeId();
+                    
+                    if (role === 'employee') {
+                        // Employee sees only their own
+                        allAppreciations = allAppreciations.filter(a => a.EmployeeId == currentEmpId);
+                    } else if (role === 'manager') {
+                        // Manager sees team's + their own
+                        // We need the team list. We can fetch employees or use stored logic.
+                        // For efficiency, we can filter if we have the list, OR assume API should handle.
+                        // If API returns ALL, we filter here.
+                        
+                        // Let's rely on the loaded employees list to check ReportingTo
+                        if (employees.length === 0) {
+                            // Fetch employees if not ready (though loadEmployees calls it)
+                             const empRes = await endpoints.employees.getAll();
+                             employees = empRes.data || [];
+                        }
+                        
+                        const teamIds = employees
+                            .filter(e => e.ReportingTo == currentEmpId || e.EmployeeId == currentEmpId)
+                            .map(e => e.EmployeeId);
+                            
+                        allAppreciations = allAppreciations.filter(a => teamIds.includes(a.EmployeeId));
+                    }
+                    // Admin/HR sees all (no filter)
+                }
+
+                appreciations = allAppreciations;
+                renderTable();
+            } catch (error) {
+                console.error('Error:', error);
+                // utils.showAlert('Failed to load appreciations', 'error');
+            }
+        }
+
+        function filterAppreciations() {
+            const term = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = appreciations.filter(app => 
+                app.Title.toLowerCase().includes(term) || 
+                app.FirstName.toLowerCase().includes(term) ||
+                app.LastName.toLowerCase().includes(term)
+            );
+            renderFilteredTable(filtered);
+        }
+
+        function renderFilteredTable(data) {
+            const tbody = document.getElementById('appreciationsTable');
+            if (data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center">No appreciations found</td></tr>';
+                return;
+            }
+
+            // Determine permissions for rows
+            const role = window.roleManager ? window.roleManager.getCurrentRole() : 'employee';
+             // Admin/HR can edit/delete anyone. Manager can edit/delete team (maybe? usually just add).
+             // Let's assume Manager can delete what they added? Or just view. 
+             // Simplification: Admin/HR can Edit/Delete. Manager can View. Employee View.
+             // Actually, if Manager added it, they should be able to delete it. But data doesn't reliably enable "CreatedBy" check here easily without more logic.
+             // Sticking to: Admin, HR can Edit/Delete.
+            const canEditGlobal = role === 'admin' || role === 'hr';
+
+            tbody.innerHTML = data.map(app => {
+                const initials = (app.FirstName[0] + app.LastName[0]).toUpperCase();
+                
+                return `
+                <tr style="vertical-align: middle;">
+                    <td><input type="checkbox"></td>
+                    <td>
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <div class="user-avatar" style="width: 32px; height: 32px; font-size: 0.875rem; background-color: var(--primary-color);">
+                                ${initials}
+                            </div>
+                            <div>
+                                <div style="font-weight: 600; font-size: 0.9rem; cursor: pointer; color: var(--primary-color);" 
+                                     onclick="window.utils.navigateToProfile(${app.EmployeeId})" 
+                                     title="View ${app.FirstName} ${app.LastName}'s profile">${app.FirstName} ${app.LastName}</div>
+                                <div style="font-size: 0.75rem; color: var(--text-secondary);">${app.DesignationName || 'Employee'}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <div style="width: 36px; height: 36px; background-color: #f3f4f6; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; color: #4b5563;">
+                                🏆
+                            </div>
+                            <span style="font-weight: 500;">${app.Title}</span>
+                        </div>
+                    </td>
+                    <td style="color: var(--text-secondary);">${app.AwardedByName || '--'}</td>
+                    <td style="color: var(--text-secondary);">${window.utils ? window.utils.formatDate(app.AppreciationDate) : new Date(app.AppreciationDate).toLocaleDateString()}</td>
+                    <td>
+                        <div class="action-buttons" style="display: flex; gap: 5px;">
+                            <button class="btn btn-sm btn-outline-primary" title="View" onclick="openViewModal(${app.AppreciationId})">
+                                <span style="font-size: 1.2em;">👁️</span>
+                            </button>
+                            ${canEditGlobal ? `
+                            <button class="btn btn-sm btn-outline-secondary edit-btn" title="Edit" onclick="editAppreciation(${app.AppreciationId})">
+                                <span style="font-size: 1.2em;">✏️</span>
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger delete-btn" title="Delete" onclick="deleteAppreciation(${app.AppreciationId})">
+                                <span style="font-size: 1.2em;">🗑️</span>
+                            </button>
+                            ` : ''}
+                        </div>
+                    </td>
+                </tr>
+            `}).join('');
+        }
+
+        function renderTable() {
+            renderFilteredTable(appreciations);
+        }
+
+        // Global Action Menu Removed - Replaced with inline buttons
+
+        async function loadEmployees() {
+            try {
+                const response = await endpoints.employees.getAll();
+                employees = response.data || [];
+                
+                [document.getElementById('employeeId'), document.getElementById('filterEmployee')].forEach((select, idx) => {
+                    const opt = idx === 1 ? '<option value="">All Employees</option>' : '<option value="">Select Employee</option>';
+                    select.innerHTML = opt + employees.map(e => `<option value="${e.EmployeeId}">${e.FirstName} ${e.LastName}</option>`).join('');
+                });
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        function openAddModal() {
+            document.getElementById('modalTitle').textContent = 'Add Appreciation';
+            document.getElementById('appreciationForm').reset();
+            document.getElementById('appreciationId').value = '';
+            document.getElementById('appreciationDate').value = new Date().toISOString().split('T')[0];
+            document.getElementById('awardedBy').value = '';
+            
+            // Reset Quill editor
+            if (quill) {
+                quill.setText('');
+            }
+            
+            // Reset photo dropzone
+            const dropzone = document.getElementById('photoDropzone');
+            const dropzoneContent = document.getElementById('dropzoneContent');
+            if (dropzone && dropzoneContent) {
+                dropzone.style.backgroundImage = '';
+                dropzoneContent.style.display = 'block';
+            }
+            
+            document.getElementById('appreciationModal').classList.add('active');
+        }
+
+        function openViewModal(id) {
+            const app = appreciations.find(a => a.AppreciationId === id);
+            if (!app) return;
+
+            document.getElementById('viewTitle').textContent = app.Title;
+            document.getElementById('viewDate').textContent = utils.formatDate(app.AppreciationDate);
+            document.getElementById('viewEmpName').textContent = app.FirstName + ' ' + app.LastName;
+            document.getElementById('viewEmpCode').textContent = app.DesignationName || 'Employee'; 
+            document.getElementById('viewAwardedBy').textContent = app.AwardedByName || '--';
+            
+            // Display HTML content from Quill editor
+            const viewDescription = document.getElementById('viewDescription');
+            if (app.Description) {
+                viewDescription.innerHTML = app.Description;
+            } else {
+                viewDescription.textContent = '--';
+            }
+            
+            const initials = (app.FirstName[0] + app.LastName[0]).toUpperCase();
+            document.getElementById('viewAvatar').textContent = initials;
+
+            // Handle photo display
+            const photoLabel = document.getElementById('viewPhotoLabel');
+            const photoContainer = document.getElementById('viewPhotoContainer');
+            const photoImg = document.getElementById('viewPhoto');
+            
+            if (app.Photo) {
+                photoLabel.style.display = 'block';
+                photoContainer.style.display = 'block';
+                photoImg.src = `http://localhost:5000${app.Photo}`;
+            } else {
+                photoLabel.style.display = 'none';
+                photoContainer.style.display = 'none';
+            }
+
+            document.getElementById('viewModal').classList.add('active');
+        }
+        
+        function closeViewModal() {
+            document.getElementById('viewModal').classList.remove('active');
+        }
+
+        async function editAppreciation(id) {
+            const app = appreciations.find(a => a.AppreciationId === id);
+            if (!app) return;
+
+            document.getElementById('modalTitle').textContent = 'Edit Appreciation';
+            document.getElementById('appreciationId').value = app.AppreciationId;
+            document.getElementById('employeeId').value = app.EmployeeId;
+            document.getElementById('title').value = app.Title;
+            document.getElementById('awardedBy').value = app.AwardedByName || '';
+            document.getElementById('appreciationDate').value = app.AppreciationDate.split('T')[0];
+            
+            // Set Quill content (supports HTML)
+            if (quill) {
+                if (app.Description) {
+                    quill.root.innerHTML = app.Description;
+                } else {
+                    quill.setText('');
+                }
+            }
+            
+            document.getElementById('appreciationModal').classList.add('active');
+        }
+
+        // File Upload Logic
+        const dropzone = document.getElementById('photoDropzone');
+        const fileInput = document.getElementById('photoInput');
+        const dropzoneContent = document.getElementById('dropzoneContent');
+
+        dropzone.addEventListener('click', () => fileInput.click());
+        
+        fileInput.addEventListener('change', handleFileSelect);
+
+        function handleFileSelect(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    // Update dropzone UI
+                    dropzone.style.backgroundImage = `url('${e.target.result}')`;
+                    dropzone.style.backgroundSize = 'contain';
+                    dropzone.style.backgroundRepeat = 'no-repeat';
+                    dropzone.style.backgroundPosition = 'center';
+                    dropzoneContent.style.display = 'none'; // Hide icon and text
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        async function saveAppreciation() {
+            const form = document.getElementById('appreciationForm');
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+
+            const id = document.getElementById('appreciationId').value;
+            const formData = new FormData();
+            
+            formData.append('employeeId', parseInt(document.getElementById('employeeId').value));
+            formData.append('title', document.getElementById('title').value);
+            
+            // Get HTML content from Quill editor
+            const description = quill ? quill.root.innerHTML : '';
+            formData.append('description', description || '');
+            
+            formData.append('appreciationDate', document.getElementById('appreciationDate').value);
+            
+            // Add awardedBy field
+            const awardedBy = document.getElementById('awardedBy').value.trim();
+            if (awardedBy) {
+                formData.append('awardedBy', awardedBy);
+            }
+
+            if (fileInput.files[0]) {
+                formData.append('photo', fileInput.files[0]);
+            }
+
+            try {
+                if (id) {
+                    await endpoints.appreciations.update(id, formData);
+                    utils.showAlert('Appreciation updated successfully', 'success');
+                } else {
+                    await endpoints.appreciations.create(formData);
+                    utils.showAlert('Appreciation created successfully', 'success');
+                }
+                closeModal();
+                loadAppreciations();
+            } catch (error) {
+                console.error('Error:', error);
+                utils.showAlert(error.message || 'Failed to save appreciation', 'error');
+            }
+        }
+        
+        function openViewModal(id) {
+            const app = appreciations.find(a => a.AppreciationId === id);
+            if (!app) return;
+
+            document.getElementById('viewTitle').textContent = app.Title;
+            document.getElementById('viewDate').textContent = utils.formatDate(app.AppreciationDate);
+            document.getElementById('viewEmpName').textContent = app.FirstName + ' ' + app.LastName;
+            document.getElementById('viewEmpCode').textContent = app.DesignationName || 'Employee'; 
+            document.getElementById('viewAwardedBy').textContent = app.AwardedByName || '--';
+            // Display HTML content from Quill editor
+            const viewDescription = document.getElementById('viewDescription');
+            if (app.Description) {
+                viewDescription.innerHTML = app.Description;
+            } else {
+                viewDescription.textContent = '--';
+            }
+            
+            const initials = (app.FirstName[0] + app.LastName[0]).toUpperCase();
+            document.getElementById('viewAvatar').textContent = initials;
+
+            const photoLabel = document.getElementById('viewPhotoLabel');
+            const photoContainer = document.getElementById('viewPhotoContainer');
+            const photoImg = document.getElementById('viewPhoto');
+
+            if (app.Photo) {
+                photoLabel.style.display = 'block';
+                photoContainer.style.display = 'block';
+                // Assuming backend runs on port 5000
+                photoImg.src = `http://localhost:5000${app.Photo}`;
+            } else {
+                photoLabel.style.display = 'none';
+                photoContainer.style.display = 'none';
+            }
+
+            document.getElementById('viewModal').classList.add('active');
+        }
+
+        async function deleteAppreciation(id) {
+            if (!confirm('Are you sure you want to delete this appreciation?')) return;
+            try {
+                await endpoints.appreciations.delete(id);
+                utils.showAlert('Appreciation deleted successfully', 'success');
+                loadAppreciations();
+            } catch (error) {
+                console.error('Error:', error);
+                utils.showAlert('Failed to delete appreciation', 'error');
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('appreciationModal').classList.remove('active');
+        }
+
+        loadEmployees();
+        loadAppreciations();
+    </script>
+</body>
+</html>

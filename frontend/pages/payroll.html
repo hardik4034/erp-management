@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payroll - HRMS</title>
+    <link rel="icon" type="image/png" href="../assets/logo.png">
+    <link rel="stylesheet" href="../styles/main.css">
+    <link rel="stylesheet" href="../styles/toast.css">
+    <link rel="stylesheet" href="../styles/payroll-redesign.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Overlay -->
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <img src="../assets/logo.png" alt="Soleos Logo" class="sidebar-logo">
+                <button class="sidebar-close-btn" id="sidebarClose">&times;</button>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-item"><a href="../index.html" class="nav-link"><i>📊</i> Dashboard</a></div>
+                <div class="nav-item"><a href="employees.html" class="nav-link"><i>👥</i> Employees</a></div>
+                <div class="nav-item"><a href="attendance.html" class="nav-link"><i>📅</i> Attendance</a></div>
+                <div class="nav-item"><a href="leaves.html" class="nav-link"><i>🏖️</i> Leaves</a></div>
+                <div class="nav-item"><a href="holidays.html" class="nav-link"><i>🎉</i> Holidays</a></div>
+                <div class="nav-item"><a href="payroll.html" class="nav-link active"><i>💰</i> Payroll</a></div>
+                <div class="nav-item"><a href="employee-salary.html" class="nav-link"><i>💵</i> Employee Salary</a></div>
+                <div class="nav-item"><a href="departments.html" class="nav-link"><i>🏢</i> Departments</a></div>
+                <div class="nav-item"><a href="designations.html" class="nav-link"><i>💼</i> Designations</a></div>
+                <div class="nav-item"><a href="appreciations.html" class="nav-link"><i>🏆</i> Appreciations</a></div>
+                <div class="nav-item"><a href="note.html" class="nav-link"><i>📝</i> Note</a></div>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            
+
+            <!-- Header -->
+            <header class="header">
+                <div>
+                    <div class="breadcrumb">
+                        <a href="../index.html">Home</a>
+                        <span class="breadcrumb-separator">›</span>
+                        <span class="breadcrumb-current">Payroll</span>
+                    </div>
+                    <h1 style="margin: 8px 0 0 0;">Payroll</h1>
+                    </div>
+                </div>
+                </div>
+            </header>
+
+            <!-- Content Area -->
+            <div class="content-area">
+                <!-- Filters Section -->
+                <div class="payroll-filters">
+                    <div class="filter-row">
+                        <div class="filter-group">
+                            <label class="filter-label">Select Year</label>
+                            <select id="filterYear" class="filter-select" onchange="loadPayroll()">
+                                <option value="">All Years</option>
+                                <option value="2026" selected>2026</option>
+                                <option value="2025">2025</option>
+                                <option value="2024">2024</option>
+                                <option value="2023">2023</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label class="filter-label">Salary Cycle</label>
+                            <select id="filterSalaryCycle" class="filter-select" onchange="loadPayroll()">
+                                <option value="">All Cycles</option>
+                                <option value="Monthly" selected>Monthly</option>
+                                <option value="Hourly">Hourly</option>
+                                <option value="Annual">Annual</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label class="filter-label">Select Month</label>
+                            <select id="filterMonth" class="filter-select" onchange="loadPayroll()">
+                                <option value="">All Months</option>
+                                <option value="1" selected>January</option>
+                                <option value="2">February</option>
+                                <option value="3">March</option>
+                                <option value="4">April</option>
+                                <option value="5">May</option>
+                                <option value="6">June</option>
+                                <option value="7">July</option>
+                                <option value="8">August</option>
+                                <option value="9">September</option>
+                                <option value="10">October</option>
+                                <option value="11">November</option>
+                                <option value="12">December</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Generate Payroll Section -->
+                <div class="generate-payroll-section">
+                    <h3 class="generate-header">Generate Payroll</h3>
+                    
+                    <div class="generate-options">
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="includeExpenseClaims">
+                            <label for="includeExpenseClaims" class="checkbox-label">
+                                Include Expenses Claims
+                                <span class="info-icon" title="Include employee expense claims in payroll calculation">?</span>
+                            </label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="addSewerageToSalary">
+                            <label for="addSewerageToSalary" class="checkbox-label">
+                                Add sewerage to salary
+                                <span class="info-icon" title="Add sewerage allowance to salary calculation">?</span>
+                            </label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="useAttendance" checked>
+                            <label for="useAttendance" class="checkbox-label">
+                                Use Attendance
+                                <span class="info-icon" title="Calculate salary based on attendance records">?</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="employee-select-row">
+                        <div class="filter-group">
+                            <label class="filter-label">
+                                Select Employee
+                                <span class="info-icon" title="Choose employee to generate payroll for">?</span>
+                            </label>
+                            <select id="genEmployeeId" class="filter-select">
+                                <option value="">Select Employee</option>
+                            </select>
+                        </div>
+                        <button class="generate-btn" onclick="generatePayroll()">
+                            Generate
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Payroll Table -->
+                <div class="payroll-table-container">
+                    <table class="payroll-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 40px;">
+                                    <input type="checkbox" id="selectAll" onchange="toggleSelectAll()">
+                                </th>
+                                <th>Name</th>
+                                <th>Net Salary</th>
+                                <th>CTC</th>
+                                <th>Duration</th>
+                                <th>Paid On</th>
+                                <th>Status</th>
+                                <th style="width: 60px;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="payrollTableBody">
+                            <tr>
+                                <td colspan="8" style="text-align: center; padding: 40px;">
+                                    <div class="payroll-loading">
+                                        <div class="payroll-loading-spinner"></div>
+                                        <p>Loading payroll data...</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <!-- Pagination -->
+                    <div class="pagination-container">
+                        <div class="pagination-info">
+                            <span id="paginationInfo">Showing 0 to 0 of 0 entries</span>
+                        </div>
+                        <div class="pagination-controls">
+                            <div class="page-size-selector">
+                                <label>Show</label>
+                                <select id="pageSize" onchange="changePageSize()">
+                                    <option value="10" selected>10</option>
+                                    <option value="25">25</option>
+                                    <option value="50">50</option>
+                                    <option value="100">100</option>
+                                </select>
+                                <label>entries</label>
+                            </div>
+                            <div class="pagination-buttons" id="paginationButtons">
+                                <button class="page-btn" onclick="previousPage()" id="prevBtn" disabled>Previous</button>
+                                <button class="page-btn active">1</button>
+                                <button class="page-btn" onclick="nextPage()" id="nextBtn" disabled>Next</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- View Payroll Modal -->
+    <div class="modal" id="viewModal">
+        <div class="modal-content" style="max-width: 900px;">
+            <div class="modal-header">
+                <h3 class="modal-title">Payroll Details</h3>
+                <button class="modal-close" onclick="closeViewModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="payrollDetails">
+                    <!-- Employee Info -->
+                    <div style="background: #f5f5f5; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                        <div class="form-row">
+                            <div class="col-md-6">
+                                <strong>Employee:</strong> <span id="viewEmployeeName"></span><br>
+                                <strong>Employee Code:</strong> <span id="viewEmployeeCode"></span><br>
+                                <strong>Department:</strong> <span id="viewDepartment"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <strong>Designation:</strong> <span id="viewDesignation"></span><br>
+                                <strong>Pay Period:</strong> <span id="viewPayPeriod"></span><br>
+                                <strong>Pay Date:</strong> <span id="viewPayDate"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Attendance Summary -->
+                    <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                        <h4 style="margin-top: 0;">Attendance Summary</h4>
+                        <div class="form-row">
+                            <div class="col-md-3">
+                                <strong>Working Days:</strong> <span id="viewWorkingDays"></span>
+                            </div>
+                            <div class="col-md-3">
+                                <strong>Present:</strong> <span id="viewPresentDays"></span>
+                            </div>
+                            <div class="col-md-3">
+                                <strong>Absent:</strong> <span id="viewAbsentDays"></span>
+                            </div>
+                            <div class="col-md-3">
+                                <strong>Leave:</strong> <span id="viewLeaveDays"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Salary Breakdown -->
+                    <div class="form-row">
+                        <div class="col-md-6">
+                            <h4>Earnings</h4>
+                            <table class="table" style="margin-bottom: 10px;">
+                                <thead>
+                                    <tr>
+                                        <th>Component</th>
+                                        <th style="text-align: right;">Amount</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="earningsTable">
+                                </tbody>
+                                <tfoot>
+                                    <tr style="font-weight: bold; background: #e8f5e9;">
+                                        <td>Total Earnings</td>
+                                        <td style="text-align: right;" id="viewTotalEarnings"></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <h4>Deductions</h4>
+                            <table class="table" style="margin-bottom: 10px;">
+                                <thead>
+                                    <tr>
+                                        <th>Component</th>
+                                        <th style="text-align: right;">Amount</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="deductionsTable">
+                                </tbody>
+                                <tfoot>
+                                    <tr style="font-weight: bold; background: #ffebee;">
+                                        <td>Total Deductions</td>
+                                        <td style="text-align: right;" id="viewTotalDeductions"></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Net Salary -->
+                    <div style="background: #1976d2; color: white; padding: 20px; border-radius: 8px; text-align: center; margin-top: 20px;">
+                        <h3 style="margin: 0;">Net Salary: <span id="viewNetSalary"></span></h3>
+                    </div>
+
+                    <!-- Status and Actions -->
+                    <div style="margin-top: 20px; padding: 15px; background: #f5f5f5; border-radius: 8px;">
+                        <div class="form-row">
+                            <div class="col-md-6">
+                                <strong>Status:</strong> <span id="viewStatus" class="badge"></span><br>
+                                <strong>Payment Method:</strong> <span id="viewPaymentMethod"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <strong>Approved By:</strong> <span id="viewApprovedBy"></span><br>
+                                <strong>Payment Reference:</strong> <span id="viewPaymentRef"></span>
+                            </div>
+                        </div>
+                        <div style="margin-top: 10px;" id="viewNotes"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeViewModal()">Close</button>
+                <button class="btn btn-success" id="btnApprove" onclick="updateStatus('Approved')" style="display: none;">Approve</button>
+                <button class="btn btn-primary" id="btnPaid" onclick="updateStatus('Paid')" style="display: none;">Mark as Paid</button>
+                <button class="btn btn-danger" id="btnCancel" onclick="updateStatus('Cancelled')" style="display: none;">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="../scripts/toast.js"></script>
+    <script src="../scripts/auth.js"></script>
+    <script src="../scripts/api.js"></script>
+    <script>
+        // Initialize
+        auth.initAuth();
+        const canManage = auth.hasRole('Admin', 'HR');
+
+        let payrollRecords = [];
+        let employees = [];
+        let currentPayrollId = null;
+        let currentPage = 1;
+        let pageSize = 10;
+        let totalRecords = 0;
+
+        // Load employees for dropdown
+        async function loadEmployees() {
+            try {
+                const response = await endpoints.employees.getAll();
+                employees = response.data || [];
+                
+                const genSelect = document.getElementById('genEmployeeId');
+                const options = employees.map(e => 
+                    `<option value="${e.EmployeeId}">${e.FirstName} ${e.LastName} (${e.EmployeeCode})</option>`
+                ).join('');
+                
+                genSelect.innerHTML = '<option value="">Select Employee</option>' + options;
+            } catch (error) {
+                console.error('Error loading employees:', error);
+            }
+        }
+
+        // Load payroll records
+        async function loadPayroll() {
+            try {
+                const params = {
+                    year: document.getElementById('filterYear').value || undefined,
+                    month: document.getElementById('filterMonth').value || undefined,
+                    salaryCycle: document.getElementById('filterSalaryCycle').value || undefined
+                };
+
+                console.log('Loading payroll with params:', params);
+                const response = await endpoints.payroll.getAll(params);
+                console.log('Payroll API response:', response);
+                
+                payrollRecords = response.data || [];
+                totalRecords = payrollRecords.length;
+                console.log('Payroll records:', payrollRecords.length, payrollRecords);
+                
+                currentPage = 1; // Reset to first page
+                renderPayroll();
+                updatePagination();
+            } catch (error) {
+                console.error('Error loading payroll:', error);
+                utils.showAlert('Failed to load payroll records', 'error');
+            }
+        }
+
+        // Render payroll table
+        function renderPayroll() {
+            const tbody = document.getElementById('payrollTableBody');
+            
+            console.log('Rendering payroll, records count:', payrollRecords.length);
+            
+            if (payrollRecords.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="8">
+                            <div class="payroll-empty">
+                                <div class="payroll-empty-icon">💰</div>
+                                <div class="payroll-empty-text">No payroll records found</div>
+                                <div class="payroll-empty-subtext">Generate payroll to see records here</div>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            // Pagination
+            const startIndex = (currentPage - 1) * pageSize;
+            const endIndex = Math.min(startIndex + pageSize, payrollRecords.length);
+            const paginatedRecords = payrollRecords.slice(startIndex, endIndex);
+
+            tbody.innerHTML = paginatedRecords.map(p => {
+                const statusClass = {
+                    'Draft': 'draft',
+                    'Approved': 'approved',
+                    'Paid': 'paid',
+                    'Cancelled': 'cancelled'
+                }[p.Status] || 'draft';
+
+                // Get initials for avatar
+                const initials = `${p.FirstName?.charAt(0) || ''}${p.LastName?.charAt(0) || ''}`.toUpperCase();
+
+                // Format duration
+                const duration = `${utils.formatDate(p.PayPeriodStart)} - ${utils.formatDate(p.PayPeriodEnd)}`;
+
+                return `
+                <tr>
+                    <td>
+                        <input type="checkbox" class="row-checkbox" data-id="${p.PayrollId}">
+                    </td>
+                    <td>
+                        <div class="employee-cell">
+                            <div class="employee-avatar">${initials}</div>
+                            <div class="employee-info">
+                                <div class="employee-name">${p.FirstName} ${p.LastName}</div>
+                                <div class="employee-code">${p.EmployeeCode}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="currency-cell net-salary">$${parseFloat(p.NetSalary).toFixed(2)}</td>
+                    <td class="currency-cell ctc-value">$${parseFloat(p.CTC || p.BaseSalary + p.TotalEarnings).toFixed(2)}</td>
+                    <td class="duration-cell">${duration}</td>
+                    <td>${utils.formatDate(p.PayDate)}</td>
+                    <td>
+                        <span class="status-badge ${statusClass}">${p.Status}</span>
+                    </td>
+                    <td class="actions-cell">
+                        <button class="actions-menu-btn" onclick="toggleActionsMenu(event, ${p.PayrollId})">⋮</button>
+                        <div class="actions-dropdown" id="actions-${p.PayrollId}">
+                            <button class="actions-dropdown-item" onclick="viewPayroll(${p.PayrollId})">View Details</button>
+                            ${p.Status === 'Draft' && canManage ? `<button class="actions-dropdown-item danger" onclick="deletePayroll(${p.PayrollId})">Delete</button>` : ''}
+                        </div>
+                    </td>
+                </tr>
+                `;
+            }).join('');
+        }
+
+        // Toggle actions menu
+        function toggleActionsMenu(event, payrollId) {
+            event.stopPropagation();
+            const dropdown = document.getElementById(`actions-${payrollId}`);
+            
+            // Close all other dropdowns
+            document.querySelectorAll('.actions-dropdown').forEach(d => {
+                if (d.id !== `actions-${payrollId}`) {
+                    d.classList.remove('active');
+                }
+            });
+            
+            dropdown.classList.toggle('active');
+        }
+
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', () => {
+            document.querySelectorAll('.actions-dropdown').forEach(d => {
+                d.classList.remove('active');
+            });
+        });
+
+        // Toggle select all
+        function toggleSelectAll() {
+            const selectAll = document.getElementById('selectAll');
+            const checkboxes = document.querySelectorAll('.row-checkbox');
+            checkboxes.forEach(cb => cb.checked = selectAll.checked);
+        }
+
+        // Update pagination
+        function updatePagination() {
+            const totalPages = Math.ceil(totalRecords / pageSize);
+            const startRecord = totalRecords === 0 ? 0 : (currentPage - 1) * pageSize + 1;
+            const endRecord = Math.min(currentPage * pageSize, totalRecords);
+            
+            // Update pagination info text
+            const paginationInfo = document.getElementById('paginationInfo');
+            if (paginationInfo) {
+                paginationInfo.textContent = `Showing ${startRecord} to ${endRecord} of ${totalRecords} entries`;
+            }
+            
+            // Update page buttons
+            const buttonsContainer = document.getElementById('paginationButtons');
+            if (!buttonsContainer) return;
+            
+            let buttonsHTML = `<button class="page-btn" onclick="previousPage()" ${currentPage === 1 ? 'disabled' : ''}>Previous</button>`;
+            
+            for (let i = 1; i <= totalPages; i++) {
+                if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
+                    buttonsHTML += `<button class="page-btn ${i === currentPage ? 'active' : ''}" onclick="goToPage(${i})">${i}</button>`;
+                } else if (i === currentPage - 2 || i === currentPage + 2) {
+                    buttonsHTML += `<span style="padding: 6px;">...</span>`;
+                }
+            }
+            
+            buttonsHTML += `<button class="page-btn" onclick="nextPage()" ${currentPage === totalPages || totalRecords === 0 ? 'disabled' : ''}>Next</button>`;
+            buttonsContainer.innerHTML = buttonsHTML;
+        }
+
+        function previousPage() {
+            if (currentPage > 1) {
+                currentPage--;
+                renderPayroll();
+                updatePagination();
+            }
+        }
+
+        function nextPage() {
+            const totalPages = Math.ceil(totalRecords / pageSize);
+            if (currentPage < totalPages) {
+                currentPage++;
+                renderPayroll();
+                updatePagination();
+            }
+        }
+
+        function goToPage(page) {
+            currentPage = page;
+            renderPayroll();
+            updatePagination();
+        }
+
+        function changePageSize() {
+            pageSize = parseInt(document.getElementById('pageSize').value);
+            currentPage = 1;
+            renderPayroll();
+            updatePagination();
+        }
+
+        // Generate payroll
+        async function generatePayroll() {
+            const employeeId = document.getElementById('genEmployeeId').value;
+            
+            if (!employeeId) {
+                utils.showAlert('Please select an employee', 'error');
+                return;
+            }
+
+            const today = new Date();
+            const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+            const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+
+            const data = {
+                employeeId: parseInt(employeeId),
+                payPeriodStart: firstDay.toISOString().split('T')[0],
+                payPeriodEnd: lastDay.toISOString().split('T')[0],
+                payDate: today.toISOString().split('T')[0],
+                includeExpenseClaims: document.getElementById('includeExpenseClaims').checked,
+                addSewerageToSalary: document.getElementById('addSewerageToSalary').checked,
+                useAttendance: document.getElementById('useAttendance').checked
+            };
+
+            try {
+                await endpoints.payroll.generate(data);
+                utils.showAlert('Payroll generated successfully', 'success');
+                document.getElementById('genEmployeeId').value = '';
+                loadPayroll();
+            } catch (error) {
+                console.error('Error generating payroll:', error);
+                utils.showAlert(error.message || 'Failed to generate payroll', 'error');
+            }
+        }
+
+        // View payroll details
+        async function viewPayroll(id) {
+            try {
+                currentPayrollId = id;
+                const response = await endpoints.payroll.getById(id);
+                const payroll = response.data;
+
+                // Employee Info
+                document.getElementById('viewEmployeeName').textContent = `${payroll.FirstName} ${payroll.LastName}`;
+                document.getElementById('viewEmployeeCode').textContent = payroll.EmployeeCode;
+                document.getElementById('viewDepartment').textContent = payroll.DepartmentName || '-';
+                document.getElementById('viewDesignation').textContent = payroll.DesignationName || '-';
+                document.getElementById('viewPayPeriod').textContent = `${utils.formatDate(payroll.PayPeriodStart)} - ${utils.formatDate(payroll.PayPeriodEnd)}`;
+                document.getElementById('viewPayDate').textContent = utils.formatDate(payroll.PayDate);
+
+                // Attendance
+                document.getElementById('viewWorkingDays').textContent = payroll.WorkingDays;
+                document.getElementById('viewPresentDays').textContent = payroll.PresentDays;
+                document.getElementById('viewAbsentDays').textContent = payroll.AbsentDays;
+                document.getElementById('viewLeaveDays').textContent = payroll.LeaveDays;
+
+                // Earnings
+                const earnings = payroll.details.filter(d => d.ComponentType === 'Earning');
+                document.getElementById('earningsTable').innerHTML = `
+                    <tr><td>Base Salary</td><td style="text-align: right;">$${parseFloat(payroll.BaseSalary).toFixed(2)}</td></tr>
+                    ${earnings.map(e => `<tr><td>${e.ComponentName}</td><td style="text-align: right;">$${parseFloat(e.Amount).toFixed(2)}</td></tr>`).join('')}
+                `;
+                document.getElementById('viewTotalEarnings').textContent = `$${parseFloat(payroll.TotalEarnings).toFixed(2)}`;
+
+                // Deductions
+                const deductions = payroll.details.filter(d => d.ComponentType === 'Deduction');
+                document.getElementById('deductionsTable').innerHTML = deductions.map(d => 
+                    `<tr><td>${d.ComponentName}</td><td style="text-align: right;">$${parseFloat(d.Amount).toFixed(2)}</td></tr>`
+                ).join('');
+                document.getElementById('viewTotalDeductions').textContent = `$${parseFloat(payroll.TotalDeductions).toFixed(2)}`;
+
+                // Net Salary
+                document.getElementById('viewNetSalary').textContent = `$${parseFloat(payroll.NetSalary).toFixed(2)}`;
+
+                // Status
+                const statusClass = {
+                    'Draft': 'badge-secondary',
+                    'Approved': 'badge-info',
+                    'Paid': 'badge-success',
+                    'Cancelled': 'badge-danger'
+                }[payroll.Status] || 'badge-secondary';
+                
+                const statusBadge = document.getElementById('viewStatus');
+                statusBadge.textContent = payroll.Status;
+                statusBadge.className = `badge ${statusClass}`;
+                
+                document.getElementById('viewPaymentMethod').textContent = payroll.PaymentMethod || '-';
+                document.getElementById('viewApprovedBy').textContent = payroll.ApprovedBy || '-';
+                document.getElementById('viewPaymentRef').textContent = payroll.PaymentReference || '-';
+                document.getElementById('viewNotes').innerHTML = payroll.Notes ? `<strong>Notes:</strong> ${payroll.Notes}` : '';
+
+                // Show/hide action buttons based on status
+                document.getElementById('btnApprove').style.display = payroll.Status === 'Draft' && canManage ? 'inline-block' : 'none';
+                document.getElementById('btnPaid').style.display = payroll.Status === 'Approved' && canManage ? 'inline-block' : 'none';
+                document.getElementById('btnCancel').style.display = (payroll.Status === 'Draft' || payroll.Status === 'Approved') && canManage ? 'inline-block' : 'none';
+
+                document.getElementById('viewModal').classList.add('active');
+            } catch (error) {
+                console.error('Error viewing payroll:', error);
+                utils.showAlert('Failed to load payroll details', 'error');
+            }
+        }
+
+        function closeViewModal() {
+            document.getElementById('viewModal').classList.remove('active');
+            currentPayrollId = null;
+        }
+
+        // Update payroll status
+        async function updateStatus(status) {
+            if (!currentPayrollId) return;
+
+            const data = {
+                status: status,
+                approvedBy: status === 'Approved' || status === 'Paid' ? 'Admin' : null,
+                paymentReference: status === 'Paid' ? prompt('Enter payment reference:') : null
+            };
+
+            if (status === 'Paid' && !data.paymentReference) {
+                return;
+            }
+
+            try {
+                await endpoints.payroll.updateStatus(currentPayrollId, data);
+                utils.showAlert(`Payroll ${status.toLowerCase()} successfully`, 'success');
+                closeViewModal();
+                loadPayroll();
+            } catch (error) {
+                console.error('Error updating status:', error);
+                utils.showAlert('Failed to update payroll status', 'error');
+            }
+        }
+
+        // Delete payroll
+        async function deletePayroll(id) {
+            if (!confirm('Are you sure you want to delete this payroll record?')) return;
+
+            try {
+                await endpoints.payroll.delete(id);
+                utils.showAlert('Payroll deleted successfully', 'success');
+                loadPayroll();
+            } catch (error) {
+                console.error('Error deleting payroll:', error);
+                utils.showAlert(error.message || 'Failed to delete payroll', 'error');
+            }
+        }
+
+        // Initialize
+        loadEmployees();
+        loadPayroll();
+    </script>
+    <script src="../scripts/sidebar.js"></script>
+</body>
+</html>
