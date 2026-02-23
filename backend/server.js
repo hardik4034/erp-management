@@ -17,6 +17,7 @@ const appreciationRoutes = require('./routes/appreciationRoutes');
 const payrollRoutes = require('./routes/payrollRoutes');
 const salaryRoutes = require('./routes/salaryRoutes');
 const biometricRoutes = require('./routes/biometricRoutes');
+const { initBiometricScheduler } = require('./services/schedulerService');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -89,6 +90,9 @@ const startServer = async () => {
             console.log('='.repeat(50));
             console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
             console.log('='.repeat(50));
+
+            // Start biometric scheduler (cron jobs for auto-sync & log processing)
+            initBiometricScheduler();
         });
     } catch (error) {
         console.error('❌ Failed to start server:', error.message);

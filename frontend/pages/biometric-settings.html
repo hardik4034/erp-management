@@ -134,6 +134,26 @@
             box-shadow: 0 5px 15px rgba(235, 51, 73, 0.4);
         }
 
+        .btn-warning {
+            background: linear-gradient(135deg, #f7971e 0%, #ffd200 100%);
+            color: #333;
+        }
+
+        .btn-warning:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 210, 0, 0.4);
+        }
+
+        .btn-info {
+            background: linear-gradient(135deg, #17a2b8 0%, #0062cc 100%);
+            color: white;
+        }
+
+        .btn-info:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(23, 162, 184, 0.4);
+        }
+
         .alert {
             padding: 15px 20px;
             border-radius: 8px;
@@ -275,6 +295,81 @@
         .back-link:hover {
             gap: 12px;
         }
+
+        /* Status Grid */
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 12px;
+            padding: 18px;
+            text-align: center;
+        }
+
+        .stat-card .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        .stat-card .stat-label {
+            font-size: 12px;
+            opacity: 0.9;
+            margin-top: 6px;
+        }
+
+        .stat-card.warning  { background: linear-gradient(135deg, #f7971e 0%, #ffd200 100%); color: #333; }
+        .stat-card.success  { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); }
+        .stat-card.danger   { background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%); }
+
+        .unmapped-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .unmapped-table th, .unmapped-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #e0e0e0;
+            text-align: left;
+        }
+
+        .unmapped-table thead {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #555;
+        }
+
+        .unmapped-table tbody tr:hover { background: #f8f9fa; }
+
+        .actions-bar {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .schedule-info {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-top: 16px;
+        }
+
+        .schedule-item {
+            background: #f0f4ff;
+            border-radius: 8px;
+            padding: 10px 16px;
+            font-size: 13px;
+            color: #555;
+        }
+
+        .schedule-item strong { color: #667eea; }
     </style>
 </head>
 <body>
@@ -335,21 +430,65 @@
 
         <!-- Connected Devices Card -->
         <div class="card">
-            <h2 class="card-title">Connected Devices</h2>
-            
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:12px;">
+                <h2 class="card-title" style="margin-bottom:0; border:none;">Connected Devices</h2>
+                <button class="btn btn-info" id="syncAllBtn" onclick="syncAll()" style="padding: 9px 20px; font-size: 13px;">
+                    <span id="syncAllText">🔄 Sync All Devices</span>
+                    <div id="syncAllSpinner" class="spinner" style="display:none;"></div>
+                </button>
+            </div>
             <div id="devicesContainer">
-                <div class="empty-state">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                    <p>Loading devices...</p>
-                </div>
+                <div class="empty-state"><p>Loading devices...</p></div>
             </div>
         </div>
+
+        <!-- Process Logs Card -->
+        <div class="card">
+            <h2 class="card-title">⚙️ Process Punch Logs → Attendance</h2>
+            <div class="info-box">
+                <h4>📌 How Processing Works</h4>
+                <p>Groups raw punch logs by employee and date. Sets <strong>MIN(punch_time)</strong> as CheckIn and <strong>MAX(punch_time)</strong> as CheckOut. Results are written to the Attendance table.</p>
+            </div>
+            <div style="display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 16px;">
+                <div class="form-group" style="flex:1; min-width:160px; margin-bottom:0;">
+                    <label for="processStart">From Date</label>
+                    <input type="date" id="processStart" />
+                </div>
+                <div class="form-group" style="flex:1; min-width:160px; margin-bottom:0;">
+                    <label for="processEnd">To Date</label>
+                    <input type="date" id="processEnd" />
+                </div>
+            </div>
+            <button class="btn btn-success" id="processBtn" onclick="processLogs()">
+                <span id="processBtnText">▶ Process Logs Now</span>
+                <div id="processSpinner" class="spinner" style="display:none;"></div>
+            </button>
+            <div id="processResult" style="margin-top:16px; display:none;"></div>
+        </div>
+
+        <!-- System Status Card -->
+        <div class="card">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:16px;">
+                <h2 class="card-title" style="margin-bottom:0; border:none;">📊 System Status</h2>
+                <button class="btn btn-primary" onclick="loadStatus()" style="padding: 9px 20px; font-size: 13px;">🔃 Refresh</button>
+            </div>
+            <div id="statusContainer"><p style="color:#999;">Loading status...</p></div>
+        </div>
+
+        <!-- Unmapped Biometric IDs Card -->
+        <div class="card">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:16px;">
+                <h2 class="card-title" style="margin-bottom:0; border:none;">⚠️ Unmapped Biometric IDs</h2>
+                <button class="btn btn-warning" onclick="loadUnmapped()" style="padding: 9px 20px; font-size: 13px;">🔍 Check Now</button>
+            </div>
+            <p style="font-size:14px; color:#666; margin-bottom:16px;">Biometric IDs in punch logs that are not mapped to any employee. Assign these IDs to employees to include them in attendance processing.</p>
+            <div id="unmappedContainer"><p style="color:#999;">Click "Check Now" to load.</p></div>
+        </div>
+
     </div>
 
     <script>
-        const API_BASE_URL = 'http://localhost:3000/api';
+        const API_BASE_URL = 'http://localhost:5000/api';
 
         // Show alert message
         function showAlert(message, type = 'info') {
@@ -415,50 +554,38 @@
         // Load connected devices
         async function loadDevices() {
             const container = document.getElementById('devicesContainer');
-
             try {
                 const response = await fetch(`${API_BASE_URL}/biometric/devices`);
                 const data = await response.json();
 
                 if (data.success && data.devices.length > 0) {
-                    container.innerHTML = `
-                        <table class="devices-table">
-                            <thead>
-                                <tr>
-                                    <th>Device ID</th>
-                                    <th>Device Name</th>
-                                    <th>Status</th>
-                                    <th>Last Sync</th>
-                                    <th>Logs</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${data.devices.map(device => `
-                                    <tr>
-                                        <td><strong>${device.device_id}</strong></td>
-                                        <td>${device.device_name || 'N/A'}</td>
-                                        <td>
-                                            <span class="status-badge status-${device.status}">
-                                                ${device.status}
-                                            </span>
-                                        </td>
-                                        <td>${device.last_sync ? new Date(device.last_sync).toLocaleString() : 'Never'}</td>
-                                        <td>${device.log_count || 0} logs</td>
-                                        <td>
-                                            <button class="btn btn-success" onclick="syncDevice('${device.device_id}')" style="padding: 8px 15px; font-size: 13px;">
-                                                Sync Now
-                                            </button>
-                                            <button class="btn btn-danger" onclick="deleteDevice('${device.device_id}')" style="padding: 8px 15px; font-size: 13px;">
-                                                Delete
-                                            </button>
-                                        </td>
-                                    </tr>
-                                `).join('')}
-                            </tbody>
-                        </table>
-                    `;
+                    let rows = '';
+                    data.devices.forEach(function(device) {
+                        const unproc = device.unprocessed_count || 0;
+                        const unprocColor = unproc > 0 ? '#e67e22' : 'green';
+                        rows += '<tr>' +
+                            '<td><strong>' + device.device_id + '</strong></td>' +
+                            '<td>' + (device.device_name || 'N/A') + '</td>' +
+                            '<td><span class="status-badge status-' + device.status + '">' + device.status + '</span></td>' +
+                            '<td>' + (device.last_sync ? new Date(device.last_sync).toLocaleString() : 'Never') + '</td>' +
+                            '<td>' + (device.log_count || 0) + ' logs</td>' +
+                            '<td><span style="font-weight:600; color:' + unprocColor + '">' + unproc + '</span></td>' +
+                            '<td>' +
+                                '<button class="btn btn-success" onclick="syncDevice(\'' + device.device_id + '\')" style="padding:8px 15px; font-size:13px;">Sync Now</button> ' +
+                                '<button class="btn btn-danger" onclick="deleteDevice(\'' + device.device_id + '\')" style="padding:8px 15px; font-size:13px;">Delete</button>' +
+                            '</td></tr>';
+                    });
+                    container.innerHTML =
+                        '<table class="devices-table"><thead><tr>' +
+                        '<th>Device ID</th><th>Device Name</th><th>Status</th>' +
+                        '<th>Last Sync</th><th>Logs</th><th>Unprocessed</th><th>Actions</th>' +
+                        '</tr></thead><tbody>' + rows + '</tbody></table>';
+
+                    if (!data.credentialsConfigured) {
+                        container.innerHTML += '<div class="alert alert-info" style="display:block; margin-top:12px;">⚠️ eSSL ADMS credentials not configured. Sync buttons will return an error until ESSL_ADMS_TOKEN is set in .env</div>';
+                    }
                 } else {
+
                     container.innerHTML = `
                         <div class="empty-state">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -479,31 +606,184 @@
             }
         }
 
-        // Sync device attendance
+        // Sync specific device attendance
         async function syncDevice(deviceId) {
-            if (!confirm(`Sync attendance logs from device ${deviceId}?`)) {
-                return;
-            }
-
+            if (!confirm(`Sync attendance logs from device ${deviceId}?`)) return;
             showAlert('Syncing attendance logs...', 'info');
-
             try {
-                const response = await fetch(`${API_BASE_URL}/biometric/sync/${deviceId}`, {
-                    method: 'POST'
-                });
-
-                const data = await response.json();
-
+                const res  = await fetch(`${API_BASE_URL}/biometric/sync/${deviceId}`, { method: 'POST' });
+                const data = await res.json();
                 if (data.success) {
                     showAlert(`${data.message} (${data.count} new logs)`, 'success');
-                    loadDevices(); // Refresh to show updated last_sync
+                    loadDevices();
                 } else {
                     showAlert(data.message || 'Sync failed', 'error');
                 }
-
-            } catch (error) {
-                console.error('Error syncing device:', error);
+            } catch (err) {
                 showAlert('Network error during sync', 'error');
+            }
+        }
+
+        // Sync all devices at once
+        async function syncAll() {
+            if (!confirm('Trigger sync for ALL active devices?')) return;
+            const btn = document.getElementById('syncAllBtn');
+            document.getElementById('syncAllText').textContent = 'Syncing...';
+            document.getElementById('syncAllSpinner').style.display = 'block';
+            btn.disabled = true;
+            try {
+                const res  = await fetch(`${API_BASE_URL}/biometric/sync-all`, { method: 'POST' });
+                const data = await res.json();
+                showAlert(data.message || (data.success ? 'Sync triggered!' : 'Sync failed'), data.success ? 'success' : 'error');
+                setTimeout(loadDevices, 3000);
+            } catch (err) {
+                showAlert('Network error during sync', 'error');
+            } finally {
+                document.getElementById('syncAllText').textContent = '🔄 Sync All Devices';
+                document.getElementById('syncAllSpinner').style.display = 'none';
+                btn.disabled = false;
+            }
+        }
+
+        // Process punch logs → Attendance records
+        async function processLogs() {
+            const startDate = document.getElementById('processStart').value;
+            const endDate   = document.getElementById('processEnd').value;
+            const btn       = document.getElementById('processBtn');
+
+            document.getElementById('processBtnText').textContent = 'Processing...';
+            document.getElementById('processSpinner').style.display = 'block';
+            btn.disabled = true;
+            document.getElementById('processResult').style.display = 'none';
+
+            try {
+                const body = {};
+                if (startDate) body.startDate = startDate;
+                if (endDate)   body.endDate   = endDate;
+
+                const res  = await fetch(`${API_BASE_URL}/biometric/process`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+                const data = await res.json();
+
+                const resultDiv = document.getElementById('processResult');
+                resultDiv.style.display = 'block';
+
+                if (data.success) {
+                    const s = data.summary;
+                    resultDiv.innerHTML = `
+                        <div class="alert alert-success" style="display:block;">
+                            ✅ <strong>Processing Complete!</strong><br>
+                            ${ s ? `
+                                Logs processed: <strong>${s.LogsMarkedProcessed}</strong> &nbsp;|&nbsp;
+                                Employees: <strong>${s.EmployeesProcessed}</strong> &nbsp;|&nbsp;
+                                Attendance records: <strong>${s.AttendanceRecordsTouched}</strong><br>
+                                Date range: ${s.ProcessedFromDate} → ${s.ProcessedToDate}
+                            ` : 'No unprocessed logs found for this date range.'}
+                        </div>`;
+                    showAlert('Logs processed successfully!', 'success');
+                } else {
+                    resultDiv.innerHTML = `<div class="alert alert-error" style="display:block;">❌ ${data.message}</div>`;
+                    showAlert(data.message || 'Processing failed', 'error');
+                }
+            } catch (err) {
+                showAlert('Network error during processing', 'error');
+            } finally {
+                document.getElementById('processBtnText').textContent = '▶ Process Logs Now';
+                document.getElementById('processSpinner').style.display = 'none';
+                btn.disabled = false;
+            }
+        }
+
+        // Load system status
+        async function loadStatus() {
+            const container = document.getElementById('statusContainer');
+            try {
+                const res  = await fetch(`${API_BASE_URL}/biometric/status`);
+                const data = await res.json();
+                if (!data.success) { container.innerHTML = `<p style="color:red;">Failed to load status.</p>`; return; }
+                const s = data.stats || {};
+                const credOk    = data.credentialsConfigured;
+                const schedOk   = data.schedulerEnabled;
+                container.innerHTML = `
+                    <div class="status-grid">
+                        <div class="stat-card ${s.activeDevices > 0 ? 'success' : 'danger'}">
+                            <div class="stat-value">${s.activeDevices ?? '—'}</div>
+                            <div class="stat-label">Active Devices</div>
+                        </div>
+                        <div class="stat-card ${s.unprocessedLogs > 0 ? 'warning' : 'success'}">
+                            <div class="stat-value">${s.unprocessedLogs ?? '—'}</div>
+                            <div class="stat-label">Unprocessed Logs</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">${s.processedLogs ?? '—'}</div>
+                            <div class="stat-label">Processed Logs</div>
+                        </div>
+                        <div class="stat-card ${s.mappedEmployees > 0 ? 'success' : 'danger'}">
+                            <div class="stat-value">${s.mappedEmployees ?? '—'}</div>
+                            <div class="stat-label">Mapped Employees</div>
+                        </div>
+                        <div class="stat-card ${s.unmappedEmployees > 0 ? 'warning' : 'success'}">
+                            <div class="stat-value">${s.unmappedEmployees ?? '—'}</div>
+                            <div class="stat-label">Employees Without BiometricId</div>
+                        </div>
+                    </div>
+                    <div class="schedule-info">
+                        <div class="schedule-item">🔐 Credentials: <strong style="color:${credOk ? 'green' : 'red'}">${credOk ? '✅ Configured' : '❌ Not Set'}</strong></div>
+                        <div class="schedule-item">🕐 Scheduler: <strong style="color:${schedOk ? 'green' : 'orange'}">${schedOk ? '✅ Enabled' : '⚠️ Disabled'}</strong></div>
+                        <div class="schedule-item">📡 Sync Job: <strong>${data.syncSchedule}</strong></div>
+                        <div class="schedule-item">⚙️ Process Job: <strong>${data.processSchedule}</strong></div>
+                        <div class="schedule-item">🕒 Last Sync: <strong>${s.lastSync ? new Date(s.lastSync).toLocaleString() : 'Never'}</strong></div>
+                    </div>`;
+            } catch (err) {
+                container.innerHTML = `<p style="color:red;">Network error loading status.</p>`;
+            }
+        }
+
+        // Load unmapped biometric IDs
+        async function loadUnmapped() {
+            const container = document.getElementById('unmappedContainer');
+            container.innerHTML = '<p style="color:#999;">Loading...</p>';
+            try {
+                const res  = await fetch(`${API_BASE_URL}/biometric/unmapped`);
+                const data = await res.json();
+                if (!data.success) { container.innerHTML = `<p style="color:red;">Failed to load.</p>`; return; }
+
+                const ids       = data.unmappedBiometricIds || [];
+                const noIdEmps  = data.employeesWithoutBiometricId || [];
+
+                let html = '';
+                if (ids.length > 0) {
+                    html += `<h4 style="color:#e67e22; margin-bottom:10px;">🔴 ${ids.length} Biometric ID(s) with no matching employee:</h4>
+                        <table class="unmapped-table"><thead><tr><th>Biometric User ID</th><th>Log Count</th><th>First Seen</th><th>Last Seen</th><th>Days</th></tr></thead><tbody>
+                        ${ids.map(r => `<tr>
+                            <td><code>${r.biometricUserId}</code></td>
+                            <td>${r.logCount}</td>
+                            <td>${new Date(r.firstSeen).toLocaleDateString()}</td>
+                            <td>${new Date(r.lastSeen).toLocaleDateString()}</td>
+                            <td>${r.distinctDays}</td>
+                        </tr>`).join('')}
+                        </tbody></table><br>`;
+                } else {
+                    html += `<div class="alert alert-success" style="display:block;">✅ All biometric IDs are mapped to employees.</div>`;
+                }
+
+                if (noIdEmps.length > 0) {
+                    html += `<h4 style="color:#c0392b; margin-bottom:10px; margin-top:16px;">⚠️ ${noIdEmps.length} Active Employee(s) without a BiometricId:</h4>
+                        <table class="unmapped-table"><thead><tr><th>Employee Code</th><th>Name</th><th>BiometricId</th></tr></thead><tbody>
+                        ${noIdEmps.map(e => `<tr>
+                            <td>${e.EmployeeCode}</td>
+                            <td>${e.FullName}</td>
+                            <td><em style="color:#999;">Not set</em></td>
+                        </tr>`).join('')}
+                        </tbody></table>`;
+                }
+
+                container.innerHTML = html || '<p style="color:#999;">No data.</p>';
+            } catch (err) {
+                container.innerHTML = `<p style="color:red;">Network error.</p>`;
             }
         }
 
@@ -536,6 +816,7 @@
         // Load devices on page load
         document.addEventListener('DOMContentLoaded', () => {
             loadDevices();
+            loadStatus();
         });
     </script>
     <script src="../scripts/sidebar.js"></script>

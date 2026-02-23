@@ -3,34 +3,42 @@
  * API endpoints for biometric device and attendance management
  */
 
-const express = require('express');
-const router = express.Router();
-const biometricController = require('../controllers/biometricController');
+const express    = require('express');
+const router     = express.Router();
+const biometric  = require('../controllers/biometricController');
 
-/**
- * POST /api/biometric/connect
- * Connect a new biometric device
- * Body: { deviceId: string }
- */
-router.post('/connect', biometricController.connectDevice);
+// ── Device Management ────────────────────────────────────────────────────────
 
-/**
- * POST /api/biometric/sync/:deviceId
- * Sync attendance logs from a device
- * Query params: startDate, endDate (optional)
- */
-router.post('/sync/:deviceId', biometricController.syncAttendance);
+/** POST /api/biometric/connect — Register a new biometric device */
+router.post('/connect', biometric.connectDevice);
 
-/**
- * GET /api/biometric/devices
- * Get all connected devices
- */
-router.get('/devices', biometricController.getDevices);
+/** GET  /api/biometric/devices — List all connected devices */
+router.get('/devices', biometric.getDevices);
 
-/**
- * DELETE /api/biometric/devices/:deviceId
- * Delete a device
- */
-router.delete('/devices/:deviceId', biometricController.deleteDevice);
+/** DELETE /api/biometric/devices/:deviceId — Remove a device */
+router.delete('/devices/:deviceId', biometric.deleteDevice);
+
+// ── Sync ─────────────────────────────────────────────────────────────────────
+
+/** POST /api/biometric/sync/:deviceId — Sync logs from one device
+ *  Query: ?startDate=YYYY-MM-DD&endDate=YYYY-MM-DD */
+router.post('/sync/:deviceId', biometric.syncAttendance);
+
+/** POST /api/biometric/sync-all — Trigger sync for ALL active devices */
+router.post('/sync-all', biometric.syncAll);
+
+// ── Processing ───────────────────────────────────────────────────────────────
+
+/** POST /api/biometric/process — Convert raw punch logs → Attendance records
+ *  Body: { startDate?, endDate?, deviceId? } */
+router.post('/process', biometric.processLogs);
+
+// ── Validation & Reporting ───────────────────────────────────────────────────
+
+/** GET /api/biometric/unmapped — List biometric IDs with no matching employee */
+router.get('/unmapped', biometric.getUnmappedIds);
+
+/** GET /api/biometric/status — Integration health check */
+router.get('/status', biometric.getStatus);
 
 module.exports = router;
