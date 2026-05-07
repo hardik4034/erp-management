@@ -1,13 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Appreciations - HRMS</title>
-        <link rel="icon" type="image/x-icon" href="../assets/favicon.png"><link rel="shortcut icon" type="image/x-icon" href="../assets/favicon.png">
+    <link rel="icon" type="image/x-icon" href="../assets/favicon.png">
+    <link rel="shortcut icon" type="image/x-icon" href="../assets/favicon.png">
     <link rel="stylesheet" href="../styles/main.css">
     <link rel="stylesheet" href="../styles/toast.css">
     <link rel="stylesheet" href="../styles/role-selector.css">
+    <link rel="stylesheet" href="../styles/appreciations-redesign.css">
+    <link rel="stylesheet" href="../styles/tailwind.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: { DEFAULT: '#ea580c', dark: '#c2410c', light: '#f97316' }
+                    }
+                }
+            }
+        }
+    </script>
     <!-- Quill.js CSS -->
     <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
     <style>
@@ -15,13 +30,13 @@
         #editor-container {
             min-height: 200px;
         }
-        
+
         #editor-container .ql-toolbar {
             background: #f8f9fa;
             border-bottom: 1px solid var(--border-color);
             border-radius: var(--radius-md) var(--radius-md) 0 0;
         }
-        
+
         #editor-container .ql-container {
             border: none;
             font-family: inherit;
@@ -29,22 +44,22 @@
         }
 
         .action-bar {
-          display: flex;
-          justify-content: flex-end;
-          margin-bottom: 10px;
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 10px;
         }
-        
+
         #editor-container .ql-editor {
             min-height: 150px;
             max-height: 300px;
             overflow-y: auto;
         }
-        
+
         #editor-container .ql-editor.ql-blank::before {
             color: #9ca3af;
             font-style: normal;
         }
-        
+
         /* Hide sidebar and header when in iframe */
         body.in-iframe .sidebar,
         body.in-iframe .sidebar-overlay,
@@ -54,44 +69,68 @@
 
         body.in-iframe .main-content {
             margin-left: 0 !important;
+            padding: 0 !important;
             width: 100% !important;
         }
 
         body.in-iframe .content-area {
-            padding-top: 0 !important;
+            padding: 0 !important;
         }
     </style>
     <script>
         // Detect if page is loaded in iframe
         if (window.self !== window.top) {
-            document.addEventListener('DOMContentLoaded', function() {
+            document.documentElement.classList.add('in-iframe');
+            document.addEventListener('DOMContentLoaded', function () {
                 document.body.classList.add('in-iframe');
             });
         }
     </script>
 </head>
+
 <body>
     <div class="app-container">
         <!-- Sidebar Overlay -->
         <div class="sidebar-overlay" id="sidebarOverlay"></div>
-
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
-                <img src="../assets/logo.png" alt="Soleos Logo" class="sidebar-logo">
-                <button class="sidebar-close-btn" id="sidebarClose">&times;</button>
+                <a href="../index.html"><img src="../assets/soleos.png" alt="Soleos Logo" class="sidebar-logo"></a>
+                <button class="sidebar-close-btn" id="sidebarClose">&#x2715;</button>
             </div>
             <nav class="sidebar-nav">
+                <div class="nav-section-label">Main</div>
                 <div class="nav-item"><a href="../index.html" class="nav-link"><i>📊</i> Dashboard</a></div>
-                <div class="nav-item"><a href="employees.html" class="nav-link"><i>👥</i> Employees</a></div>
-                <div class="nav-item"><a href="attendance.html" class="nav-link"><i>📅</i> Attendance</a></div>
-                <div class="nav-item"><a href="leaves.html" class="nav-link"><i>🏖️</i> Leaves</a></div>
-                <div class="nav-item"><a href="holidays.html" class="nav-link"><i>🎉</i> Holidays</a></div>
-                <div class="nav-item"><a href="payroll.html" class="nav-link"><i>💰</i> Payroll</a></div>
-                <div class="nav-item"><a href="employee-salary.html" class="nav-link"><i>💵</i> Employee Salary</a></div>
-                <div class="nav-item"><a href="departments.html" class="nav-link"><i>🏢</i> Departments</a></div>
-                <div class="nav-item"><a href="designations.html" class="nav-link"><i>💼</i> Designations</a></div>
-                <div class="nav-item"><a href="appreciations.html" class="nav-link active"><i>🏆</i> Appreciations</a></div>
-                <div class="nav-item"><a href="note.html" class="nav-link"><i>📝</i> Note</a></div>
+                <div class="nav-item"><a href="./profile.html" id="myProfileLink" class="nav-link"><i>👤</i> My
+                        Profile</a></div>
+                <div class="nav-item"><a href="./employees.html" class="nav-link"><i>👥</i> Employees</a></div>
+
+                <div class="nav-section-label">Time & Leave</div>
+                <div class="nav-item"><a href="./attendance.html" class="nav-link"><i>📅</i> Attendance</a></div>
+                <div class="nav-item"><a href="./leaves.html" class="nav-link"><i>🏖️</i> Leaves</a></div>
+                <div class="nav-item"><a href="./holidays.html" class="nav-link"><i>🎉</i> Holidays</a></div>
+                <div class="nav-item"><a href="./calendar.html" class="nav-link"><i>📆</i> Calendar</a></div>
+
+                <div class="nav-section-label">Payroll</div>
+                <div class="nav-item"><a href="./payroll.html" class="nav-link"><i>💰</i> Payroll</a></div>
+                <div class="nav-item"><a href="./employee-salary.html" class="nav-link"><i>💵</i> Employee Salary</a>
+                </div>
+
+                <div class="nav-section-label">Organisation</div>
+                <div class="nav-item"><a href="./departments.html" class="nav-link"><i>🏢</i> Departments</a></div>
+                <div class="nav-item"><a href="./designations.html" class="nav-link"><i>💼</i> Designations</a></div>
+                <div class="nav-item"><a href="./appreciations.html" class="nav-link"><i>🏆</i> Appreciations</a></div>
+                <div class="nav-item"><a href="./assets.html" class="nav-link hr-only"><i>💻</i> Assets</a></div>
+                <div class="nav-item"><a href="./note.html" class="nav-link"><i>📝</i> Notes</a></div>
+
+                <div class="nav-section-label">Reports</div>
+                <div class="nav-item"><a href="./reports.html" class="nav-link hr-only"><i>📈</i> Reports</a></div>
+
+                <div class="nav-section-label">Settings</div>
+                <div class="nav-item"><a href="./audit-logs.html" class="nav-link admin-only"><i>📜</i> Audit Logs</a></div>
+                <div class="nav-item"><a href="./biometric-settings.html" class="nav-link hr-only"><i>🔐</i> Biometric
+                        Settings</a></div>
+
+
             </nav>
         </aside>
 
@@ -101,19 +140,33 @@
                     <button class="hamburger-btn" id="sidebarToggle">
                         ☰
                     </button>
-                    <div class="header-title"><h1>Employee Appreciations</h1></div>
-                </div>
-                <div class="header-actions">
-                    <div class="role-selector">
-                        <label for="roleDropdown">Current Role:</label>
-                        <select id="roleDropdown">
-                            <option value="admin">Admin</option>
-                            <option value="hr">HR</option>
-                            <option value="manager">Manager</option>
-                            <option value="employee">Employee</option>
-                        </select>
+                    <div class="header-title">
+                        <h1>Employee Appreciations</h1>
                     </div>
-                    <span class="role-badge" id="roleBadge">Employee</span>
+                </div>
+                                <div class="header-actions">
+                    <!-- Global Search -->
+                    <div class="global-search" id="globalSearchWrap">
+                        <span class="global-search-icon">🔍</span>
+                        <input type="text" id="globalSearchInput" class="global-search-input" placeholder="Search pages..." autocomplete="off">
+                        <div class="global-search-dropdown" id="globalSearchDropdown"></div>
+                    </div>
+                    <!-- Notification Bell -->
+                    <button class="notif-btn" id="notifBtn" title="Pending approvals">
+                        🔔
+                        <span class="notif-badge" id="notifBadge" style="display:none;">0</span>
+                    </button>
+                    <!-- Dark Mode Toggle -->
+                    <button class="dark-mode-btn" id="darkModeBtn" title="Toggle dark mode">🌙</button>
+
+                    <div class="user-info">
+                        <div class="user-avatar" id="userAvatarInitial">?</div>
+                        <div>
+                            <div class="user-name" id="userDisplayName">Loading...</div>
+                            <div class="user-role-badge"><span class="role-badge" id="roleBadge">Loading...</span></div>
+                        </div>
+                    </div>
+                    <button class="btn-logout" id="logoutBtn" onclick="auth.logout()">Logout</button>
                 </div>
             </header>
 
@@ -131,16 +184,23 @@
                         </div>
                         <div class="search-box-wrapper">
                             <i class="search-icon">🔍</i>
-                            <input type="text" class="search-input" placeholder="Search..." id="searchInput" onkeyup="filterAppreciations()">
+                            <input type="text" class="search-input" placeholder="Search..." id="searchInput"
+                                onkeyup="filterAppreciations()">
                         </div>
                     </div>
                     <div class="action-bar">
+                        <label id="showDeletedLabel"
+                            style="display:none; align-items:center; gap:6px; cursor:pointer; font-size:0.85rem; color:#dc2626; margin-right:10px;">
+                            <input type="checkbox" id="showDeletedToggle" onchange="loadAppreciations()"
+                                style="accent-color:#dc2626;">
+                            Show Deleted
+                        </label>
                         <button class="btn btn-primary" onclick="openAddModal()" id="addBtn">+ Add Appreciation</button>
                     </div>
                 </div>
 
                 <!-- Table -->
-                <div class="card" style="padding: 0; overflow: hidden;">
+                <div class="card" style="padding: 0; overflow: visible;">
                     <div class="table-container">
                         <table class="table">
                             <thead>
@@ -154,7 +214,9 @@
                                 </tr>
                             </thead>
                             <tbody id="appreciationsTable">
-                                <tr><td colspan="6" class="text-center">Loading...</td></tr>
+                                <tr class="loading-row">
+                                    <td colspan="6" class="text-center">Loading...</td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
@@ -173,37 +235,47 @@
             <div class="modal-body">
                 <form id="appreciationForm">
                     <input type="hidden" id="appreciationId">
-                    
+
                     <!-- Row 1: Award, Given To, Award By, Date -->
-                    <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 20px; align-items: start;">
+                    <div class="form-row"
+                        style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 20px; align-items: start;">
                         <div class="form-group">
-                            <label class="form-label" style="font-size: 0.85rem; color: var(--text-secondary);">Award *</label>
+                            <label class="form-label" style="font-size: 0.85rem; color: var(--text-secondary);">Award
+                                *</label>
                             <div style="display: flex;">
-                                <input type="text" id="title" class="form-control" required placeholder="Best User" list="awardSuggestions" style="border-top-right-radius: 0; border-bottom-right-radius: 0;">
+                                <input type="text" id="title" class="form-control" required placeholder="Best User"
+                                    list="awardSuggestions"
+                                    style="border-top-right-radius: 0; border-bottom-right-radius: 0;">
                                 <datalist id="awardSuggestions"></datalist>
-                                <button type="button" id="addAwardBtn" class="btn btn-outline" style="border-top-left-radius: 0; border-bottom-left-radius: 0; border-left: none; padding: 0 10px; color: var(--primary-color);">Add</button>
+                                <button type="button" id="addAwardBtn" class="btn btn-outline"
+                                    style="border-top-left-radius: 0; border-bottom-left-radius: 0; border-left: none; padding: 0 10px; color: var(--primary-color);">Add</button>
                             </div>
                         </div>
                         <div class="form-group">
-                            <label class="form-label" style="font-size: 0.85rem; color: var(--text-secondary);">Given To *</label>
+                            <label class="form-label" style="font-size: 0.85rem; color: var(--text-secondary);">Given To
+                                *</label>
                             <select id="employeeId" class="form-control" required>
                                 <option value="">Select Employee</option>
                             </select>
                         </div>
                         <div class="form-group">
-                            <label class="form-label" style="font-size: 0.85rem; color: var(--text-secondary);">Award By</label>
+                            <label class="form-label" style="font-size: 0.85rem; color: var(--text-secondary);">Award
+                                By</label>
                             <input type="text" id="awardedBy" class="form-control" placeholder="Enter name">
                         </div>
                         <div class="form-group">
-                            <label class="form-label" style="font-size: 0.85rem; color: var(--text-secondary);">Date *</label>
+                            <label class="form-label" style="font-size: 0.85rem; color: var(--text-secondary);">Date
+                                *</label>
                             <input type="date" id="appreciationDate" class="form-control" required>
                         </div>
                     </div>
 
                     <!-- Row 2: Summary with Rich Text Editor -->
                     <div class="form-group">
-                        <label class="form-label" style="font-size: 0.85rem; color: var(--text-secondary);">Summary</label>
-                        <div id="editor-container" style="border: 1px solid var(--border-color); border-radius: var(--radius-md); overflow: hidden; background: white;">
+                        <label class="form-label"
+                            style="font-size: 0.85rem; color: var(--text-secondary);">Summary</label>
+                        <div id="editor-container"
+                            style="border: 1px solid var(--border-color); border-radius: var(--radius-md); overflow: hidden; background: white;">
                             <!-- Quill editor will be initialized here -->
                         </div>
                         <input type="hidden" id="description">
@@ -211,13 +283,18 @@
 
                     <!-- Row 3: Photo Dropzone -->
                     <div class="form-group">
-                        <label class="form-label" style="font-size: 0.85rem; color: var(--text-secondary);">Photo <span title="Optional" style="cursor: help;">❓</span></label>
-                        <div id="photoDropzone" style="border: 2px dashed #e5e7eb; border-radius: var(--radius-md); padding: 40px; text-align: center; background-color: #f9fafb; cursor: pointer; transition: 0.2s;" onmouseover="this.style.borderColor='var(--primary-color)'" onmouseout="this.style.borderColor='#e5e7eb'">
+                        <label class="form-label" style="font-size: 0.85rem; color: var(--text-secondary);">Photo <span
+                                title="Optional" style="cursor: help;">❓</span></label>
+                        <div id="photoDropzone"
+                            style="border: 2px dashed #e5e7eb; border-radius: var(--radius-md); padding: 40px; text-align: center; background-color: #f9fafb; cursor: pointer; transition: 0.2s;"
+                            onmouseover="this.style.borderColor='var(--primary-color)'"
+                            onmouseout="this.style.borderColor='#e5e7eb'">
                             <div id="dropzoneContent">
                                 <div style="font-size: 2rem; color: #d1d5db; margin-bottom: 10px;">☁️</div>
                                 <div style="font-size: 0.9rem; color: var(--text-secondary);">Choose a file</div>
                             </div>
-                            <input type="file" id="photoInput" accept="image/*" style="position: absolute; opacity: 0; cursor: pointer; height: 0; width: 0;">
+                            <input type="file" id="photoInput" accept="image/*"
+                                style="position: absolute; opacity: 0; cursor: pointer; height: 0; width: 0;">
                         </div>
                     </div>
                 </form>
@@ -238,17 +315,20 @@
             <div class="modal-header">
                 <h3 class="modal-title">Appreciation Details</h3>
                 <div style="display: flex; gap: 15px; align-items: center;">
-                    <button class="btn btn-outline" style="border: none; font-size: 1.2rem; color: var(--text-secondary);">⋮</button>
+                    <button class="btn btn-outline"
+                        style="border: none; font-size: 1.2rem; color: var(--text-secondary);">⋮</button>
                     <button class="modal-close" onclick="closeViewModal()">&times;</button>
                 </div>
             </div>
             <div class="modal-body" style="padding: 30px;">
-                <div style="display: grid; grid-template-columns: 200px 1fr; gap: 20px; row-gap: 30px; align-items: start;">
-                    
+                <div
+                    style="display: grid; grid-template-columns: 200px 1fr; gap: 20px; row-gap: 30px; align-items: start;">
+
                     <!-- Award Row -->
                     <div style="color: var(--text-secondary); font-size: 0.9rem;">Award</div>
                     <div style="display: flex; align-items: center; gap: 10px;">
-                        <div style="width: 40px; height: 40px; background: #f3f4f6; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: #4b5563; font-size: 1.2rem;">
+                        <div
+                            style="width: 40px; height: 40px; background: #f3f4f6; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: #4b5563; font-size: 1.2rem;">
                             🏆
                         </div>
                         <span id="viewTitle" style="font-weight: 500;">Title</span>
@@ -269,20 +349,47 @@
                     <!-- Given To Row -->
                     <div style="color: var(--text-secondary); font-size: 0.9rem;">Given To</div>
                     <div style="display: flex; align-items: center; gap: 12px;">
-                        <div class="user-avatar" id="viewAvatar" style="width: 40px; height: 40px; font-size: 1rem;">A</div>
+                        <div class="user-avatar" id="viewAvatar" style="width: 40px; height: 40px; font-size: 1rem;">A
+                        </div>
                         <div>
                             <div style="font-weight: 600;" id="viewEmpName">Name</div>
                             <div style="font-size: 0.8rem; color: var(--text-secondary);" id="viewEmpCode">Role</div>
                         </div>
                     </div>
-                    
+
                     <!-- Photo Row (Hidden if no photo) -->
-                    <div id="viewPhotoLabel" style="color: var(--text-secondary); font-size: 0.9rem; display: none;">Photo</div>
+                    <div id="viewPhotoLabel" style="color: var(--text-secondary); font-size: 0.9rem; display: none;">
+                        Photo</div>
                     <div id="viewPhotoContainer" style="display: none;">
-                        <img id="viewPhoto" src="" alt="Appreciation Photo" style="max-width: 100%; border-radius: 8px; border: 1px solid #e5e7eb;">
+                        <img id="viewPhoto" src="" alt="Appreciation Photo"
+                            style="max-width: 100%; border-radius: 8px; border: 1px solid #e5e7eb;">
                     </div>
 
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Soft Delete Modal -->
+    <div class="modal" id="softDeleteModal">
+        <div class="modal-content" style="max-width:480px;">
+            <div class="modal-header" style="border-bottom:1px solid #fee2e2;">
+                <h3 class="modal-title" style="color:#dc2626;">🗑️ Delete Appreciation</h3>
+                <button class="modal-close" onclick="closeSoftDeleteModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p style="margin-bottom:12px;">This will be <strong>soft deleted</strong> — hidden but recoverable by
+                    Admin/HR.</p>
+                <div class="form-group">
+                    <label class="form-label">Reason <span style="color:#9ca3af;">(optional)</span></label>
+                    <textarea id="deleteReasonInput" class="form-control" rows="3"
+                        placeholder="Reason for deletion..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeSoftDeleteModal()">Cancel</button>
+                <button class="btn" style="background:#dc2626;color:#fff;" onclick="confirmSoftDelete()">Confirm
+                    Delete</button>
             </div>
         </div>
     </div>
@@ -291,6 +398,10 @@
     <script src="../scripts/sidebar.js"></script>
     <script src="../scripts/role-manager.js"></script>
     <script src="../scripts/api.js"></script>
+    <script src="../scripts/theme.js"></script>
+    <script src="../scripts/header.js"></script>
+
+    <script src="../scripts/auth.js"></script>
     <!-- Quill.js JS -->
     <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
     <script>
@@ -298,15 +409,30 @@
         window.addEventListener('roleChanged', () => {
             console.log('🔄 Dashboard: Role changed, reloading data...');
             applyRolePermissions();
+            const lbl = document.getElementById('showDeletedLabel');
+            const ok = window.roleManager && window.roleManager.isRole('admin');
+            if (lbl) {
+                lbl.style.display = ok ? 'flex' : 'none';
+                console.log(`Setting showDeletedLabel display to: ${lbl.style.display} for role: ${window.roleManager.getCurrentRole()}`);
+            }
             loadAppreciations();
         });
+
+        document.addEventListener('DOMContentLoaded', () => setTimeout(() => {
+            const lbl = document.getElementById('showDeletedLabel');
+            const ok = window.roleManager && window.roleManager.isRole('admin');
+            if (lbl) {
+                lbl.style.display = ok ? 'flex' : 'none';
+                console.log(`Initial showDeletedLabel display: ${lbl.style.display}`);
+            }
+        }, 300));
 
         let appreciations = [];
         let employees = [];
 
         async function applyRolePermissions() {
             if (!window.roleManager) return;
-            
+
             const role = window.roleManager.getCurrentRole();
             const canManage = window.roleManager.isRole('admin') || window.roleManager.isRole('hr') || window.roleManager.isRole('manager');
             const canEdit = window.roleManager.isRole('admin') || window.roleManager.isRole('hr'); // Only Admin/HR can edit globally
@@ -317,7 +443,7 @@
             // Admin/HR/Manager can add appreciations
             const addBtn = document.getElementById('addBtn');
             if (addBtn) addBtn.style.display = canManage ? 'inline-block' : 'none';
-            
+
             // Toggle Action Header (hide column if no actions available)
             // But checking per row is better, so we'll keep header and hide buttons in row
         }
@@ -327,7 +453,7 @@
         const toolbarOptions = [
             [{ 'header': [1, 2, 3, 4, 5, false] }],
             ['bold', 'italic', 'underline', 'strike'],
-            [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+            [{ 'list': 'ordered' }, { 'list': 'bullet' }],
             [{ 'align': [] }],
             ['link', 'image'],
             [{ 'color': [] }, { 'background': [] }],
@@ -335,7 +461,7 @@
         ];
 
         // Wait for DOM to be ready before initializing Quill
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             quill = new Quill('#editor-container', {
                 theme: 'snow',
                 modules: {
@@ -343,7 +469,7 @@
                 },
                 placeholder: 'Enter summary...'
             });
-            
+
             // Intial Load
             applyRolePermissions();
             loadEmployees(); // Load dropdowns first
@@ -352,57 +478,58 @@
 
         // Award Suggestions Management
         let awardSuggestions = JSON.parse(localStorage.getItem('awardSuggestions') || '["Employee of the Month", "Outstanding Performance", "Team Player", "Innovation Award", "Customer Service Excellence"]');
-        
+
         function loadAwardSuggestions() {
             const datalist = document.getElementById('awardSuggestions');
-            if(datalist) datalist.innerHTML = awardSuggestions.map(award => `<option value="${award}">`).join('');
+            if (datalist) datalist.innerHTML = awardSuggestions.map(award => `<option value="${award}">`).join('');
         }
-        
+
         function addAwardSuggestion() {
             const titleInput = document.getElementById('title');
             const newAward = titleInput.value.trim();
-            
+
             if (!newAward) {
-                if(window.utils) utils.showAlert('Please enter an award name', 'error');
+                if (window.utils) utils.showAlert('Please enter an award name', 'error');
                 return;
             }
-            
+
             if (awardSuggestions.includes(newAward)) {
-                if(window.utils) utils.showAlert('This award already exists in suggestions', 'info');
+                if (window.utils) utils.showAlert('This award already exists in suggestions', 'info');
                 return;
             }
-            
+
             awardSuggestions.push(newAward);
             localStorage.setItem('awardSuggestions', JSON.stringify(awardSuggestions));
             loadAwardSuggestions();
-            if(window.utils) utils.showAlert('Award added to suggestions', 'success');
+            if (window.utils) utils.showAlert('Award added to suggestions', 'success');
         }
-        
+
         // Initialize award suggestions on page load (called in DOMContentLoaded via logic if needed, but safe here too)
         loadAwardSuggestions();
-        
+
         // Add event listener to Add button
         const addAwardBtn = document.getElementById('addAwardBtn');
-        if(addAwardBtn) addAwardBtn.addEventListener('click', addAwardSuggestion);
+        if (addAwardBtn) addAwardBtn.addEventListener('click', addAwardSuggestion);
 
         document.getElementById('appreciationDate').value = new Date().toISOString().split('T')[0];
 
         async function loadAppreciations() {
             try {
                 const params = {};
-                // Filter by employee selection
                 const filterEmpId = document.getElementById('filterEmployee').value;
                 if (filterEmpId) params.employeeId = filterEmpId;
+                const showDeleted = document.getElementById('showDeletedToggle')?.checked;
+                if (showDeleted) params.showDeleted = 'true';
 
                 // API Fetch
                 const response = await endpoints.appreciations.getAll(params);
                 let allAppreciations = response.data || [];
-                
+
                 // Role-Based Filtering
                 if (window.roleManager) {
                     const role = window.roleManager.getCurrentRole();
                     const currentEmpId = window.roleManager.getCurrentEmployeeId();
-                    
+
                     if (role === 'employee') {
                         // Employee sees only their own
                         allAppreciations = allAppreciations.filter(a => a.EmployeeId == currentEmpId);
@@ -411,18 +538,18 @@
                         // We need the team list. We can fetch employees or use stored logic.
                         // For efficiency, we can filter if we have the list, OR assume API should handle.
                         // If API returns ALL, we filter here.
-                        
+
                         // Let's rely on the loaded employees list to check ReportingTo
                         if (employees.length === 0) {
                             // Fetch employees if not ready (though loadEmployees calls it)
-                             const empRes = await endpoints.employees.getAll();
-                             employees = empRes.data || [];
+                            const empRes = await endpoints.employees.getAll();
+                            employees = empRes.data || [];
                         }
-                        
+
                         const teamIds = employees
                             .filter(e => e.ReportingTo == currentEmpId || e.EmployeeId == currentEmpId)
                             .map(e => e.EmployeeId);
-                            
+
                         allAppreciations = allAppreciations.filter(a => teamIds.includes(a.EmployeeId));
                     }
                     // Admin/HR sees all (no filter)
@@ -438,10 +565,11 @@
 
         function filterAppreciations() {
             const term = document.getElementById('searchInput').value.toLowerCase();
-            const filtered = appreciations.filter(app => 
-                app.Title.toLowerCase().includes(term) || 
-                app.FirstName.toLowerCase().includes(term) ||
-                app.LastName.toLowerCase().includes(term)
+            const filtered = appreciations.filter(app =>
+                app.Title.toLowerCase().includes(term) ||
+                (app.EmployeeName || '').toLowerCase().includes(term) ||
+                (app.FirstName || '').toLowerCase().includes(term) ||
+                (app.LastName || '').toLowerCase().includes(term)
             );
             renderFilteredTable(filtered);
         }
@@ -455,55 +583,75 @@
 
             // Determine permissions for rows
             const role = window.roleManager ? window.roleManager.getCurrentRole() : 'employee';
-             // Admin/HR can edit/delete anyone. Manager can edit/delete team (maybe? usually just add).
-             // Let's assume Manager can delete what they added? Or just view. 
-             // Simplification: Admin/HR can Edit/Delete. Manager can View. Employee View.
-             // Actually, if Manager added it, they should be able to delete it. But data doesn't reliably enable "CreatedBy" check here easily without more logic.
-             // Sticking to: Admin, HR can Edit/Delete.
-            const canEditGlobal = role === 'admin' || role === 'hr';
+            const canEditGlobal = window.roleManager ? window.roleManager.hasPermission('edit') : false;
+            const canDeleteGlobal = window.roleManager ? window.roleManager.hasPermission('delete') : false;
 
             tbody.innerHTML = data.map(app => {
-                const initials = (app.FirstName[0] + app.LastName[0]).toUpperCase();
+                const name = app.EmployeeName || (app.FirstName + ' ' + (app.LastName || '')) || 'Unknown';
+                const initials = app.EmployeeName ? 
+                    app.EmployeeName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : 
+                    ((app.FirstName ? app.FirstName[0] : 'U') + (app.LastName ? app.LastName[0] : 'N')).toUpperCase();
                 
+                const isDeleted = app.IsDeleted || app.DeletedAt;
+
                 return `
-                <tr style="vertical-align: middle;">
+                <tr style="vertical-align: middle; ${isDeleted ? 'opacity: 0.6; background: #fffcfc;' : ''}">
                     <td><input type="checkbox"></td>
                     <td>
                         <div style="display: flex; align-items: center; gap: 12px;">
-                            <div class="user-avatar" style="width: 32px; height: 32px; font-size: 0.875rem; background-color: var(--primary-color);">
+                            <div class="user-avatar" style="width: 36px; height: 36px; font-size: 0.9rem; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
                                 ${initials}
                             </div>
                             <div>
-                                <div style="font-weight: 600; font-size: 0.9rem; cursor: pointer; color: var(--primary-color);" 
+                                <div class="user-name-cell" style="cursor: pointer;" 
                                      onclick="window.utils.navigateToProfile(${app.EmployeeId})" 
-                                     title="View ${app.FirstName} ${app.LastName}'s profile">${app.FirstName} ${app.LastName}</div>
-                                <div style="font-size: 0.75rem; color: var(--text-secondary);">${app.DesignationName || 'Employee'}</div>
+                                     title="View ${name}'s profile">
+                                     ${name}
+                                     ${isDeleted ? ' <span style="font-size: 10px; color: #dc2626; border: 1px solid #fee2e2; padding: 1px 4px; border-radius: 4px;">DELETED</span>' : ''}
+                                </div>
+                                <div class="user-role-cell">${app.DesignationName || 'Employee'}</div>
                             </div>
                         </div>
                     </td>
                     <td>
                         <div style="display: flex; align-items: center; gap: 12px;">
-                            <div style="width: 36px; height: 36px; background-color: #f3f4f6; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; color: #4b5563;">
+                            <div class="award-icon-box">
                                 🏆
                             </div>
-                            <span style="font-weight: 500;">${app.Title}</span>
+                            <span class="award-title">${app.Title}</span>
                         </div>
                     </td>
-                    <td style="color: var(--text-secondary);">${app.AwardedByName || '--'}</td>
-                    <td style="color: var(--text-secondary);">${window.utils ? window.utils.formatDate(app.AppreciationDate) : new Date(app.AppreciationDate).toLocaleDateString()}</td>
+                    <td style="color: #64748b; font-weight: 500;">${app.AwardedByName || '--'}</td>
+                    <td style="color: #64748b; font-weight: 500;">${window.utils ? window.utils.formatDate(app.AppreciationDate) : new Date(app.AppreciationDate).toLocaleDateString()}</td>
                     <td>
-                        <div class="action-buttons" style="display: flex; gap: 5px;">
+                        <div class="action-buttons">
                             <button class="btn btn-sm btn-outline-primary" title="View" onclick="openViewModal(${app.AppreciationId})">
-                                <span style="font-size: 1.2em;">👁️</span>
+                                <span style="font-size: 1.1em;">👁️</span>
                             </button>
-                            ${canEditGlobal ? `
-                            <button class="btn btn-sm btn-outline-secondary edit-btn" title="Edit" onclick="editAppreciation(${app.AppreciationId})">
-                                <span style="font-size: 1.2em;">✏️</span>
-                            </button>
-                            <button class="btn btn-sm btn-outline-danger delete-btn" title="Delete" onclick="deleteAppreciation(${app.AppreciationId})">
-                                <span style="font-size: 1.2em;">🗑️</span>
-                            </button>
-                            ` : ''}
+                            
+                            ${isDeleted ? `
+                                ${canEditGlobal ? `
+                                <button class="btn btn-sm" style="color: #16a34a; border: 1px solid #dcfce7;" title="Restore" onclick="restoreAppreciation(${app.AppreciationId})">
+                                    <span style="font-size: 1.1em;">🔓</span>
+                                </button>
+                                ` : ''}
+                                ${canDeleteGlobal ? `
+                                <button class="btn btn-sm" style="color: #dc2626; border: 1px solid #fee2e2;" title="Permanent Delete" onclick="hardDeleteAppreciation(${app.AppreciationId})">
+                                    <span style="font-size: 1.1em;">🔥</span>
+                                </button>
+                                ` : ''}
+                            ` : `
+                                ${canEditGlobal ? `
+                                <button class="btn btn-sm btn-outline-secondary edit-btn" title="Edit" onclick="editAppreciation(${app.AppreciationId})">
+                                    <span style="font-size: 1.1em;">✏️</span>
+                                </button>
+                                ` : ''}
+                                ${canDeleteGlobal ? `
+                                <button class="btn btn-sm btn-outline-danger delete-btn" title="Delete" onclick="deleteAppreciation(${app.AppreciationId})">
+                                    <span style="font-size: 1.1em;">🗑️</span>
+                                </button>
+                                ` : ''}
+                            `}
                         </div>
                     </td>
                 </tr>
@@ -520,7 +668,7 @@
             try {
                 const response = await endpoints.employees.getAll();
                 employees = response.data || [];
-                
+
                 [document.getElementById('employeeId'), document.getElementById('filterEmployee')].forEach((select, idx) => {
                     const opt = idx === 1 ? '<option value="">All Employees</option>' : '<option value="">Select Employee</option>';
                     select.innerHTML = opt + employees.map(e => `<option value="${e.EmployeeId}">${e.FirstName} ${e.LastName}</option>`).join('');
@@ -536,12 +684,12 @@
             document.getElementById('appreciationId').value = '';
             document.getElementById('appreciationDate').value = new Date().toISOString().split('T')[0];
             document.getElementById('awardedBy').value = '';
-            
+
             // Reset Quill editor
             if (quill) {
                 quill.setText('');
             }
-            
+
             // Reset photo dropzone
             const dropzone = document.getElementById('photoDropzone');
             const dropzoneContent = document.getElementById('dropzoneContent');
@@ -549,7 +697,7 @@
                 dropzone.style.backgroundImage = '';
                 dropzoneContent.style.display = 'block';
             }
-            
+
             document.getElementById('appreciationModal').classList.add('active');
         }
 
@@ -557,12 +705,17 @@
             const app = appreciations.find(a => a.AppreciationId === id);
             if (!app) return;
 
+            const name = app.EmployeeName || (app.FirstName + ' ' + (app.LastName || '')) || 'Unknown';
+            const initials = app.EmployeeName ? 
+                app.EmployeeName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : 
+                ((app.FirstName ? app.FirstName[0] : 'U') + (app.LastName ? app.LastName[0] : 'N')).toUpperCase();
+
             document.getElementById('viewTitle').textContent = app.Title;
             document.getElementById('viewDate').textContent = utils.formatDate(app.AppreciationDate);
-            document.getElementById('viewEmpName').textContent = app.FirstName + ' ' + app.LastName;
-            document.getElementById('viewEmpCode').textContent = app.DesignationName || 'Employee'; 
+            document.getElementById('viewEmpName').textContent = name;
+            document.getElementById('viewEmpCode').textContent = app.DesignationName || 'Employee';
             document.getElementById('viewAwardedBy').textContent = app.AwardedByName || '--';
-            
+
             // Display HTML content from Quill editor
             const viewDescription = document.getElementById('viewDescription');
             if (app.Description) {
@@ -570,19 +723,18 @@
             } else {
                 viewDescription.textContent = '--';
             }
-            
-            const initials = (app.FirstName[0] + app.LastName[0]).toUpperCase();
+
             document.getElementById('viewAvatar').textContent = initials;
 
             // Handle photo display
             const photoLabel = document.getElementById('viewPhotoLabel');
             const photoContainer = document.getElementById('viewPhotoContainer');
             const photoImg = document.getElementById('viewPhoto');
-            
+
             if (app.Photo) {
                 photoLabel.style.display = 'block';
                 photoContainer.style.display = 'block';
-                photoImg.src = `http://localhost:5000${app.Photo}`;
+                photoImg.src = `${window.api ? window.api.baseURL.replace('/api', '') : ''}${app.Photo}`;
             } else {
                 photoLabel.style.display = 'none';
                 photoContainer.style.display = 'none';
@@ -590,7 +742,7 @@
 
             document.getElementById('viewModal').classList.add('active');
         }
-        
+
         function closeViewModal() {
             document.getElementById('viewModal').classList.remove('active');
         }
@@ -605,7 +757,7 @@
             document.getElementById('title').value = app.Title;
             document.getElementById('awardedBy').value = app.AwardedByName || '';
             document.getElementById('appreciationDate').value = app.AppreciationDate.split('T')[0];
-            
+
             // Set Quill content (supports HTML)
             if (quill) {
                 if (app.Description) {
@@ -614,7 +766,7 @@
                     quill.setText('');
                 }
             }
-            
+
             document.getElementById('appreciationModal').classList.add('active');
         }
 
@@ -624,7 +776,7 @@
         const dropzoneContent = document.getElementById('dropzoneContent');
 
         dropzone.addEventListener('click', () => fileInput.click());
-        
+
         fileInput.addEventListener('change', handleFileSelect);
 
         function handleFileSelect(e) {
@@ -652,16 +804,16 @@
 
             const id = document.getElementById('appreciationId').value;
             const formData = new FormData();
-            
+
             formData.append('employeeId', parseInt(document.getElementById('employeeId').value));
             formData.append('title', document.getElementById('title').value);
-            
+
             // Get HTML content from Quill editor
             const description = quill ? quill.root.innerHTML : '';
             formData.append('description', description || '');
-            
+
             formData.append('appreciationDate', document.getElementById('appreciationDate').value);
-            
+
             // Add awardedBy field
             const awardedBy = document.getElementById('awardedBy').value.trim();
             if (awardedBy) {
@@ -687,7 +839,7 @@
                 utils.showAlert(error.message || 'Failed to save appreciation', 'error');
             }
         }
-        
+
         function openViewModal(id) {
             const app = appreciations.find(a => a.AppreciationId === id);
             if (!app) return;
@@ -695,7 +847,7 @@
             document.getElementById('viewTitle').textContent = app.Title;
             document.getElementById('viewDate').textContent = utils.formatDate(app.AppreciationDate);
             document.getElementById('viewEmpName').textContent = app.FirstName + ' ' + app.LastName;
-            document.getElementById('viewEmpCode').textContent = app.DesignationName || 'Employee'; 
+            document.getElementById('viewEmpCode').textContent = app.DesignationName || 'Employee';
             document.getElementById('viewAwardedBy').textContent = app.AwardedByName || '--';
             // Display HTML content from Quill editor
             const viewDescription = document.getElementById('viewDescription');
@@ -704,7 +856,7 @@
             } else {
                 viewDescription.textContent = '--';
             }
-            
+
             const initials = (app.FirstName[0] + app.LastName[0]).toUpperCase();
             document.getElementById('viewAvatar').textContent = initials;
 
@@ -716,7 +868,7 @@
                 photoLabel.style.display = 'block';
                 photoContainer.style.display = 'block';
                 // Assuming backend runs on port 5000
-                photoImg.src = `http://localhost:5000${app.Photo}`;
+                photoImg.src = `${window.api ? window.api.baseURL.replace('/api', '') : ''}${app.Photo}`;
             } else {
                 photoLabel.style.display = 'none';
                 photoContainer.style.display = 'none';
@@ -725,15 +877,50 @@
             document.getElementById('viewModal').classList.add('active');
         }
 
-        async function deleteAppreciation(id) {
-            if (!confirm('Are you sure you want to delete this appreciation?')) return;
+        let _pendingDeleteId = null;
+
+        function deleteAppreciation(id) {
+            _pendingDeleteId = id;
+            document.getElementById('deleteReasonInput').value = '';
+            document.getElementById('softDeleteModal').classList.add('active');
+        }
+
+        function closeSoftDeleteModal() {
+            document.getElementById('softDeleteModal').classList.remove('active');
+            _pendingDeleteId = null;
+        }
+
+        async function confirmSoftDelete() {
+            const reason = document.getElementById('deleteReasonInput').value.trim();
             try {
-                await endpoints.appreciations.delete(id);
+                await endpoints.appreciations.delete(_pendingDeleteId, { reason });
                 utils.showAlert('Appreciation deleted successfully', 'success');
+                closeSoftDeleteModal();
                 loadAppreciations();
             } catch (error) {
-                console.error('Error:', error);
                 utils.showAlert('Failed to delete appreciation', 'error');
+            }
+        }
+
+        async function restoreAppreciation(id) {
+            if (!confirm('Restore this appreciation?')) return;
+            try {
+                await endpoints.appreciations.restore(id);
+                utils.showAlert('Appreciation restored successfully', 'success');
+                loadAppreciations();
+            } catch (error) {
+                utils.showAlert('Failed to restore appreciation', 'error');
+            }
+        }
+
+        async function hardDeleteAppreciation(id) {
+            if (!confirm('⚠️ Permanently delete? This CANNOT be undone.')) return;
+            try {
+                await endpoints.appreciations.hardDelete(id);
+                utils.showAlert('Appreciation permanently deleted', 'success');
+                loadAppreciations();
+            } catch (error) {
+                utils.showAlert('Failed to permanently delete appreciation', 'error');
             }
         }
 
@@ -745,4 +932,5 @@
         loadAppreciations();
     </script>
 </body>
+
 </html>

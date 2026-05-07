@@ -1,5 +1,5 @@
 // Profile Page Script
-(function() {
+(function () {
     'use strict';
 
     // Initialize Auth
@@ -7,12 +7,21 @@
 
     // Get employee ID from URL parameters (support both 'id' and 'employeeId')
     const urlParams = new URLSearchParams(window.location.search);
-    const employeeId = urlParams.get('employeeId') || urlParams.get('id');
+    let employeeId = urlParams.get('employeeId') || urlParams.get('id');
+
+    // If no ID is provided in URL, default to current authenticated employee ID
+    if (!employeeId && window.roleManager) {
+        employeeId = window.roleManager.getCurrentEmployeeId();
+        console.log(`ℹ️ No ID in URL, defaulting to current employee: ${employeeId}`);
+    }
 
     if (!employeeId) {
         showError('No employee ID provided');
         return;
     }
+
+    let currentEmployee = null;
+    let loadedEmployees = [];
 
     // Load employee profile
     loadEmployeeProfile(employeeId);
@@ -20,18 +29,18 @@
     async function loadEmployeeProfile(id) {
         try {
             showLoading();
-            
+
             // Role-based access control: Employees can only view their own profile
             if (window.roleManager && window.roleManager.isRole('employee')) {
                 const currentEmployeeId = window.roleManager.getCurrentEmployeeId();
-                
+
                 // If employee tries to view another employee's profile, redirect to their own
                 if (currentEmployeeId && parseInt(id) !== parseInt(currentEmployeeId)) {
                     console.warn(`Access denied: Employee ${currentEmployeeId} tried to access profile ${id}`);
-                    
+
                     // Show error message
                     showError('You do not have permission to view this profile. Redirecting to your profile...');
-                    
+
                     // Redirect to their own profile after a short delay
                     setTimeout(() => {
                         window.location.href = `profile.html?employeeId=${currentEmployeeId}`;
@@ -39,7 +48,7 @@
                     return;
                 }
             }
-            
+
             const response = await endpoints.employees.getById(id);
             const employee = response.data;
 
@@ -83,23 +92,24 @@
         document.getElementById('infoEmployeeCode').textContent = employee.EmployeeCode || '-';
         document.getElementById('infoDepartment').textContent = employee.DepartmentName || '-';
         document.getElementById('infoDesignation').textContent = employee.DesignationName || '-';
-        
+
         // Find reporting manager
         let reportingToName = '-';
         if (employee.ReportingTo) {
-            const manager = allEmployees.find(emp => emp.EmployeeId == employee.ReportingTo);
+            const manager = loadedEmployees.find(emp => emp.EmployeeId == employee.ReportingTo);
             if (manager) {
                 reportingToName = `${manager.FirstName} ${manager.LastName}`;
             }
         }
         document.getElementById('infoReportingTo').textContent = reportingToName;
-        
+
         document.getElementById('infoDOJ').textContent = formatDate(employee.DateOfJoining);
         document.getElementById('infoEmploymentType').textContent = employee.EmploymentType || '-';
 
         // Contact & Location
         document.getElementById('infoCountry').textContent = employee.Country || '-';
-        document.getElementById('infoAddress').textContent = employee.Address || '-';
+        document.getElementById('infoPermanentAddress').textContent = employee.PermanentAddress || employee.Address || '-';
+        document.getElementById('infoTemporaryAddress').textContent = employee.TemporaryAddress || '-';
         document.getElementById('infoBusinessAddress').textContent = employee.BusinessAddress || '-';
         document.getElementById('infoLanguage').textContent = employee.Language || '-';
 
@@ -109,6 +119,13 @@
         document.getElementById('infoLoginAllowed').textContent = employee.LoginAllowed !== false ? 'Yes' : 'No';
         document.getElementById('infoEmailNotifications').textContent = employee.ReceiveEmailNotifications !== false ? 'Yes' : 'No';
 
+        // Attendance & Leave Tab Approvers — store IDs for dropdowns
+        currentEmployee = employee;
+        loadedEmployees = allEmployees;
+
+        // Populate approver dropdowns (Admin/HR only sees the edit section via CSS, but populate anyway)
+        populateApproverDropdowns(allEmployees);
+
         // Set salary iframe src with employee ID
         const salaryIframe = document.getElementById('salaryIframe');
         if (salaryIframe && employeeId) {
@@ -116,18 +133,113 @@
         }
     }
 
+    /**
+     * Populate the approver <select> dropdowns with all employees
+     */
+    function populateApproverDropdowns(employees) {
+        const attendanceSel = document.getElementById('editAttendanceApproverId');
+        const leaveSel = document.getElementById('editLeaveApproverId');
+        if (!attendanceSel || !leaveSel) return;
+
+        const buildOptions = (select) => {
+            // Keep the "— None —" option, remove the rest
+            select.innerHTML = '<option value="">— None —</option>';
+            employees.forEach(emp => {
+                const opt = document.createElement('option');
+                opt.value = emp.EmployeeId;
+                opt.textContent = `${emp.FirstName} ${emp.LastName} (${emp.EmployeeCode})`;
+                select.appendChild(opt);
+            });
+        };
+
+        buildOptions(attendanceSel);
+        buildOptions(leaveSel);
+    }
+
+    /**
+     * Load and display current approver data via the dedicated approvers endpoint
+     */
+    async function loadApprovers() {
+        if (!employeeId) return;
+        try {
+            const response = await window.endpoints.employees.getApprovers(employeeId);
+            const data = response.data;
+            if (!data) return;
+
+            // Update read-only info cards
+            const attendanceName = document.getElementById('attendanceApproverName');
+            const attendanceCode = document.getElementById('attendanceApproverCode');
+            const leaveName = document.getElementById('leaveApproverName');
+            const leaveCode = document.getElementById('leaveApproverCode');
+
+            if (attendanceName) attendanceName.textContent = data.AttendanceApproverName || '— Not assigned —';
+            if (attendanceCode) attendanceCode.textContent = data.AttendanceApproverCode || '';
+            if (leaveName) leaveName.textContent = data.LeaveApproverName || '— Not assigned —';
+            if (leaveCode) leaveCode.textContent = data.LeaveApproverCode || '';
+
+            // Set selected values in dropdowns
+            const attendanceSel = document.getElementById('editAttendanceApproverId');
+            const leaveSel = document.getElementById('editLeaveApproverId');
+            if (attendanceSel && data.AttendanceApproverId) attendanceSel.value = data.AttendanceApproverId;
+            if (leaveSel && data.LeaveApproverId) leaveSel.value = data.LeaveApproverId;
+        } catch (error) {
+            console.warn('Could not load approvers:', error.message);
+        }
+    }
+
+    async function saveApprovers() {
+        // Role guard: employees cannot save approvers
+        const role = window.roleManager?.getCurrentRole() || 'employee';
+        if (role === 'employee' || role === 'manager') {
+            window.utils.showAlert('You do not have permission to assign approvers.', 'error');
+            return;
+        }
+
+        if (!employeeId) return;
+
+        try {
+            window.utils.showLoading(true);
+
+            const attendanceApproverId = document.getElementById('editAttendanceApproverId')?.value || null;
+            const leaveApproverId = document.getElementById('editLeaveApproverId')?.value || null;
+
+            await window.endpoints.employees.saveApprovers(employeeId, {
+                attendanceApproverId: attendanceApproverId ? parseInt(attendanceApproverId) : null,
+                leaveApproverId: leaveApproverId ? parseInt(leaveApproverId) : null
+            });
+
+            // Refresh the info cards
+            await loadApprovers();
+
+            // Show success feedback
+            const msg = document.getElementById('approversSavedMsg');
+            if (msg) {
+                msg.style.display = 'block';
+                setTimeout(() => { msg.style.display = 'none'; }, 3000);
+            }
+
+            window.utils.showAlert('Approvers updated successfully', 'success');
+        } catch (error) {
+            console.error('Error saving approvers:', error);
+            window.utils.showAlert('Failed to save approvers: ' + error.message, 'error');
+        } finally {
+            window.utils.showLoading(false);
+        }
+    }
+
     function formatDate(dateString) {
         if (!dateString) return '-';
-        
+
         try {
             const date = new Date(dateString);
-            return date.toLocaleDateString('en-US', { 
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric' 
+            return date.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
             });
         } catch (error) {
             return dateString;
+
         }
     }
 
@@ -151,33 +263,35 @@
     // Tab Switching Functionality
     function initTabs() {
         const tabLinks = document.querySelectorAll('.tab-nav-link');
-        
+
         tabLinks.forEach(link => {
-            link.addEventListener('click', function(e) {
+            link.addEventListener('click', function (e) {
                 e.preventDefault();
-                
+
                 const targetTab = this.getAttribute('data-tab');
-                
+
                 // Remove active class from all tabs and content
                 document.querySelectorAll('.tab-nav-link').forEach(l => l.classList.remove('active'));
                 document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-                
+
                 // Add active class to clicked tab and corresponding content
                 this.classList.add('active');
                 const targetContent = document.getElementById(`tab-${targetTab}`);
                 if (targetContent) {
                     targetContent.classList.add('active');
-                    
-                    // Update iframe src with employee ID for specific tabs
-                    const iframe = targetContent.querySelector('iframe');
-                    if (iframe && employeeId) {
-                        const currentSrc = iframe.getAttribute('src');
-                        // Only update if not already set with employee ID
-                        if (!currentSrc.includes('employeeId=')) {
-                            const separator = currentSrc.includes('?') ? '&' : '?';
-                            iframe.setAttribute('src', `${currentSrc}${separator}employeeId=${employeeId}`);
+
+                    // Update iframe src with employee ID for all iframes in the tab
+                    const iframes = targetContent.querySelectorAll('iframe');
+                    iframes.forEach(iframe => {
+                        if (employeeId) {
+                            const currentSrc = iframe.getAttribute('src');
+                            // Only update if not already set with employee ID
+                            if (!currentSrc.includes('employeeId=')) {
+                                const separator = currentSrc.includes('?') ? '&' : '?';
+                                iframe.setAttribute('src', `${currentSrc}${separator}employeeId=${employeeId}`);
+                            }
                         }
-                    }
+                    });
                 }
             });
         });
@@ -186,6 +300,12 @@
     // Initialize tabs after profile loads
     window.addEventListener('DOMContentLoaded', () => {
         initTabs();
+
+        // Add listener for save approvers button
+        const saveBtn = document.getElementById('saveApproversBtn');
+        if (saveBtn) {
+            saveBtn.addEventListener('click', saveApprovers);
+        }
     });
 
     // Load Leave Quota Data
@@ -232,7 +352,7 @@
                 const percentage = (quota.remaining / quota.allocated) * 100;
                 let statusClass = 'good';
                 let statusText = 'Good';
-                
+
                 if (percentage <= 25) {
                     statusClass = 'critical';
                     statusText = 'Critical';
@@ -272,11 +392,141 @@
 
     // Load leave quota when tab is clicked
     document.addEventListener('DOMContentLoaded', () => {
+        // Load approvers when Attendance & Leave tab is clicked
+        const attendanceLeaveTab = document.querySelector('[data-tab="attendance-leave"]');
+        if (attendanceLeaveTab) {
+            attendanceLeaveTab.addEventListener('click', () => {
+                loadApprovers();
+            });
+        }
+
         const leaveQuotaTab = document.querySelector('[data-tab="leave-quota"]');
         if (leaveQuotaTab) {
             leaveQuotaTab.addEventListener('click', () => {
                 loadLeaveQuota();
             });
         }
+
+        // Initialize documents tab when clicked
+        const documentsTab = document.querySelector('[data-tab="documents"]');
+        if (documentsTab) {
+            documentsTab.addEventListener('click', () => {
+                if (window.documentsManager && !document.querySelector('.document-card')) {
+                    window.documentsManager.init(employeeId);
+                }
+            });
+        }
+
+        // Initialize exit details tab when clicked
+        const employeeExitTab = document.querySelector('[data-tab="employee-exit"]');
+        if (employeeExitTab) {
+            employeeExitTab.addEventListener('click', () => {
+                loadExitDetails();
+            });
+        }
+
+        // Initialize asset details tab when clicked
+        const assetDetailsTab = document.querySelector('[data-tab="asset-details"]');
+        if (assetDetailsTab) {
+            assetDetailsTab.addEventListener('click', () => {
+                loadProfileAssets();
+            });
+        }
+
+        // Add listener for save exit details button
+        const saveExitDetailsBtn = document.getElementById('saveExitDetailsBtn');
+        if (saveExitDetailsBtn) {
+            saveExitDetailsBtn.addEventListener('click', saveExitDetails);
+        }
     });
+
+    // Employee Exit Details functions
+    async function loadExitDetails() {
+        if (!employeeId) return;
+        try {
+            const response = await window.endpoints.employees.getExitDetails(employeeId);
+            const exitDetails = response.data;
+            if (exitDetails) {
+                // Populate form
+                document.getElementById('exitResignationDate').value = exitDetails.ResignationLetterDate ? exitDetails.ResignationLetterDate.split('T')[0] : '';
+                document.getElementById('exitInterviewDate').value = exitDetails.ExitInterviewDate ? exitDetails.ExitInterviewDate.split('T')[0] : '';
+                document.getElementById('exitLeaveEncased').value = exitDetails.LeaveEncased || '';
+                document.getElementById('exitRelievingDate').value = exitDetails.RelievingDate ? exitDetails.RelievingDate.split('T')[0] : '';
+                document.getElementById('exitNewWorkplace').value = exitDetails.NewWorkplace || '';
+                document.getElementById('exitReasonForLeaving').value = exitDetails.ReasonForLeaving || '';
+                document.getElementById('exitFeedback').value = exitDetails.Feedback || '';
+            }
+        } catch (error) {
+            console.error('Error loading exit details:', error);
+        }
+    }
+
+    async function saveExitDetails() {
+        if (!employeeId) return;
+        try {
+            window.utils.showLoading(true);
+            const data = {
+                resignationLetterDate: document.getElementById('exitResignationDate').value || null,
+                exitInterviewDate: document.getElementById('exitInterviewDate').value || null,
+                leaveEncased: document.getElementById('exitLeaveEncased').value || null,
+                relievingDate: document.getElementById('exitRelievingDate').value || null,
+                newWorkplace: document.getElementById('exitNewWorkplace').value,
+                reasonForLeaving: document.getElementById('exitReasonForLeaving').value,
+                feedback: document.getElementById('exitFeedback').value
+            };
+            await window.endpoints.employees.saveExitDetails(employeeId, data);
+            window.utils.showAlert('Exit details saved successfully', 'success');
+        } catch (error) {
+            console.error('Error saving exit details:', error);
+            window.utils.showAlert('Failed to save exit details', 'error');
+        } finally {
+            window.utils.showLoading(false);
+        }
+    }
+
+    function formatDate(dateString) {
+        if (!dateString) return '-';
+        return new Date(dateString).toLocaleDateString();
+    }
+
+    // Load specific assigned assets for this employee in profile
+    async function loadProfileAssets() {
+        if (!employeeId) return;
+        try {
+            // Wait for window.api (it might take a moment if it's the first tab click)
+            if (!window.api) {
+                console.error("API module not loaded");
+                return;
+            }
+
+            const data = await window.api.get(`/assets/employee/${employeeId}`);
+            if (data && data.success) {
+                const tbody = document.getElementById('profileAssetsTable');
+                if (!tbody) return;
+
+                if (data.data.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="5" class="text-center" style="padding:20px; color:#64748b;">No assets assigned</td></tr>`;
+                    return;
+                }
+
+                let html = '';
+                data.data.forEach(asset => {
+                    html += `
+                        <tr style="border-bottom: 1px solid #f1f5f9;">
+                            <td style="padding: 12px; font-weight: 600; color: #ea580c;">${asset.AssetCode}</td>
+                            <td style="padding: 12px;">${asset.AssetName}</td>
+                            <td style="padding: 12px;">${asset.Brand || '-'} / ${asset.Model || '-'}</td>
+                            <td style="padding: 12px;">${asset.SerialNumber || '-'}</td>
+                            <td style="padding: 12px;">${formatDate(asset.AssignDate)}</td>
+                        </tr>
+                    `;
+                });
+                tbody.innerHTML = html;
+            }
+        } catch (error) {
+            console.error('Error loading profile assets:', error);
+            const tbody = document.getElementById('profileAssetsTable');
+            if (tbody) tbody.innerHTML = `<tr><td colspan="5" class="text-center" style="padding:20px; color:red;">Failed to load assets</td></tr>`;
+        }
+    }
 })();

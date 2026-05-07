@@ -4,9 +4,6 @@
 // FIXED: String-based date/time handling (no timezone bugs)
 // =============================================
 
-auth.requireAuth();
-auth.initAuth();
-
 // Global State
 let currentEmployee = null;
 let currentMonth = new Date().getMonth() + 1;
@@ -25,7 +22,7 @@ async function init() {
     document.getElementById('employeeFilter').addEventListener('change', handleEmployeeChange);
     document.getElementById('monthFilter').addEventListener('change', handleFilterChange);
     document.getElementById('yearFilter').addEventListener('change', handleFilterChange);
-    
+
     // Listen for role changes and reload employees
     window.addEventListener('roleChanged', (event) => {
         console.log(`🔄 Role changed to ${event.detail.role}, reloading employees...`);
@@ -64,10 +61,10 @@ async function loadEmployees() {
         // Apply role-based filtering
         const dataScope = window.roleManager.getDataScope();
         const currentEmployeeId = window.roleManager.getCurrentEmployeeId();
-        
-        console.log('🔍 Filtering Debug:', { 
+
+        console.log('🔍 Filtering Debug:', {
             role: window.roleManager.getCurrentRole(),
-            dataScope, 
+            dataScope,
             currentEmployeeId
         });
 
@@ -78,7 +75,7 @@ async function loadEmployees() {
             console.log(`📊 Filtered to own data: ${employees.length} employee(s)`);
         } else if (dataScope === 'team' && currentEmployeeId) {
             // Manager role: show their team (employees reporting to them) + themselves
-            employees = allEmployees.filter(emp => 
+            employees = allEmployees.filter(emp =>
                 emp.ReportingTo == currentEmployeeId || emp.EmployeeId == currentEmployeeId
             );
             console.log(`📊 Filtered to team data: ${employees.length} employee(s)`);
@@ -101,7 +98,7 @@ async function loadEmployees() {
             option.dataset.profilePicture = emp.ProfilePicture || '';
             employeeSelect.appendChild(option);
         });
-        
+
         // Auto-select if only one employee (Employee role)
         if (employees.length === 1 && dataScope === 'own') {
             employeeSelect.value = employees[0].EmployeeId;
@@ -109,28 +106,28 @@ async function loadEmployees() {
             loadAttendanceData();
             console.log('✅ Auto-selected employee for Employee role');
         }
-        
+
         // Check for employeeId URL parameter (from profile page)
         const urlParams = new URLSearchParams(window.location.search);
         const urlEmployeeId = urlParams.get('employeeId');
-        
+
         if (urlEmployeeId) {
             const employeeExists = employees.find(emp => emp.EmployeeId == urlEmployeeId);
             if (employeeExists) {
                 employeeSelect.value = urlEmployeeId;
                 currentEmployee = parseInt(urlEmployeeId);
                 loadAttendanceData();
-                
+
                 // Hide the employee dropdown when coming from profile
-                const employeeFilterContainer = employeeSelect.closest('.filter-group');
+                const employeeFilterContainer = employeeSelect.closest('.form-group');
                 if (employeeFilterContainer) {
                     employeeFilterContainer.style.display = 'none';
                 }
-                
+
                 console.log('✅ Auto-selected employee from URL parameter:', urlEmployeeId);
             }
         }
-        
+
         console.log('Employees loaded successfully');
     } catch (error) {
         console.error('Error loading employees:', error);
@@ -441,18 +438,18 @@ function getDayOfWeek(dateStr) {
     const [year, month, day] = dateStr.split('-').map(Number);
     let y = year;
     let m = month;
-    
+
     if (m < 3) {
         m += 12;
         y -= 1;
     }
-    
+
     const q = day;
     const k = y % 100;
     const j = Math.floor(y / 100);
-    
+
     const h = (q + Math.floor((13 * (m + 1)) / 5) + k + Math.floor(k / 4) + Math.floor(j / 4) - 2 * j) % 7;
-    
+
     // Convert to 0=Sunday format
     return (h + 6) % 7;
 }
@@ -473,7 +470,7 @@ function getDayName(dateStr) {
 function formatDateForDisplay(dateStr) {
     const [year, month, day] = dateStr.split('-').map(Number);
     const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    
+
     return {
         display: `${day} ${monthNames[month - 1]} ${year}`
     };
@@ -491,12 +488,12 @@ function formatTimeForDisplay(timeStr) {
     if (typeof timeStr === 'string' && timeStr.includes('T')) {
         timeStr = timeStr.split('T')[1];
     }
-    
+
     // Extract HH:mm
     if (typeof timeStr === 'string') {
         return timeStr.substring(0, 5);
     }
-    
+
     return '-';
 }
 
@@ -513,19 +510,19 @@ function calculateHours(checkIn, checkOut) {
         // Extract HH:mm format
         const checkInTime = formatTimeForDisplay(checkIn);
         const checkOutTime = formatTimeForDisplay(checkOut);
-        
+
         // Parse to minutes
         const [checkInHour, checkInMin] = checkInTime.split(':').map(Number);
         const [checkOutHour, checkOutMin] = checkOutTime.split(':').map(Number);
-        
+
         let checkInMinutes = checkInHour * 60 + checkInMin;
         let checkOutMinutes = checkOutHour * 60 + checkOutMin;
-        
+
         // Handle night shift: if checkout < checkin, add 24 hours to checkout
         if (checkOutMinutes < checkInMinutes) {
             checkOutMinutes += 24 * 60;
         }
-        
+
         const diffMinutes = checkOutMinutes - checkInMinutes;
         const hours = Math.floor(diffMinutes / 60);
         const minutes = diffMinutes % 60;
@@ -565,22 +562,22 @@ function getTodayDateString() {
  */
 function normalizeTimeTo24Hour(timeStr) {
     if (!timeStr) return null;
-    
+
     const trimmed = String(timeStr).trim();
-    
+
     // Check if it's already in 24-hour format (HH:mm or HH:mm:ss)
     if (/^\d{2}:\d{2}(:\d{2})?$/.test(trimmed)) {
         // Already in 24-hour format, return HH:mm (strip seconds if present)
         return trimmed.substring(0, 5);
     }
-    
+
     // Check if it's in AM/PM format
     const ampmMatch = trimmed.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
     if (ampmMatch) {
         let hours = parseInt(ampmMatch[1], 10);
         const minutes = ampmMatch[2];
         const period = ampmMatch[3].toUpperCase();
-        
+
         // Convert to 24-hour format
         if (period === 'AM') {
             // 12:00 AM → 00:00, 12:30 AM → 00:30
@@ -594,11 +591,11 @@ function normalizeTimeTo24Hour(timeStr) {
                 hours += 12;
             }
         }
-        
+
         // Format as HH:mm (WITHOUT seconds)
         return `${String(hours).padStart(2, '0')}:${minutes}`;
     }
-    
+
     // If format is not recognized, try to extract HH:mm
     console.warn('Unrecognized time format:', timeStr);
     const hhmmMatch = trimmed.match(/^(\d{1,2}):(\d{2})/);
@@ -613,13 +610,24 @@ function normalizeTimeTo24Hour(timeStr) {
 // =============================================
 function openMarkAttendanceModal() {
     if (!currentEmployee) {
-        utils.showAlert('Please select an employee first', 'warning');
+        if (window.utils && typeof window.utils.showAlert === 'function') {
+            window.utils.showAlert('Please select an employee first', 'warning');
+        } else {
+            alert('Please select an employee first');
+        }
         return;
     }
 
     const employeeSelect = document.getElementById('employeeFilter');
+    if (!employeeSelect || employeeSelect.selectedIndex === -1) {
+        if (window.utils && typeof window.utils.showAlert === 'function') {
+            window.utils.showAlert('No employee selected', 'error');
+        }
+        return;
+    }
+
     const selectedOption = employeeSelect.options[employeeSelect.selectedIndex];
-    const employeeName = selectedOption.textContent;
+    const employeeName = selectedOption ? selectedOption.textContent : 'Unknown';
 
     document.getElementById('attendanceForm').reset();
     document.getElementById('attendanceId').value = '';
@@ -632,7 +640,12 @@ function openMarkAttendanceModal() {
     document.getElementById('checkInTime').value = '08:00';
     document.getElementById('checkOutTime').value = '18:00';
 
-    document.getElementById('attendanceModal').classList.add('active');
+    const modal = document.getElementById('attendanceModal');
+    if (modal) {
+        modal.classList.add('active');
+    } else {
+        console.error('Attendance modal not found');
+    }
 }
 
 function closeModal() {
@@ -693,20 +706,20 @@ async function saveAttendance() {
         await loadAttendanceData();
     } catch (error) {
         console.error('Error saving attendance:', error);
-        
+
         // Check if it's a duplicate record error
         if (error.message && error.message.includes('already exists')) {
             // Highlight the overwrite checkbox
             const overwriteCheckbox = document.getElementById('attendanceOverwrite');
             const checkboxContainer = overwriteCheckbox.closest('.checkbox-label');
-            
+
             // Add visual highlight
             if (checkboxContainer) {
                 checkboxContainer.style.backgroundColor = '#fef3c7';
                 checkboxContainer.style.padding = '0.75rem';
                 checkboxContainer.style.borderRadius = '6px';
                 checkboxContainer.style.border = '2px solid #f59e0b';
-                
+
                 // Remove highlight after 3 seconds
                 setTimeout(() => {
                     checkboxContainer.style.backgroundColor = '';
@@ -715,7 +728,7 @@ async function saveAttendance() {
                     checkboxContainer.style.border = '';
                 }, 3000);
             }
-            
+
             // Show user-friendly error message
             utils.showAlert('⚠️ Attendance already exists for this date. Please check "Attendance Overwrite" below to update it.', 'warning');
         } else {
@@ -741,14 +754,20 @@ function exportAttendance() {
     utils.showAlert('Export functionality coming soon', 'info');
 }
 
-// =============================================
-// Initialize on page load
-// =============================================
-document.addEventListener('DOMContentLoaded', init);
+// Initialize on page load or auth ready
+document.addEventListener('DOMContentLoaded', () => {
+    // If auth is already initialized, start init
+    if (window.auth && window.auth.isInitialized) {
+        init();
+    } else {
+        // Otherwise wait for authReady
+        window.addEventListener('authReady', init);
+    }
+});
 
 window.openMarkAttendanceModal = openMarkAttendanceModal;
 window.closeModal = closeModal;
 window.saveAttendance = saveAttendance;
 window.importAttendance = importAttendance;
 window.exportAttendance = exportAttendance;
-console.log("attendance-by-member.js fully loaded (FIXED: String-based date/time)");
+console.log("attendance-by-member.js fully loaded");

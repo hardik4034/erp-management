@@ -1,11 +1,19 @@
 const sql = require('mssql');
 const { getConnection } = require('../config/database');
 const { successResponse, errorResponse } = require('../utils/helpers');
+const logger = require('../utils/logger');
 
 // Get all attendance
 const getAllAttendance = async (req, res, next) => {
     try {
-        const { employeeId, fromDate, toDate } = req.query;
+        let { employeeId, fromDate, toDate } = req.query;
+        
+        // SECURITY: Role-based scoping — use employeeId (not user.id which is the login account ID)
+        if (req.user.role === 'employee') {
+            employeeId = req.user.employeeId; // Force to own Employee ID
+        } 
+        // Managers can see all and filter on frontend, or see specify an ID for a team member
+
         const pool = await getConnection();
 
         const result = await pool.request()
@@ -27,8 +35,8 @@ const getAttendanceById = async (req, res, next) => {
         const pool = await getConnection();
 
         const result = await pool.request()
-            .input('EmployeeId', sql.Int, id)
-            .execute('sp_GetAllAttendance');
+            .input('AttendanceId', sql.Int, id)
+            .query('SELECT * FROM Attendance WHERE AttendanceId = @AttendanceId');
 
         if (result.recordset.length === 0) {
             throw errorResponse('Attendance record not found', 404);
@@ -93,7 +101,7 @@ const createAttendance = async (req, res, next) => {
             
             // Validate time format (HH:mm or HH:mm:ss)
             if (!/^\d{2}:\d{2}(:\d{2})?$/.test(timeStr)) {
-                console.error('Invalid time format:', timeStr);
+                logger.warn('Invalid time format received', { timeStr });
                 throw new Error(`Invalid time format: ${timeStr}. Expected HH:mm or HH:mm:ss`);
             }
             
@@ -104,10 +112,7 @@ const createAttendance = async (req, res, next) => {
         const normalizedCheckIn = normalizeTime(checkInTime);
         const normalizedCheckOut = normalizeTime(checkOutTime);
 
-        console.log('✅ FIXED VERSION - Using VarChar for time parameters');
-        console.log('Input CheckIn:', checkInTime, '→ Normalized:', normalizedCheckIn);
-        console.log('Input CheckOut:', checkOutTime, '→ Normalized:', normalizedCheckOut);
-        console.log('Attendance Date:', attendanceDate);
+        logger.debug('Attendance create', { employeeId, attendanceDate, status: dbStatus, checkIn: normalizedCheckIn, checkOut: normalizedCheckOut });
 
         const pool = await getConnection();
 
@@ -128,7 +133,7 @@ const createAttendance = async (req, res, next) => {
         res.status(201).json(successResponse(result.recordset[0], 'Attendance marked successfully'));
 
     } catch (error) {
-        console.error("SQL ERROR:", error);
+        logger.error('Attendance Create Error', { error: error.message, number: error.number });
 
         // Handle specific business logic error from SP (50001)
         if (error.number === 50001) {
@@ -213,14 +218,8 @@ const getMonthlyReport = async (req, res, next) => {
     }
 };
 
-module.exports = {
-    getAllAttendance,
-    getAttendanceById,
-    createAttendance,
-    updateAttendance,
-    deleteAttendance,
-    getMonthlyReport
-};
+// NOTE: Full export is at the bottom of the file (after getAttendanceGrid,
+// bulkImportAttendance, exportAttendance are defined).
 
 // Get attendance grid for calendar view
 const getAttendanceGrid = async (req, res, next) => {

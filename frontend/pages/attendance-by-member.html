@@ -1,90 +1,156 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Attendance by Member - HRMS</title>
-    <link rel="icon" type="image/x-icon" href="../assets/favicon.png"><link rel="shortcut icon" type="image/x-icon" href="../assets/favicon.png">
+    <link rel="icon" type="image/x-icon" href="../assets/favicon.png">
+    <link rel="shortcut icon" type="image/x-icon" href="../assets/favicon.png">
     <link rel="stylesheet" href="../styles/main.css">
     <link rel="stylesheet" href="../styles/toast.css">
     <link rel="stylesheet" href="../styles/role-selector.css">
+    <link rel="stylesheet" href="../styles/tailwind.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: { DEFAULT: '#ea580c', dark: '#c2410c', light: '#f97316' }
+                    }
+                }
+            }
+        }
+    </script>
     <style>
         /* Summary Cards Grid */
         .summary-cards {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
             gap: 1rem;
-            margin-bottom: 2rem;
+            margin-bottom: 1.75rem;
         }
 
         .summary-card {
             background: white;
-            border-radius: 8px;
-            padding: 1.25rem;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            border-left: 4px solid;
+            border-radius: 1rem;
+            padding: 1.25rem 1rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+            border: 1px solid rgba(0, 0, 0, 0.04);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.2s ease;
         }
 
-        .summary-card.working-days { border-left-color: #3b82f6; }
-        .summary-card.present { border-left-color: #10b981; }
-        .summary-card.late { border-left-color: #f59e0b; }
-        .summary-card.half-day { border-left-color: #8b5cf6; }
-        .summary-card.absent { border-left-color: #ef4444; }
-        .summary-card.holidays { border-left-color: #06b6d4; }
+        .summary-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .summary-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            border-radius: 1rem 1rem 0 0;
+        }
+
+        .summary-card.working-days::before {
+            background: linear-gradient(90deg, #2563eb, #3b82f6);
+        }
+
+        .summary-card.present::before {
+            background: linear-gradient(90deg, #059669, #10b981);
+        }
+
+        .summary-card.late::before {
+            background: linear-gradient(90deg, #d97706, #f59e0b);
+        }
+
+        .summary-card.half-day::before {
+            background: linear-gradient(90deg, #7c3aed, #8b5cf6);
+        }
+
+        .summary-card.absent::before {
+            background: linear-gradient(90deg, #dc2626, #ef4444);
+        }
+
+        .summary-card.holidays::before {
+            background: linear-gradient(90deg, #0891b2, #06b6d4);
+        }
 
         .summary-card-title {
-            font-size: 0.875rem;
-            color: #6b7280;
-            margin-bottom: 0.5rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #64748b;
+            margin-bottom: 0.625rem;
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.4rem;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
         }
 
         .summary-card-value {
             font-size: 2rem;
-            font-weight: 700;
-            color: #111827;
+            font-weight: 800;
+            color: #0f172a;
+            letter-spacing: -0.03em;
+            line-height: 1;
         }
 
         /* Filter Section */
         .filter-section {
             background: white;
-            padding: 1.5rem;
-            border-radius: 8px;
+            padding: 1.25rem 1.5rem;
+            border-radius: 1rem;
             margin-bottom: 1.5rem;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+            border: 1px solid rgba(0, 0, 0, 0.04);
+            display: flex;
+            align-items: flex-end;
+            gap: 1rem;
+            flex-wrap: wrap;
         }
 
         .filter-row {
             display: grid;
             grid-template-columns: 2fr 1fr 1fr;
             gap: 1rem;
-            margin-bottom: 1rem;
+            flex: 1;
+            min-width: 0;
         }
 
         .employee-select {
             display: flex;
             align-items: center;
             gap: 0.75rem;
-            padding: 0.625rem;
-            border: 1px solid #e5e7eb;
-            border-radius: 6px;
+            padding: 0.5625rem 0.875rem;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 0.625rem;
             background: white;
             cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .employee-select:hover {
+            border-color: #ea580c;
         }
 
         .employee-avatar {
-            width: 32px;
-            height: 32px;
+            width: 30px;
+            height: 30px;
             border-radius: 50%;
-            background: #ea580c;
+            background: linear-gradient(135deg, #ea580c, #f97316);
             color: white;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-weight: 600;
-            font-size: 0.875rem;
+            font-weight: 700;
+            font-size: 0.8rem;
+            flex-shrink: 0;
         }
 
         .employee-avatar img {
@@ -97,14 +163,17 @@
         /* Action Buttons */
         .action-buttons {
             display: flex;
-            gap: 0.75rem;
+            gap: 0.625rem;
+            align-items: flex-end;
+            flex-shrink: 0;
         }
 
         /* Attendance Table */
         .attendance-table-container {
             background: white;
-            border-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border-radius: 1rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+            border: 1px solid rgba(0, 0, 0, 0.04);
             overflow: hidden;
         }
 
@@ -114,26 +183,38 @@
         }
 
         .attendance-table thead {
-            background: #f9fafb;
+            background: linear-gradient(to right, #f8fafc, #f1f5f9);
         }
 
         .attendance-table th {
-            padding: 1rem;
+            padding: 0.875rem 1rem;
             text-align: left;
-            font-weight: 600;
-            font-size: 0.875rem;
-            color: #374151;
-            border-bottom: 2px solid #e5e7eb;
+            font-weight: 700;
+            font-size: 0.7rem;
+            color: #64748b;
+            border-bottom: 2px solid #e2e8f0;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            white-space: nowrap;
         }
 
         .attendance-table td {
-            padding: 1rem;
-            border-bottom: 1px solid #f3f4f6;
+            padding: 0.875rem 1rem;
+            border-bottom: 1px solid #f1f5f9;
             font-size: 0.875rem;
+            color: #1e293b;
+        }
+
+        .attendance-table tbody tr {
+            transition: background 0.15s;
+        }
+
+        .attendance-table tbody tr:last-child td {
+            border-bottom: none;
         }
 
         .attendance-table tbody tr:hover {
-            background: #f9fafb;
+            background: #f8fafc;
         }
 
         .date-cell {
@@ -142,52 +223,84 @@
         }
 
         .date-day {
-            font-weight: 600;
-            color: #111827;
+            font-weight: 700;
+            color: #0f172a;
         }
 
         .date-weekday {
-            font-size: 0.75rem;
-            color: #6b7280;
+            font-size: 0.7rem;
+            color: #94a3b8;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
         }
 
         /* Status Badges */
         .status-badge {
-            padding: 0.25rem 0.75rem;
-            border-radius: 12px;
-            font-size: 0.75rem;
-            font-weight: 500;
-            display: inline-block;
+            padding: 0.2rem 0.65rem;
+            border-radius: 999px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            letter-spacing: 0.03em;
         }
 
-        .status-present { background: #d1fae5; color: #065f46; }
-        .status-absent { background: #fee2e2; color: #991b1b; }
-        .status-late { background: #fef3c7; color: #92400e; }
-        .status-half-day { background: #e0e7ff; color: #3730a3; }
-        .status-on-leave { background: #dbeafe; color: #1e40af; }
-        .status-holiday { background: #dbeafe; color: #1e40af; }
+        .status-present {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .status-absent {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .status-late {
+            background: #fef9c3;
+            color: #854d0e;
+        }
+
+        .status-half-day {
+            background: #f3e8ff;
+            color: #6b21a8;
+        }
+
+        .status-on-leave {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .status-holiday {
+            background: #e0f2fe;
+            color: #075985;
+        }
 
         .time-cell {
-            color: #374151;
+            color: #475569;
+            font-variant-numeric: tabular-nums;
         }
 
         .empty-cell {
-            color: #9ca3af;
+            color: #cbd5e1;
+            font-size: 0.8rem;
         }
 
         /* Breadcrumb */
         .breadcrumb {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
-            font-size: 0.875rem;
-            color: #6b7280;
-            margin-bottom: 0.5rem;
+            gap: 0.375rem;
+            font-size: 0.75rem;
+            color: #94a3b8;
+            margin-bottom: 0.25rem;
         }
 
         .breadcrumb a {
-            color: #6b7280;
+            color: #94a3b8;
             text-decoration: none;
+            font-weight: 500;
+            transition: color 0.15s;
         }
 
         .breadcrumb a:hover {
@@ -195,9 +308,9 @@
         }
 
         .breadcrumb-separator {
-            color: #d1d5db;
+            color: #cbd5e1;
         }
-        
+
         /* Hide sidebar and header when in iframe */
         body.in-iframe .sidebar,
         body.in-iframe .sidebar-overlay,
@@ -208,21 +321,24 @@
         body.in-iframe .main-content {
             margin-left: 0 !important;
             width: 100% !important;
+            padding: 0 !important;
         }
 
         body.in-iframe .content-area {
-            padding-top: 0 !important;
+            padding: 0 !important;
         }
     </style>
     <script>
         // Detect if page is loaded in iframe
         if (window.self !== window.top) {
-            document.addEventListener('DOMContentLoaded', function() {
+            document.documentElement.classList.add('in-iframe');
+            document.addEventListener('DOMContentLoaded', function () {
                 document.body.classList.add('in-iframe');
             });
         }
     </script>
 </head>
+
 <body>
     <div class="app-container">
         <!-- Sidebar Overlay -->
@@ -231,21 +347,43 @@
         <!-- Sidebar -->
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
-                <img src="../assets/logo.png" alt="Soleos Logo" class="sidebar-logo">
-                <button class="sidebar-close-btn" id="sidebarClose">&times;</button>
+                <a href="../index.html"><img src="../assets/soleos.png" alt="Soleos Logo" class="sidebar-logo"></a>
+                <button class="sidebar-close-btn" id="sidebarClose">&#x2715;</button>
             </div>
             <nav class="sidebar-nav">
+                <div class="nav-section-label">Main</div>
                 <div class="nav-item"><a href="../index.html" class="nav-link"><i>📊</i> Dashboard</a></div>
-                <div class="nav-item"><a href="employees.html" class="nav-link"><i>👥</i> Employees</a></div>
-                <div class="nav-item"><a href="attendance.html" class="nav-link"><i>📅</i> Attendance</a></div>
-                <div class="nav-item"><a href="attendance-by-member.html" class="nav-link active"><i>👤</i> Attendance by Member</a></div>
-                <div class="nav-item"><a href="leaves.html" class="nav-link"><i>🏖️</i> Leaves</a></div>
-                <div class="nav-item"><a href="holidays.html" class="nav-link"><i>🎉</i> Holidays</a></div>
-                <div class="nav-item"><a href="payroll.html" class="nav-link"><i>💰</i> Payroll</a></div>
-                <div class="nav-item"><a href="employee-salary.html" class="nav-link"><i>💵</i> Employee Salary</a></div>
-                <div class="nav-item"><a href="departments.html" class="nav-link"><i>🏢</i> Departments</a></div>
-                <div class="nav-item"><a href="designations.html" class="nav-link"><i>💼</i> Designations</a></div>
-                <div class="nav-item"><a href="appreciations.html" class="nav-link"><i>🏆</i> Appreciations</a></div>
+                <div class="nav-item"><a href="./profile.html" id="myProfileLink" class="nav-link"><i>👤</i> My
+                        Profile</a></div>
+                <div class="nav-item"><a href="./employees.html" class="nav-link"><i>👥</i> Employees</a></div>
+
+                <div class="nav-section-label">Time & Leave</div>
+                <div class="nav-item"><a href="./attendance.html" class="nav-link"><i>📅</i> Attendance</a></div>
+                <div class="nav-item"><a href="./leaves.html" class="nav-link"><i>🏖️</i> Leaves</a></div>
+                <div class="nav-item"><a href="./holidays.html" class="nav-link"><i>🎉</i> Holidays</a></div>
+                <div class="nav-item"><a href="./calendar.html" class="nav-link"><i>📆</i> Calendar</a></div>
+
+                <div class="nav-section-label">Payroll</div>
+                <div class="nav-item"><a href="./payroll.html" class="nav-link"><i>💰</i> Payroll</a></div>
+                <div class="nav-item"><a href="./employee-salary.html" class="nav-link"><i>💵</i> Employee Salary</a>
+                </div>
+
+                <div class="nav-section-label">Organisation</div>
+                <div class="nav-item"><a href="./departments.html" class="nav-link"><i>🏢</i> Departments</a></div>
+                <div class="nav-item"><a href="./designations.html" class="nav-link"><i>💼</i> Designations</a></div>
+                <div class="nav-item"><a href="./appreciations.html" class="nav-link"><i>🏆</i> Appreciations</a></div>
+                <div class="nav-item"><a href="./assets.html" class="nav-link hr-only"><i>💻</i> Assets</a></div>
+                <div class="nav-item"><a href="./note.html" class="nav-link"><i>📝</i> Notes</a></div>
+
+                <div class="nav-section-label">Reports</div>
+                <div class="nav-item"><a href="./reports.html" class="nav-link hr-only"><i>📈</i> Reports</a></div>
+
+                <div class="nav-section-label">Settings</div>
+                <div class="nav-item"><a href="./audit-logs.html" class="nav-link admin-only"><i>📜</i> Audit Logs</a></div>
+                <div class="nav-item"><a href="./biometric-settings.html" class="nav-link hr-only"><i>🔐</i> Biometric
+                        Settings</a></div>
+
+
             </nav>
         </aside>
 
@@ -257,27 +395,39 @@
                         ☰
                     </button>
                     <div class="header-title">
-                    <div class="breadcrumb">
-                        <a href="../index.html">Home</a>
-                        <span class="breadcrumb-separator">›</span>
-                        <a href="attendance.html">Attendances</a>
-                        <span class="breadcrumb-separator">›</span>
-                        <span>Attendance by Member</span>
+                        <div class="breadcrumb">
+                            <a href="../index.html">Home</a>
+                            <span class="breadcrumb-separator">›</span>
+                            <a href="attendance.html">Attendances</a>
+                            <span class="breadcrumb-separator">›</span>
+                            <span>Attendance by Member</span>
+                        </div>
+                        <h1>Attendance by Member</h1>
                     </div>
-                    <h1>Attendance by Member</h1>
-                </div>
                 </div>
                 <div class="header-actions">
-                    <div class="role-selector">
-                        <label for="roleDropdown">Current Role:</label>
-                        <select id="roleDropdown">
-                            <option value="admin">Admin</option>
-                            <option value="hr">HR</option>
-                            <option value="manager">Manager</option>
-                            <option value="employee">Employee</option>
-                        </select>
+                    <!-- Global Search -->
+                    <div class="global-search" id="globalSearchWrap">
+                        <span class="global-search-icon">🔍</span>
+                        <input type="text" id="globalSearchInput" class="global-search-input" placeholder="Search pages..." autocomplete="off">
+                        <div class="global-search-dropdown" id="globalSearchDropdown"></div>
                     </div>
-                    <span class="role-badge" id="roleBadge">Employee</span>
+                    <!-- Notification Bell -->
+                    <button class="notif-btn" id="notifBtn" title="Pending approvals">
+                        🔔
+                        <span class="notif-badge" id="notifBadge" style="display:none;">0</span>
+                    </button>
+                    <!-- Dark Mode Toggle -->
+                    <button class="dark-mode-btn" id="darkModeBtn" title="Toggle dark mode">🌙</button>
+
+                    <div class="user-info">
+                        <div class="user-avatar" id="userAvatarInitial">?</div>
+                        <div>
+                            <div class="user-name" id="userDisplayName">Loading...</div>
+                            <div class="user-role-badge"><span class="role-badge" id="roleBadge">Loading...</span></div>
+                        </div>
+                    </div>
+                    <button class="btn-logout" id="logoutBtn" onclick="auth.logout()">Logout</button>
                 </div>
             </header>
 
@@ -399,7 +549,7 @@
 
     <!-- Mark Attendance Modal -->
     <div class="modal" id="attendanceModal">
-        
+
         <div class="modal-content modal-content-wide" style="max-width: 1200px;">
             <div class="modal-header">
                 <h3 class="modal-title" id="modalTitle">Mark Attendance</h3>
@@ -489,10 +639,14 @@
 
     <!-- Scripts -->
     <script src="../scripts/toast.js"></script>
+    <script src="../scripts/api.js"></script>
+    <script src="../scripts/theme.js"></script>
+    <script src="../scripts/header.js"></script>
+
     <script src="../scripts/sidebar.js"></script>
     <script src="../scripts/role-manager.js"></script>
     <script src="../scripts/auth.js"></script>
-    <script src="../scripts/api.js"></script>
     <script src="../scripts/attendance-by-member.js"></script>
 </body>
+
 </html>

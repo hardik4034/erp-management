@@ -387,3 +387,69 @@ exports.getStatus = async (req, res) => {
         return res.status(500).json({ success: false, message: 'Failed to fetch status', error: error.message });
     }
 };
+/**
+ * Simulate a biometric punch (for testing/demo)
+ * POST /api/biometric/mock-punch
+ * Body: { biometricUserId, deviceId?, punchTime?, punchType? }
+ */
+exports.mockPunch = async (req, res) => {
+    const { biometricUserId, deviceId, punchTime, punchType } = req.body;
+
+    if (!biometricUserId) {
+        return res.status(400).json({ success: false, message: 'Biometric User ID is required' });
+    }
+
+    try {
+        const pool = await sql.connect();
+        
+        // Find a device if not provided
+        let targetDeviceId = deviceId;
+        if (!targetDeviceId) {
+            const deviceResult = await pool.request().query('SELECT TOP 1 device_id FROM biometric_devices WHERE status = \'active\'');
+            if (deviceResult.recordset.length > 0) {
+                targetDeviceId = deviceResult.recordset[0].device_id;
+            } else {
+                targetDeviceId = 'MOCK_DEVICE_001';
+                // Create mock device if none exists
+                await pool.request()
+                    .input('deviceId', sql.NVarChar, targetDeviceId)
+                    .query(`
+                        IF NOT EXISTS (SELECT 1 FROM biometric_devices WHERE device_id = @deviceId)
+                        INSERT INTO biometric_devices (device_id, device_name, status, created_at, updated_at)
+                        VALUES (@deviceId, 'Virtual Mock Device', 'active', GETDATE(), GETDATE())
+                    `);
+            }
+        }
+
+        const time = punchTime ? new Date(punchTime) : new Date();
+        const type = punchType || 'IN';
+
+        await pool.request()
+            .input('deviceId',        sql.NVarChar, targetDeviceId)
+            .input('biometricUserId', sql.NVarChar, biometricUserId)
+            .input('punchTime',       sql.DateTime, time)
+            .input('punchType',       sql.NVarChar, type)
+            .input('rawJson',         sql.NVarChar, JSON.stringify({ isMock: true, source: 'UI_Simulate' }))
+            .query(`
+                INSERT INTO biometric_logs
+                    (device_id, biometric_user_id, punch_time, punch_type, raw_json, processed, created_at)
+                VALUES
+                    (@deviceId, @biometricUserId, @punchTime, @punchType, @rawJson, 0, GETDATE())
+            `);
+
+        return res.status(201).json({
+            success: true,
+            message: 'Mock biometric punch added successfully',
+            data: {
+                deviceId: targetDeviceId,
+                biometricUserId,
+                punchTime: time,
+                punchType: type
+            }
+        });
+
+    } catch (error) {
+        console.error('[biometricController][mockPunch]', error);
+        return res.status(500).json({ success: false, message: 'Failed to add mock punch', error: error.message });
+    }
+};

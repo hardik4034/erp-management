@@ -1,23 +1,67 @@
-# Ignore node_modules
+# =============================================
+# .gitignore — HRMS Project
+# =============================================
+
+# ── Node modules ──────────────────────────────
 node_modules/
+**/node_modules/
 
-# Ignore environment variables
+# ── Environment variables (NEVER commit) ──────
 .env
+.env.local
+.env.production
+.env.staging
+backend/.env
+# Keep the example template committed for reference
+!backend/.env.example
+!.env.example
 
-# Ignore logs
+# ── Uploaded files (user-generated content) ───
+backend/uploads/*
+!backend/uploads/.gitkeep
+
+# ── Log files ─────────────────────────────────
 *.log
 npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+backend/logs/*
+!backend/logs/.gitkeep
 
-# Ignore OS files
+# ── OS files ──────────────────────────────────
 .DS_Store
 Thumbs.db
+desktop.ini
 
-# Ignore IDE files
+# ── IDE / Editor files ────────────────────────
 .vscode/
 .idea/
 *.swp
 *.swo
+*.sublime-workspace
 
-# Ignore build files
+# ── Build output ──────────────────────────────
 dist/
 build/
+.cache/
+
+# ── Debug / one-off dev scripts (cleaned up, but just in case) ──
+frontend/debug-*.html
+frontend/toast-demo.html
+frontend/scratch_*.js
+frontend/update_*.js
+frontend/update_*.ps1
+backend/scratch/
+backend/tmp_*.js
+backend/set-test-*.js
+backend/check-sp.js
+backend/alter-sp-*.js
+tmp_*.js
+db_sp_diag.txt
+
+# ── SSL certificates (never commit private keys) ──
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx

@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reports - HRMS</title>
+    <link rel="icon" type="image/x-icon" href="../assets/favicon.png">
+    <link rel="stylesheet" href="../styles/main.css">
+    <link rel="stylesheet" href="../styles/toast.css">
+    <link rel="stylesheet" href="../styles/tailwind.min.css">
+    <style>
+        .report-card {
+            background: white;
+            border-radius: 8px;
+            padding: 24px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .report-header {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #1e293b;
+        }
+
+        .report-desc {
+            color: #64748b;
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            border: none;
+            font-weight: 600;
+        }
+
+        .btn-primary {
+            background: #ea580c;
+            color: white;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-control {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin-right: 15px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Sidebar Overlay -->
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <a href="../index.html"><img src="../assets/soleos.png" alt="Soleos Logo" class="sidebar-logo"></a>
+                <button class="sidebar-close-btn" id="sidebarClose">&#x2715;</button>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section-label">Main</div>
+                <div class="nav-item"><a href="../index.html" class="nav-link"><i>📊</i> Dashboard</a></div>
+                <div class="nav-item"><a href="./profile.html" id="myProfileLink" class="nav-link"><i>👤</i> My
+                        Profile</a></div>
+                <div class="nav-item"><a href="./employees.html" class="nav-link"><i>👥</i> Employees</a></div>
+
+                <div class="nav-section-label">Time & Leave</div>
+                <div class="nav-item"><a href="./attendance.html" class="nav-link"><i>📅</i> Attendance</a></div>
+                <div class="nav-item"><a href="./leaves.html" class="nav-link"><i>🏖️</i> Leaves</a></div>
+                <div class="nav-item"><a href="./holidays.html" class="nav-link"><i>🎉</i> Holidays</a></div>
+                <div class="nav-item"><a href="./calendar.html" class="nav-link"><i>📆</i> Calendar</a></div>
+
+                <div class="nav-section-label">Payroll</div>
+                <div class="nav-item"><a href="./payroll.html" class="nav-link"><i>💰</i> Payroll</a></div>
+                <div class="nav-item"><a href="./employee-salary.html" class="nav-link"><i>💵</i> Employee Salary</a>
+                </div>
+
+                <div class="nav-section-label">Organisation</div>
+                <div class="nav-item"><a href="./departments.html" class="nav-link"><i>🏢</i> Departments</a></div>
+                <div class="nav-item"><a href="./designations.html" class="nav-link"><i>💼</i> Designations</a></div>
+                <div class="nav-item"><a href="./appreciations.html" class="nav-link"><i>🏆</i> Appreciations</a></div>
+                <div class="nav-item"><a href="./assets.html" class="nav-link hr-only"><i>💻</i> Assets</a></div>
+                <div class="nav-item"><a href="./note.html" class="nav-link"><i>📝</i> Notes</a></div>
+
+                <div class="nav-section-label">Reports</div>
+                <div class="nav-item"><a href="./reports.html" class="nav-link hr-only"><i>📈</i> Reports</a></div>
+
+                <div class="nav-section-label">Settings</div>
+                <div class="nav-item"><a href="./audit-logs.html" class="nav-link admin-only"><i>📜</i> Audit Logs</a></div>
+                <div class="nav-item"><a href="./biometric-settings.html" class="nav-link hr-only"><i>🔐</i> Biometric
+                        Settings</a></div>
+
+
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="header">
+                <div class="header-left">
+                    <button class="hamburger-btn" id="sidebarToggle">☰</button>
+                    <div class="header-title">
+                        <h1>Reports Generator</h1>
+                    </div>
+                </div>
+                                <div class="header-actions">
+                    <!-- Global Search -->
+                    <div class="global-search" id="globalSearchWrap">
+                        <span class="global-search-icon">🔍</span>
+                        <input type="text" id="globalSearchInput" class="global-search-input" placeholder="Search pages..." autocomplete="off">
+                        <div class="global-search-dropdown" id="globalSearchDropdown"></div>
+                    </div>
+                    <!-- Notification Bell -->
+                    <button class="notif-btn" id="notifBtn" title="Pending approvals">
+                        🔔
+                        <span class="notif-badge" id="notifBadge" style="display:none;">0</span>
+                    </button>
+                    <!-- Dark Mode Toggle -->
+                    <button class="dark-mode-btn" id="darkModeBtn" title="Toggle dark mode">🌙</button>
+
+                    <div class="user-info">
+                        <div class="user-avatar" id="userAvatarInitial">?</div>
+                        <div>
+                            <div class="user-name" id="userDisplayName">Loading...</div>
+                            <div class="user-role-badge"><span class="role-badge" id="roleBadge">Loading...</span></div>
+                        </div>
+                    </div>
+                    <button class="btn-logout" id="logoutBtn" onclick="auth.logout()">Logout</button>
+                </div>
+            </header>
+
+            <div class="content-area">
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                    <!-- Leave Report -->
+                    <div class="report-card">
+                        <div class="report-header">Leave Report</div>
+                        <div class="report-desc">Export all leave requests (Pending/Approved/Rejected) for a given date
+                            range.</div>
+                        <div style="display:flex; align-items:center; margin-bottom: 15px;">
+                            <input type="date" id="repLeaveFrom" class="form-control">
+                            <input type="date" id="repLeaveTo" class="form-control">
+                        </div>
+                        <button class="btn btn-primary" onclick="generateLeaveReport()"><span>📥</span>
+                            Download</button>
+                    </div>
+
+                    <!-- Holiday Report -->
+                    <div class="report-card">
+                        <div class="report-header">Holiday Report</div>
+                        <div class="report-desc">Export a list of all company holidays for a specific year.</div>
+                        <div style="display:flex; align-items:center; margin-bottom: 15px;">
+                            <input type="number" id="repHolidayYear" class="form-control" min="2000" max="2100"
+                                placeholder="YYYY">
+                            <button class="btn btn-primary" onclick="generateHolidayReport()"><span>📥</span>
+                                Download</button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="../scripts/toast.js"></script>
+    <script src="../scripts/sidebar.js"></script>
+    <script src="../scripts/role-manager.js"></script>
+    <script src="../scripts/auth.js"></script>
+    <script src="../scripts/api.js"></script>
+    <script src="../scripts/theme.js"></script>
+    <script src="../scripts/header.js"></script>
+
+    <script>
+        auth.initAuth();
+    </script>
+    <script src="../scripts/reports.js"></script>
+</body>
+
+</html>

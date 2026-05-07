@@ -14,12 +14,18 @@ router.get('/', holidayController.getAllHolidays);
 router.get('/:id', holidayController.getHolidayById);
 
 // Create holiday (Admin/HR only)
-router.post('/', requireRole(['admin', 'hr']), ...holidayValidation.create, holidayController.createHoliday);
+router.post('/', requireRole('admin', 'hr'), ...holidayValidation.create, holidayController.createHoliday);
 
 // Update holiday (Admin/HR only)
-router.put('/:id', requireRole(['admin', 'hr']), holidayController.updateHoliday);
+router.put('/:id', requireRole('admin', 'hr'), holidayController.updateHoliday);
 
-// Delete holiday (Admin/HR only)
-router.delete('/:id', requireRole(['admin', 'hr']), holidayController.deleteHoliday);
+// Soft delete holiday (Admin/HR only)
+router.delete('/:id', requireRole('admin', 'hr'), holidayController.deleteHoliday);
+
+// Restore soft-deleted holiday (Admin/HR only)
+router.post('/:id/restore', requireRole('admin', 'hr'), holidayController.restoreHoliday);
+
+// Hard (permanent) delete holiday (Admin only)
+router.delete('/:id/hard', requireRole('admin'), holidayController.hardDeleteHoliday);
 
 module.exports = router;

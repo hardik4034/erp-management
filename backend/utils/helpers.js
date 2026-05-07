@@ -63,11 +63,12 @@ const getCurrentYear = () => {
 /**
  * Create success response
  */
-const successResponse = (data, message = 'Success') => {
+const successResponse = (data, message = 'Success', extra = {}) => {
     return {
         success: true,
         message,
-        data
+        data,
+        ...extra
     };
 };
 

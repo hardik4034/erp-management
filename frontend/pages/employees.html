@@ -1,21 +1,65 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Employees - HRMS</title>
-    <link rel="icon" type="image/x-icon" href="../assets/favicon.png"><link rel="shortcut icon" type="image/x-icon" href="../assets/favicon.png">
+    <link rel="icon" type="image/x-icon" href="../assets/favicon.png">
+    <link rel="shortcut icon" type="image/x-icon" href="../assets/favicon.png">
     <link rel="stylesheet" href="../styles/main.css">
     <link rel="stylesheet" href="../styles/toast.css">
     <link rel="stylesheet" href="../styles/role-selector.css">
+    <link rel="stylesheet" href="../styles/tailwind.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: { DEFAULT: '#ea580c', dark: '#c2410c', light: '#f97316' }
+                    }
+                }
+            }
+        }
+    </script>
     <style>
         /* Hover effects for employee links */
         .table td a:hover {
             text-decoration: underline !important;
             opacity: 0.8;
         }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-logout {
+            padding: 6px 16px;
+            background-color: transparent;
+            border: 1px solid #e5e7eb;
+            color: #4b5563;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .btn-logout:hover {
+            background-color: #f3f4f6;
+            color: #111827;
+        }
     </style>
 </head>
+
 <body>
     <div class="app-container">
         <!-- Sidebar Overlay -->
@@ -24,65 +68,44 @@
         <!-- Sidebar -->
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
-                <img src="../assets/logo.png" alt="Soleos Logo" class="sidebar-logo">
-                <button class="sidebar-close-btn" id="sidebarClose">&times;</button>
+                <a href="../index.html"><img src="../assets/soleos.png" alt="Soleos Logo" class="sidebar-logo"></a>
+                <button class="sidebar-close-btn" id="sidebarClose">&#x2715;</button>
             </div>
             <nav class="sidebar-nav">
-                <div class="nav-item">
-                    <a href="../index.html" class="nav-link">
-                        <i>📊</i> Dashboard
-                    </a>
+                <div class="nav-section-label">Main</div>
+                <div class="nav-item"><a href="../index.html" class="nav-link"><i>📊</i> Dashboard</a></div>
+                <div class="nav-item"><a href="./profile.html" id="myProfileLink" class="nav-link"><i>👤</i> My
+                        Profile</a></div>
+                <div class="nav-item"><a href="./employees.html" class="nav-link"><i>👥</i> Employees</a></div>
+
+                <div class="nav-section-label">Time & Leave</div>
+                <div class="nav-item"><a href="./attendance.html" class="nav-link"><i>📅</i> Attendance</a></div>
+                <div class="nav-item"><a href="./leaves.html" class="nav-link"><i>🏖️</i> Leaves</a></div>
+                <div class="nav-item"><a href="./holidays.html" class="nav-link"><i>🎉</i> Holidays</a></div>
+                <div class="nav-item"><a href="./calendar.html" class="nav-link"><i>📆</i> Calendar</a></div>
+
+                <div class="nav-section-label">Payroll</div>
+                <div class="nav-item"><a href="./payroll.html" class="nav-link"><i>💰</i> Payroll</a></div>
+                <div class="nav-item"><a href="./employee-salary.html" class="nav-link"><i>💵</i> Employee Salary</a>
                 </div>
-                <div class="nav-item">
-                    <a href="employees.html" class="nav-link active">
-                        <i>👥</i> Employees
-                    </a>
+
+                <div class="nav-section-label">Organisation</div>
+                <div class="nav-item"><a href="./departments.html" class="nav-link"><i>🏢</i> Departments</a></div>
+                <div class="nav-item"><a href="./designations.html" class="nav-link"><i>💼</i> Designations</a></div>
+                <div class="nav-item"><a href="./appreciations.html" class="nav-link"><i>🏆</i> Appreciations</a></div>
+                <div class="nav-item"><a href="./assets.html" class="nav-link hr-only"><i>💻</i> Assets</a></div>
+                <div class="nav-item"><a href="./note.html" class="nav-link"><i>📝</i> Notes</a></div>
+
+                <div class="nav-section-label">Reports</div>
+                <div class="nav-item"><a href="./reports.html" class="nav-link hr-only"><i>📈</i> Reports</a></div>
+
+                <div class="nav-section-label">Settings</div>
+                <div class="nav-item"><a href="./audit-logs.html" class="nav-link admin-only"><i>📜</i> Audit Logs</a>
                 </div>
-                <div class="nav-item">
-                    <a href="attendance.html" class="nav-link">
-                        <i>📅</i> Attendance
-                    </a>
-                </div>
-                <div class="nav-item">
-                    <a href="leaves.html" class="nav-link">
-                        <i>🏖️</i> Leaves
-                    </a>
-                </div>
-                <div class="nav-item">
-                    <a href="holidays.html" class="nav-link">
-                        <i>🎉</i> Holidays
-                    </a>
-                </div>
-                <div class="nav-item">
-                    <a href="payroll.html" class="nav-link">
-                        <i>💰</i> Payroll
-                    </a>
-                </div>
-                <div class="nav-item">
-                    <a href="employee-salary.html" class="nav-link">
-                        <i>💵</i> Employee Salary
-                    </a>
-                </div>
-                <div class="nav-item">
-                    <a href="departments.html" class="nav-link">
-                        <i>🏢</i> Departments
-                    </a>
-                </div>
-                <div class="nav-item">
-                    <a href="designations.html" class="nav-link">
-                        <i>💼</i> Designations
-                    </a>
-                </div>
-                <div class="nav-item">
-                    <a href="appreciations.html" class="nav-link">
-                        <i>🏆</i> Appreciations
-                    </a>
-                </div>
-                <div class="nav-item">
-                    <a href="note.html" class="nav-link">
-                        <i>📝</i> Note
-                    </a>
-                </div>
+                <div class="nav-item"><a href="./biometric-settings.html" class="nav-link hr-only"><i>🔐</i> Biometric
+                        Settings</a></div>
+
+
             </nav>
         </aside>
 
@@ -90,23 +113,37 @@
         <main class="main-content">
             <!-- Header -->
             <header class="header">
-                 <div class="header-left">
+                <div class="header-left">
                     <button class="hamburger-btn" id="sidebarToggle">
                         ☰
                     </button>
-                    <div class="header-title"><h1>Employees</h1></div>
+                    <div class="header-title">
+                        <h1>Employees</h1>
+                    </div>
                 </div>
                 <div class="header-actions">
-                    <div class="role-selector">
-                        <label for="roleDropdown">Current Role:</label>
-                        <select id="roleDropdown">
-                            <option value="admin">Admin</option>
-                            <option value="hr">HR</option>
-                            <option value="manager">Manager</option>
-                            <option value="employee">Employee</option>
-                        </select>
+                    <!-- Global Search -->
+                    <div class="global-search" id="globalSearchWrap">
+                        <span class="global-search-icon">🔍</span>
+                        <input type="text" id="globalSearchInput" class="global-search-input" placeholder="Search pages..." autocomplete="off">
+                        <div class="global-search-dropdown" id="globalSearchDropdown"></div>
                     </div>
-                    <span class="role-badge" id="roleBadge">Employee</span>
+                    <!-- Notification Bell -->
+                    <button class="notif-btn" id="notifBtn" title="Pending approvals">
+                        🔔
+                        <span class="notif-badge" id="notifBadge" style="display:none;">0</span>
+                    </button>
+                    <!-- Dark Mode Toggle -->
+                    <button class="dark-mode-btn" id="darkModeBtn" title="Toggle dark mode">🌙</button>
+                    <!-- User Info -->
+                    <div class="user-info">
+                        <div class="user-avatar" id="userAvatarInitial">?</div>
+                        <div>
+                            <div class="user-name" id="userDisplayName">Loading...</div>
+                            <div class="user-role-badge"><span class="role-badge" id="roleBadge">Loading...</span></div>
+                        </div>
+                    </div>
+                    <button class="btn-logout" id="logoutBtn" onclick="auth.logout()">Logout</button>
                 </div>
             </header>
 
@@ -115,11 +152,17 @@
                 <div class="card">
                     <div class="card-header">
                         <h3 class="card-title">Employee Management</h3>
-                        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items:center;">
+                            <label id="showDeletedLabel"
+                                style="display:none; align-items:center; gap:6px; cursor:pointer; font-size:0.85rem; color:#dc2626;">
+                                <input type="checkbox" id="showDeletedToggle" onchange="loadEmployees()"
+                                    style="accent-color:#dc2626;">
+                                Show Deleted
+                            </label>
                             <button class="btn btn-primary create-btn" onclick="openAddModal()" id="addEmployeeBtn">
                                 + Add Employee
                             </button>
-                           
+
                             <button class="btn admin-only" onclick="openImportModal()" id="ImportEmployeeBtn">
                                 + Import
                             </button>
@@ -128,7 +171,7 @@
                             </button>
                         </div>
                     </div>
-                    
+
                     <div class="table-container">
                         <table class="table">
                             <thead>
@@ -155,11 +198,6 @@
         </main>
     </div>
 
-    </div>
-
-    <!-- Global Action Menu -->
-    <!-- Global Action Menu Removed -->
-
     <!-- Add/Edit Employee Modal -->
     <div class="modal" id="employeeModal">
         <div class="modal-content" style="max-width: 1500px; width: 95%;">
@@ -170,16 +208,18 @@
             <div class="modal-body">
                 <form id="employeeForm">
                     <input type="hidden" id="employeeId">
-                    
+
                     <!-- Account Details -->
                     <h4 class="section-title">Account Details</h4>
-                    
+
                     <!-- Employee ID Field -->
                     <div class="form-row">
                         <div class="form-group col-md-12">
                             <label class="form-label" for="employeeCode">Employee ID *</label>
-                            <input type="text" id="employeeCode" class="form-control" required placeholder="e.g. EMP2026001">
-                            <small class="text-muted">Unique identifier for the employee. Cannot be changed after creation.</small>
+                            <input type="text" id="employeeCode" class="form-control" required
+                                placeholder="e.g. EMP2026001">
+                            <small class="text-muted">Unique identifier for the employee. Cannot be changed after
+                                creation.</small>
                         </div>
                     </div>
 
@@ -207,11 +247,13 @@
                     <div class="form-row">
                         <div class="form-group col-md-6">
                             <label class="form-label" for="email">Employee Email *</label>
-                            <input type="email" id="email" class="form-control" required placeholder="e.g. johndoe@example.com">
+                            <input type="email" id="email" class="form-control" required
+                                placeholder="e.g. johndoe@example.com">
                         </div>
                         <div class="form-group col-md-6">
                             <label class="form-label" for="password">Password</label>
-                            <input type="password" id="password" class="form-control" placeholder="Minimum 8 characters">
+                            <input type="password" id="password" class="form-control"
+                                placeholder="Minimum 8 characters">
                             <small class="text-muted">Leave blank to keep current password when editing.</small>
                         </div>
                     </div>
@@ -285,8 +327,8 @@
                             </select>
                         </div>
                         <div class="form-group col-md-4">
-                            <label class="form-label" for="userRole">User Role</label>
-                            <select id="userRole" class="form-control">
+                            <label class="form-label" for="employeeUserRole">User Role</label>
+                            <select id="employeeUserRole" class="form-control">
                                 <option value="">Select Role</option>
                                 <option value="Employee">Employee</option>
                                 <option value="Admin">Admin</option>
@@ -296,21 +338,40 @@
                         </div>
                     </div>
 
-                    <div class="form-group">
-                        <label class="form-label" for="address">Address</label>
-                        <textarea id="address" class="form-control" rows="2" placeholder="e.g. 132, My Street, Kingston, New York 12401"></textarea>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label" for="about">About</label>
-                        <textarea id="about" class="form-control" rows="2"></textarea>
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label class="form-label" for="permanentAddress">Permanent Address</label>
+                            <textarea id="permanentAddress" class="form-control" rows="2"
+                                placeholder="e.g. 132, My Street, Kingston, New York 12401"></textarea>
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label class="form-label" for="temporaryAddress">Temporary Address</label>
+                            <textarea id="temporaryAddress" class="form-control" rows="2"
+                                placeholder="e.g. 132, My Street, Kingston, New York 12401"></textarea>
+                        </div>
                     </div>
 
                     <hr>
 
-                    <!-- Other Details -->
-                    <h4 class="section-title">Other Details</h4>
-                    
+                    <!-- Approvers Section -->
+                    <div class="form-section-title">Approvers</div>
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label class="form-label" for="attendanceApprover">Attendance Approver</label>
+                            <select id="attendanceApprover" class="form-control">
+                                <option value="">Select Approver</option>
+                            </select>
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label class="form-label" for="leaveApprover">Leave Approver</label>
+                            <select id="leaveApprover" class="form-control">
+                                <option value="">Select Approver</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-section-title">Other Details</div>
+
                     <div class="form-row">
                         <div class="form-group col-md-6">
                             <label class="form-label">Login Allowed?</label>
@@ -322,17 +383,11 @@
                         <div class="form-group col-md-6">
                             <label class="form-label">Receive email notifications?</label>
                             <div>
-                                <label><input type="radio" name="receiveEmailNotifications" value="true" checked> Yes</label>
+                                <label><input type="radio" name="receiveEmailNotifications" value="true" checked>
+                                    Yes</label>
                                 <label><input type="radio" name="receiveEmailNotifications" value="false"> No</label>
                             </div>
                         </div>
-                    </div>
-
-                   
-
-                    <div class="form-group">
-                        <label class="form-label" for="skills">Skills</label>
-                        <input type="text" id="skills" class="form-control" placeholder="e.g. communication, ReactJS">
                     </div>
 
                     <div class="form-row">
@@ -351,7 +406,7 @@
                     </div>
 
                     <div class="form-row">
-                        <div class="form-group col-md-6">
+                        <div class="form-group col-md-4">
                             <label class="form-label" for="employmentType">Employment Type</label>
                             <select id="employmentType" class="form-control">
                                 <option value="">--</option>
@@ -361,7 +416,7 @@
                                 <option value="Internship">Internship</option>
                             </select>
                         </div>
-                        <div class="form-group col-md-6">
+                        <div class="form-group col-md-4">
                             <label class="form-label" for="maritalStatus">Marital Status</label>
                             <select id="maritalStatus" class="form-control">
                                 <option value="">--</option>
@@ -371,11 +426,18 @@
                                 <option value="Divorced">Divorced</option>
                             </select>
                         </div>
+                        <div class="form-group col-md-4">
+                            <label class="form-label" for="skills">Skills</label>
+                            <input type="text" id="skills" class="form-control" placeholder="e.g. JavaScript, SQL">
+                        </div>
                     </div>
 
-                    <div class="form-group">
-                        <label class="form-label" for="businessAddress">Business Address</label>
-                        <input type="text" id="businessAddress" class="form-control" placeholder="Worksuite">
+                    <div class="form-row">
+                        <div class="form-group col-md-12">
+                            <label class="form-label" for="businessAddress">Business Address</label>
+                            <textarea id="businessAddress" class="form-control" rows="2"
+                                placeholder="Business office address"></textarea>
+                        </div>
                     </div>
 
                 </form>
@@ -387,86 +449,120 @@
         </div>
     </div>
 
+    <!-- Soft Delete Modal -->
+    <div class="modal" id="softDeleteModal">
+        <div class="modal-content" style="max-width:480px;">
+            <div class="modal-header" style="border-bottom:1px solid #fee2e2;">
+                <h3 class="modal-title" style="color:#dc2626;">🗑️ Delete Employee</h3>
+                <button class="modal-close" onclick="closeSoftDeleteModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p style="margin-bottom:12px;color:#374151;">This will be <strong>soft deleted</strong> — hidden but
+                    recoverable by Admin/HR.</p>
+                <div class="form-group">
+                    <label class="form-label">Reason <span style="color:#9ca3af;">(optional)</span></label>
+                    <textarea id="deleteReasonInput" class="form-control" rows="3"
+                        placeholder="Reason for deletion..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeSoftDeleteModal()">Cancel</button>
+                <button class="btn" style="background:#dc2626;color:#fff;" onclick="confirmSoftDelete()">Confirm
+                    Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Import Modal -->
+    <div class="modal" id="importModal">
+        <div class="modal-content" style="max-width:500px;">
+            <div class="modal-header">
+                <h3 class="modal-title">Import Employees</h3>
+                <button class="modal-close" onclick="closeImportModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Upload a CSV file to import employees.</p>
+                <input type="file" id="importFile" class="form-control" accept=".csv">
+                <div class="mt-4">
+                    <a href="#" onclick="downloadSampleCSV()" class="text-primary hover:underline">Download Sample
+                        CSV</a>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeImportModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="processImport()">Import</button>
+            </div>
+        </div>
+    </div>
+
     <script src="../scripts/toast.js"></script>
     <script src="../scripts/sidebar.js"></script>
     <script src="../scripts/role-manager.js"></script>
     <script src="../scripts/auth.js"></script>
     <script src="../scripts/api.js"></script>
+    <script src="../scripts/theme.js"></script>
+    <script src="../scripts/header.js"></script>
     <script>
-        // Initialize Auth
+        // STRICT ADMIN ENFORCEMENT
+        auth.requireAuth();
         auth.initAuth();
-        const canManage = auth.hasRole('Admin', 'HR');
+
+        window.addEventListener('roleChanged', () => {
+            const isAdmin = auth.hasRole('Admin');
+            if (!isAdmin) {
+                // Instantly block non-admins from rendering visually or intercepting.
+                document.body.innerHTML = '<h1 style="color:red; text-align:center; margin-top:50px;">UNAUTHORIZED ACCESS</h1>';
+                setTimeout(() => {
+                    window.location.href = '../index.html';
+                }, 1500);
+            }
+        });
+
+        // If the initial event fires synchronously before logic is bound, double check asynchronously
+        setTimeout(() => {
+            if (window.auth && window.auth.user) {
+                const isAdmin = auth.hasRole('Admin');
+                if (!isAdmin) {
+                    window.location.href = '../index.html';
+                }
+            }
+        }, 500);
+
+        const canManage = auth.hasRole('Admin');
 
         let employees = [];
         let departments = [];
         let designations = [];
 
-        // Load employees with role-based filtering
+        // Load employees
         async function loadEmployees() {
             try {
-                const response = await endpoints.employees.getAll();
-                let allEmployees = response.data || [];
-                
-                // Filter employees based on role
-                const dataScope = window.roleManager.getDataScope();
-                const currentEmployeeId = window.roleManager.getCurrentEmployeeId();
-                
-                console.log('🔍 Filtering Debug:', { 
-                    role: window.roleManager.getCurrentRole(),
-                    dataScope, 
-                    currentEmployeeId,
-                    firstEmployeeId: allEmployees[0]?.EmployeeId,
-                    firstEmployeeIdType: typeof allEmployees[0]?.EmployeeId
-                });
+                const showDeleted = document.getElementById('showDeletedToggle')?.checked;
+                const params = showDeleted ? { showDeleted: 'true' } : {};
+                const response = await endpoints.employees.getAll(params);
+                employees = response.data || [];
 
-                if (dataScope === 'own' && currentEmployeeId) {
-                    // Employee role: show only their own data
-                    // Use loose equality (==) to match string/number IDs
-                    employees = allEmployees.filter(emp => emp.EmployeeId == currentEmployeeId);
-                    console.log(`📊 Filtered to own data: ${employees.length} employee(s)`);
-                } else if (dataScope === 'team' && currentEmployeeId) {
-                    // Manager role: show their team (employees reporting to them)
-                    employees = allEmployees.filter(emp => 
-                        emp.ReportingTo == currentEmployeeId || emp.EmployeeId == currentEmployeeId
-                    );
-                    console.log(`📊 Filtered to team data: ${employees.length} employee(s)`);
-                } else {
-                    // Admin/HR role: show all data
-                    employees = allEmployees;
-                    console.log(`📊 Showing all data: ${employees.length} employee(s)`);
-                }
-                
                 renderEmployees();
                 updateReportingToDropdown();
-                
-                // Re-apply UI permissions to ensure buttons are hidden/shown correctly
-                window.roleManager.applyRolePermissions();
             } catch (error) {
                 console.error('Error loading employees:', error);
-                utils.showAlert('Failed to load employees', 'error');
+                if (window.utils) utils.showAlert('Failed to load employees', 'error');
             }
         }
-
-        // Listen for role changes and reload data
-        window.addEventListener('roleChanged', (event) => {
-            console.log(`🔄 Role changed, reloading employee data...`);
-            loadEmployees();
-        });
 
         // Render employees table
         function renderEmployees() {
             const tbody = document.getElementById('employeesTable');
-            
             if (employees.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="8" class="text-center">No employees found</td></tr>';
                 return;
             }
 
-            // Create a lookup map for faster reporting supervisor finding
             const employeeMap = {};
             employees.forEach(e => { employeeMap[e.EmployeeId] = e; });
 
             tbody.innerHTML = employees.map(emp => {
+                const isDeleted = emp.IsDeleted === true || emp.IsDeleted === 1;
                 let reportingToName = '-';
                 if (emp.ReportingTo && employeeMap[emp.ReportingTo]) {
                     const supervisor = employeeMap[emp.ReportingTo];
@@ -474,185 +570,77 @@
                 }
 
                 return `
-                <tr>
+                <tr style="${isDeleted ? 'opacity:0.6;background:#fef2f2;' : ''}">
                     <td><input type="checkbox" class="emp-checkbox" value="${emp.EmployeeId}"></td>
-                    <td><a href="profile.html?id=${emp.EmployeeId}" style="color: #667eea; text-decoration: none; font-weight: 500;">${emp.EmployeeCode || '-'}</a></td>
+                    <td><a href="profile.html?id=${emp.EmployeeId}" class="text-primary hover:underline font-medium">${emp.EmployeeCode || '-'}</a></td>
                     <td>
-                        <div style="display: flex; align-items: center;">
-                            <div style="width: 32px; height: 32px; border-radius: 50%; background-color: #ddd; margin-right: 10px; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #555;">
+                        <div class="flex items-center">
+                            <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center font-bold text-gray-600 mr-2">
                                 ${emp.FirstName.charAt(0)}${emp.LastName.charAt(0)}
                             </div>
                             <div>
-                                <div style="font-weight: 500;"><a href="profile.html?id=${emp.EmployeeId}" style="color: #333; text-decoration: none;">${emp.FirstName} ${emp.LastName}</a></div>
-                                <div style="font-size: 12px; color: #888;">${emp.DesignationName || 'No Designation'}</div>
+                                <div class="font-medium">${emp.FirstName} ${emp.LastName}</div>
+                                <div class="text-xs text-gray-500">${emp.DesignationName || 'No Designation'}</div>
                             </div>
                         </div>
                     </td>
                     <td>${emp.Email}</td>
                     <td><span class="badge badge-info">${emp.UserRole || 'Employee'}</span></td>
+                    <td>${reportingToName}</td>
                     <td>
-                        <div style="display: flex; align-items: center;">
-                             <div style="width: 24px; height: 24px; border-radius: 50%; background-color: #eee; margin-right: 5px; display: flex; align-items: center; justify-content: center; font-size: 10px;">
-                                ${reportingToName !== '-' ? reportingToName.charAt(0) : '-'}
-                            </div>
-                            <span>${reportingToName}</span>
-                        </div>
+                        <span class="badge badge-success">${emp.Status || 'Active'}</span>
+                        ${isDeleted ? '<span class="ml-1 bg-red-600 text-white px-1.5 py-0.5 rounded text-[10px] font-bold">Deleted</span>' : ''}
                     </td>
-                    <td><span class="badge badge-success">${emp.Status || 'Active'}</span></td>
                     <td>
-                        <div class="action-buttons" style="display: flex; gap: 5px;">
-                            <button class="btn btn-sm btn-outline-primary" title="View" onclick="viewEmployee(${emp.EmployeeId})">
-                                <span style="font-size: 1.2em;">👁️</span>
-                            </button>
-                            ${canManage ? `
-                                <button class="btn btn-sm btn-outline-secondary edit-btn" title="Edit" onclick="editEmployee(${emp.EmployeeId})">
-                                    <span style="font-size: 1.2em;">✏️</span>
-                                </button>
-                                <button class="btn btn-sm btn-outline-danger delete-btn" title="Delete" onclick="deleteEmployee(${emp.EmployeeId})">
-                                    <span style="font-size: 1.2em;">🗑️</span>
-                                </button>
-                            ` : ''}
+                        <div class="flex gap-1">
+                            ${isDeleted ? `
+                                <button class="btn btn-sm btn-success" onclick="restoreEmployee(${emp.EmployeeId})">Restore</button>
+                            ` : `
+                                <button class="btn btn-sm btn-outline-primary" onclick="window.location.href='profile.html?id=${emp.EmployeeId}'" aria-label="View Employee Details">👁️</button>
+                                <button class="btn btn-sm btn-outline-secondary" onclick="editEmployee(${emp.EmployeeId})" aria-label="Edit Employee">✏️</button>
+                                <button class="btn btn-sm btn-outline-danger" onclick="openDeleteModal(${emp.EmployeeId})" aria-label="Delete Employee">🗑️</button>
+                            `}
                         </div>
                     </td>
                 </tr>
             `}).join('');
         }
 
-        // Global Action Menu Logic Removed - Replaced with inline buttons
-        // Keeping this comment block to indicate removal spot
-
-
-        // Load departments and designations
+        // Implementation logic
         async function loadDropdowns() {
-            try {
-                const [deptResponse, desigResponse] = await Promise.all([
-                    endpoints.departments.getAll(),
-                    endpoints.designations.getAll()
-                ]);
+            const [deptResponse, desigResponse] = await Promise.all([
+                endpoints.departments.getAll(),
+                endpoints.designations.getAll()
+            ]);
+            departments = deptResponse.data || [];
+            designations = desigResponse.data || [];
 
-                departments = deptResponse.data || [];
-                designations = desigResponse.data || [];
+            document.getElementById('departmentId').innerHTML = '<option value="">Select Department</option>' +
+                departments.map(d => `<option value="${d.DepartmentId}">${d.DepartmentName}</option>`).join('');
 
-                const deptSelect = document.getElementById('departmentId');
-                deptSelect.innerHTML = '<option value="">Select Department</option>' +
-                    departments.map(d => `<option value="${d.DepartmentId}">${d.DepartmentName}</option>`).join('');
-
-                const desigSelect = document.getElementById('designationId');
-                desigSelect.innerHTML = '<option value="">Select Designation</option>' +
-                    designations.map(d => `<option value="${d.DesignationId}">${d.DesignationName}</option>`).join('');
-            } catch (error) {
-                console.error('Error loading dropdowns:', error);
-            }
+            document.getElementById('designationId').innerHTML = '<option value="">Select Designation</option>' +
+                designations.map(d => `<option value="${d.DesignationId}">${d.DesignationName}</option>`).join('');
         }
 
         function updateReportingToDropdown() {
-             const reportingSelect = document.getElementById('reportingTo');
-             reportingSelect.innerHTML = '<option value="">Select Supervisor</option>' +
-                    employees.map(e => `<option value="${e.EmployeeId}">${e.FirstName} ${e.LastName} (${e.EmployeeCode})</option>`).join('');
+            const options = '<option value="">Select Supervisor</option>' +
+                employees.map(e => `<option value="${e.EmployeeId}">${e.FirstName} ${e.LastName}</option>`).join('');
+            document.getElementById('reportingTo').innerHTML = options;
+
+            // Also populate approvers
+            document.getElementById('attendanceApprover').innerHTML = options;
+            document.getElementById('leaveApprover').innerHTML = options;
         }
 
-        // Open add modal
         function openAddModal() {
-            resetModalState();
-            document.getElementById('modalTitle').textContent = 'Add Employee';
+            document.getElementById('employeeModal').classList.add('active');
             document.getElementById('employeeForm').reset();
             document.getElementById('employeeId').value = '';
-            document.getElementById('employeeCode').disabled = false; // Enable for new employee
-            document.getElementById('employeeModal').classList.add('active');
-            updateReportingToDropdown();
+            document.getElementById('modalTitle').textContent = 'Add Employee';
         }
 
-        // Edit employee (Helper to get value safely)
-        const getVal = (val, defaultVal = '') => val !== null && val !== undefined ? val : defaultVal;
-        const getDateVal = (val) => val ? val.split('T')[0] : '';
+        function closeModal() { document.getElementById('employeeModal').classList.remove('active'); }
 
-        async function editEmployee(id) {
-             resetModalState();
-             // Fetch latest details (since list might not have all fields if we didn't update list query fully, but we did)
-             // However, let's use the local object if it has everything, or fetch by ID to be safe
-             try {
-                const response = await endpoints.employees.getById(id);
-                const employee = response.data;
-                
-                document.getElementById('modalTitle').textContent = 'Edit Employee';
-                document.getElementById('employeeId').value = employee.EmployeeId;
-                
-                // Account Details
-                document.getElementById('employeeCode').value = employee.EmployeeCode;
-                document.getElementById('employeeCode').disabled = true; // Cannot change Employee ID
-                document.getElementById('salutation').value = getVal(employee.Salutation);
-                document.getElementById('firstName').value = employee.FirstName;
-                document.getElementById('lastName').value = employee.LastName;
-                document.getElementById('email').value = employee.Email;
-                document.getElementById('password').value = ''; // Don't show password
-                document.getElementById('designationId').value = employee.DesignationId;
-                document.getElementById('departmentId').value = employee.DepartmentId;
-                document.getElementById('country').value = getVal(employee.Country);
-                document.getElementById('phone').value = getVal(employee.Phone);
-                document.getElementById('gender').value = getVal(employee.Gender, 'Male');
-                document.getElementById('dateOfJoining').value = getDateVal(employee.DateOfJoining);
-                document.getElementById('dateOfBirth').value = getDateVal(employee.DateOfBirth);
-                
-                updateReportingToDropdown(); // Ensure list is populated
-                // Use setTimeout to ensure dropdown is ready if it wasn't
-                document.getElementById('reportingTo').value = getVal(employee.ReportingTo);
-                
-                document.getElementById('language').value = getVal(employee.Language, 'English');
-                document.getElementById('userRole').value = getVal(employee.UserRole) || 'Employee';
-                document.getElementById('address').value = getVal(employee.Address);
-                document.getElementById('about').value = getVal(employee.About);
-
-                // Other Details
-                document.querySelector(`input[name="loginAllowed"][value="${employee.LoginAllowed !== false ? 'true' : 'false'}"]`).checked = true;
-                document.querySelector(`input[name="receiveEmailNotifications"][value="${employee.ReceiveEmailNotifications !== false ? 'true' : 'false'}"]`).checked = true;
-                
-                
-                document.getElementById('skills').value = getVal(employee.Skills);
-                document.getElementById('probationEndDate').value = getDateVal(employee.ProbationEndDate);
-                document.getElementById('noticePeriodStartDate').value = getDateVal(employee.NoticePeriodStartDate);
-                document.getElementById('noticePeriodEndDate').value = getDateVal(employee.NoticePeriodEndDate);
-                document.getElementById('employmentType').value = getVal(employee.EmploymentType);
-                document.getElementById('maritalStatus').value = getVal(employee.MaritalStatus);
-                document.getElementById('businessAddress').value = getVal(employee.BusinessAddress);
-
-                document.getElementById('employeeModal').classList.add('active');
-             } catch(error) {
-                 console.error("Error fetching employee details", error);
-                 utils.showAlert("Failed to fetch employee details", "error");
-             }
-        }
-
-        // View Employee (Read-only)
-        async function viewEmployee(id) {
-            try {
-                // Reuse edit logic to populate form
-                await editEmployee(id);
-                
-                document.getElementById('modalTitle').textContent = 'View Employee';
-                
-                // Disable all inputs
-                const form = document.getElementById('employeeForm');
-                const inputs = form.querySelectorAll('input, select, textarea');
-                inputs.forEach(input => input.disabled = true);
-                
-                // Hide Save button
-                document.querySelector('.modal-footer .btn-primary').style.display = 'none';
-                
-            } catch (error) {
-                console.error("Error viewing employee", error);
-                utils.showAlert("Failed to view employee", "error");
-            }
-        }
-
-        // Helper to reset modal state (enable inputs, show save button)
-        function resetModalState() {
-            const form = document.getElementById('employeeForm');
-            const inputs = form.querySelectorAll('input, select, textarea');
-            inputs.forEach(input => input.disabled = false);
-            document.querySelector('.modal-footer .btn-primary').style.display = 'inline-block';
-        }
-
-        // Save employee
         async function saveEmployee() {
             const form = document.getElementById('employeeForm');
             if (!form.checkValidity()) {
@@ -660,90 +648,158 @@
                 return;
             }
 
-            const employeeId = document.getElementById('employeeId').value;
-            
-            const getRadioVal = (name) => document.querySelector(`input[name="${name}"]:checked`).value === 'true';
-
-            const data = {
-                employeeCode: document.getElementById('employeeCode').value, // Add Employee Code
+            const id = document.getElementById('employeeId').value;
+            const payload = {
+                employeeCode: document.getElementById('employeeCode').value,
                 firstName: document.getElementById('firstName').value,
                 lastName: document.getElementById('lastName').value,
                 email: document.getElementById('email').value,
-                phone: document.getElementById('phone').value,
-                departmentId: parseInt(document.getElementById('departmentId').value),
-                designationId: parseInt(document.getElementById('designationId').value),
-                dateOfJoining: document.getElementById('dateOfJoining').value,
-                // New Fields
+                departmentId: document.getElementById('departmentId').value,
+                designationId: document.getElementById('designationId').value,
                 salutation: document.getElementById('salutation').value,
-                password: document.getElementById('password').value || undefined, // Send only if not empty
-                country: document.getElementById('country').value,
+                phone: document.getElementById('phone').value,
                 gender: document.getElementById('gender').value,
-                dateOfBirth: document.getElementById('dateOfBirth').value || null,
-                reportingTo: document.getElementById('reportingTo').value ? parseInt(document.getElementById('reportingTo').value) : null,
-                language: document.getElementById('language').value,
-                userRole: document.getElementById('userRole').value,
-                address: document.getElementById('address').value,
-                about: document.getElementById('about').value,
-                loginAllowed: getRadioVal('loginAllowed'),
-                receiveEmailNotifications: getRadioVal('receiveEmailNotifications'),
-                skills: document.getElementById('skills').value,
-                probationEndDate: document.getElementById('probationEndDate').value || null,
-                noticePeriodStartDate: document.getElementById('noticePeriodStartDate').value || null,
-                noticePeriodEndDate: document.getElementById('noticePeriodEndDate').value || null,
-                employmentType: document.getElementById('employmentType').value,
-                maritalStatus: document.getElementById('maritalStatus').value,
-                businessAddress: document.getElementById('businessAddress').value,
+                dateOfJoining: document.getElementById('dateOfJoining').value,
+                country: document.getElementById('country').value,
+                userRole: document.getElementById('employeeUserRole').value,
             };
 
+            const optionalFields = ['dateOfBirth', 'reportingTo', 'language', 'permanentAddress', 'temporaryAddress', 'attendanceApprover', 'leaveApprover', 'probationEndDate', 'noticePeriodStartDate', 'noticePeriodEndDate', 'employmentType', 'maritalStatus', 'skills', 'businessAddress'];
+
+            optionalFields.forEach(field => {
+                const val = document.getElementById(field)?.value;
+                if (val) {
+                    payload[field] = val; // keep it camelCase
+                }
+            });
+
+            const pass = document.getElementById('password').value;
+            if (pass) payload.password = pass;
+
+            payload.loginAllowed = document.querySelector('input[name="loginAllowed"]:checked')?.value === 'true';
+            payload.receiveEmailNotifications = document.querySelector('input[name="receiveEmailNotifications"]:checked')?.value === 'true';
+
             try {
-                if (employeeId) {
-                    await endpoints.employees.update(employeeId, data);
-                    utils.showAlert('Employee updated successfully', 'success');
+                if (id) {
+                    await endpoints.employees.update(id, payload);
+                    if (window.utils) utils.showAlert('Employee updated successfully', 'success');
                 } else {
-                    await endpoints.employees.create(data);
-                    utils.showAlert('Employee created successfully', 'success');
+                    await endpoints.employees.create(payload);
+                    if (window.utils) utils.showAlert('Employee added successfully', 'success');
                 }
                 closeModal();
                 loadEmployees();
             } catch (error) {
-                console.error('Error saving employee:', error);
-                utils.showAlert(error.message || 'Failed to save employee', 'error');
+                console.error(error);
+                if (window.utils) window.utils.showAlert(error.message || 'Error saving employee', 'error');
             }
         }
 
-        // Delete employee
-        async function deleteEmployee(id) {
-            if (!confirm('Are you sure you want to delete this employee?')) return;
-
+        async function editEmployee(id) {
             try {
-                await endpoints.employees.delete(id);
-                utils.showAlert('Employee deleted successfully', 'success');
+                const response = await endpoints.employees.getById(id);
+                const emp = response.data;
+                if (!emp) return;
+
+                document.getElementById('employeeId').value = emp.EmployeeId;
+                document.getElementById('employeeCode').value = emp.EmployeeCode || '';
+                document.getElementById('firstName').value = emp.FirstName || '';
+                document.getElementById('lastName').value = emp.LastName || '';
+                document.getElementById('email').value = emp.Email || '';
+                document.getElementById('departmentId').value = emp.DepartmentId || '';
+                document.getElementById('designationId').value = emp.DesignationId || '';
+                document.getElementById('salutation').value = emp.Salutation || '';
+                document.getElementById('phone').value = emp.Phone || '';
+                document.getElementById('gender').value = emp.Gender || '';
+
+                if (emp.DateOfJoining) document.getElementById('dateOfJoining').value = emp.DateOfJoining.split('T')[0];
+                if (emp.DateOfBirth) document.getElementById('dateOfBirth').value = emp.DateOfBirth.split('T')[0];
+                if (emp.ProbationEndDate) document.getElementById('probationEndDate').value = emp.ProbationEndDate.split('T')[0];
+                if (emp.NoticePeriodStartDate) document.getElementById('noticePeriodStartDate').value = emp.NoticePeriodStartDate.split('T')[0];
+                if (emp.NoticePeriodEndDate) document.getElementById('noticePeriodEndDate').value = emp.NoticePeriodEndDate.split('T')[0];
+
+                document.getElementById('country').value = emp.Country || '';
+                document.getElementById('reportingTo').value = emp.ReportingTo || '';
+                document.getElementById('language').value = emp.Language || '';
+                document.getElementById('employeeUserRole').value = emp.UserRole || '';
+                document.getElementById('permanentAddress').value = emp.PermanentAddress || '';
+                document.getElementById('temporaryAddress').value = emp.TemporaryAddress || '';
+                document.getElementById('attendanceApprover').value = emp.AttendanceApprover || '';
+                document.getElementById('leaveApprover').value = emp.LeaveApprover || '';
+                document.getElementById('employmentType').value = emp.EmploymentType || '';
+                document.getElementById('maritalStatus').value = emp.MaritalStatus || '';
+                document.getElementById('skills').value = emp.Skills || '';
+                document.getElementById('businessAddress').value = emp.BusinessAddress || '';
+
+                if (emp.IsLoginAllowed !== undefined) {
+                    const radios = document.getElementsByName('loginAllowed');
+                    for (let r of radios) {
+                        if (r.value === String(emp.IsLoginAllowed)) r.checked = true;
+                    }
+                }
+
+                document.getElementById('modalTitle').textContent = 'Edit Employee';
+                document.getElementById('employeeModal').classList.add('active');
+            } catch (error) {
+                console.error(error);
+                if (window.utils) window.utils.showAlert('Error loading employee details', 'error');
+            }
+        }
+
+        let deleteId = null;
+        function openDeleteModal(id) {
+            deleteId = id;
+            document.getElementById('softDeleteModal').classList.add('active');
+            document.getElementById('deleteReasonInput').value = '';
+        }
+
+        function closeSoftDeleteModal() {
+            deleteId = null;
+            document.getElementById('softDeleteModal').classList.remove('active');
+        }
+
+        async function confirmSoftDelete() {
+            if (!deleteId) return;
+            try {
+                const reason = document.getElementById('deleteReasonInput').value || 'User requested';
+                await endpoints.employees.delete(deleteId, { reason });
+                if (window.utils) utils.showAlert('Employee deleted successfully', 'success');
+                closeSoftDeleteModal();
                 loadEmployees();
             } catch (error) {
-                console.error('Error deleting employee:', error);
-                utils.showAlert('Failed to delete employee', 'error');
+                console.error(error);
+                if (window.utils) window.utils.showAlert('Error deleting employee', 'error');
             }
         }
 
-        // Close modal
-        function closeModal() {
-            document.getElementById('employeeModal').classList.remove('active');
+        async function restoreEmployee(id) {
+            if (!confirm('Are you sure you want to restore this employee?')) return;
+            try {
+                await endpoints.employees.restore(id);
+                if (window.utils) utils.showAlert('Employee restored successfully', 'success');
+                loadEmployees();
+            } catch (error) {
+                console.error(error);
+                if (window.utils) window.utils.showAlert('Error restoring employee', 'error');
+            }
         }
 
-        // Placeholder for Invite Modal
+        function openImportModal() { document.getElementById('importModal').classList.add('active'); }
+        function closeImportModal() { document.getElementById('importModal').classList.remove('active'); }
+        function openExportModal() { if (window.utils) window.utils.showAlert('Export functionality coming soon', 'info'); }
+        function downloadSampleCSV() { if (window.utils) window.utils.showAlert('Download functionality coming soon', 'info'); }
 
-
-        function openImportModal() {
-            utils.showAlert('import feature coming soon', 'info');
+        async function processImport() {
+            if (window.utils) window.utils.showAlert('Import feature is in development', 'info');
+            closeImportModal();
         }
 
-        function openExportModal() {
-            utils.showAlert('export feature coming soon', 'info');
-        }
+        window.addEventListener('DOMContentLoaded', () => {
+            loadEmployees();
+            loadDropdowns();
+        });
 
-        // Initialize
-        loadEmployees();
-        loadDropdowns();
     </script>
 </body>
+
 </html>

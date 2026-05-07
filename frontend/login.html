@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | HR Management System</title>
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/toast.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #f59e0b;
+            /* Amber 500 */
+            --primary-dark: #d97706;
+            /* Amber 600 */
+            --secondary: #fbbf24;
+            /* Amber 400 */
+            --bg-glass: rgba(255, 255, 255, 0.75);
+            --border-glass: rgba(255, 255, 255, 0.4);
+            --text-main: #1f2937;
+            --accent: #ffedd5;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #0f172a;
+            /* Dark background as fallback */
+            overflow: hidden;
+            position: relative;
+        }
+
+        .bg-image {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('assets/solar-bg.png');
+            background-size: cover;
+            background-position: center;
+            z-index: -1;
+            filter: brightness(0.75) saturate(1.1);
+            animation: kenburns 60s infinite alternate;
+        }
+
+        .bg-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, transparent 0%, rgba(0, 0, 0, 0.4) 100%);
+            z-index: 0;
+        }
+
+        @keyframes kenburns {
+            from {
+                transform: scale(1);
+            }
+
+            to {
+                transform: scale(1.15);
+            }
+        }
+
+        .login-container {
+            width: 100%;
+            max-width: 420px;
+            padding: 40px;
+            background: var(--bg-glass);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--border-glass);
+            border-radius: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            position: relative;
+            z-index: 10;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo img {
+            width: auto;
+            height: 60px;
+            margin-bottom: 10px;
+        }
+
+        .logo h1 {
+            font-size: 26px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            color: #111827;
+            margin: 0;
+            background: linear-gradient(90deg, #111827, #f59e0b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .logo p {
+            color: #4b5563;
+            margin-top: 5px;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 8px;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-wrapper i {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9ca3af;
+            transition: color 0.3s;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 14px 12px 42px;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 15px;
+            transition: all 0.3s;
+            box-sizing: border-box;
+            background: white;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+        }
+
+        .form-control:focus+i {
+            color: var(--primary);
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 12px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .btn-login:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.4);
+        }
+
+        .btn-login:active {
+            transform: translateY(0);
+        }
+
+        .btn-login .loader {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top: 3px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .footer-links {
+            text-align: center;
+            margin-top: 25px;
+            font-size: 13px;
+            color: #6b7280;
+        }
+
+        .footer-links a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .footer-links a:hover {
+            text-decoration: underline;
+        }
+
+        .error-message {
+            background: #fee2e2;
+            color: #b91c1c;
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 13px;
+            margin-bottom: 20px;
+            display: none;
+            border: 1px solid #fecaca;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="bg-image"></div>
+    <div class="bg-overlay"></div>
+
+    <div class="login-container">
+        <div class="logo">
+            <img src="assets/soleos.png" alt="Soleos Logo">
+            <h1 id="pageTitle">Solar Admin HRMS</h1>
+            <p id="pageSubtitle">Please enter your credentials to login</p>
+        </div>
+
+        <div id="errorMessage" class="error-message"></div>
+
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <div class="input-wrapper">
+                    <input type="text" id="username" class="form-control" placeholder="Enter your username" required
+                        autocomplete="username">
+                    <i class="fas fa-user"></i>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <div class="input-wrapper">
+                    <input type="password" id="password" class="form-control" placeholder="Enter your password" required
+                        autocomplete="current-password">
+                    <i class="fas fa-lock"></i>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-login" id="loginBtn">
+                <span class="btn-text">Sign In</span>
+                <div class="loader" id="loader"></div>
+            </button>
+        </form>
+
+        <!-- Change Password Form (Hidden by default) -->
+        <form id="changePasswordForm" style="display: none;">
+            <div class="form-group">
+                <label for="currentPassword">Current Password</label>
+                <div class="input-wrapper">
+                    <input type="password" id="currentPassword" class="form-control"
+                        placeholder="Enter current password" required>
+                    <i class="fas fa-key"></i>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="newPassword">New Password</label>
+                <div class="input-wrapper">
+                    <input type="password" id="newPassword" class="form-control"
+                        placeholder="Choose strong new password" required>
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="confirmPassword">Confirm New Password</label>
+                <div class="input-wrapper">
+                    <input type="password" id="confirmPassword" class="form-control"
+                        placeholder="Confirm your new password" required>
+                    <i class="fas fa-check-circle"></i>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-login" id="changeBtn">
+                <span class="btn-text">Update Password</span>
+                <div class="loader" id="changeLoader"></div>
+            </button>
+        </form>
+
+        <div class="footer-links">
+            <p>Forgot password? <a href="#">Contact Admin</a></p>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="scripts/toast.js"></script>
+    <script src="scripts/api.js"></script>
+    <script src="scripts/auth.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const loginForm = document.getElementById('loginForm');
+            const changePasswordForm = document.getElementById('changePasswordForm');
+            const loginBtn = document.getElementById('loginBtn');
+            const changeBtn = document.getElementById('changeBtn');
+            const errorMessage = document.getElementById('errorMessage');
+            const pageTitle = document.getElementById('pageTitle');
+            const pageSubtitle = document.getElementById('pageSubtitle');
+
+            // Handle UI Mode (Login vs Change Password)
+            const urlParams = new URLSearchParams(window.location.search);
+            const isChangeMode = urlParams.get('mode') === 'change_password';
+
+            if (isChangeMode) {
+                loginForm.style.display = 'none';
+                changePasswordForm.style.display = 'block';
+                pageTitle.textContent = 'Change Password';
+                pageSubtitle.textContent = 'Your security is important. Please update your password.';
+            }
+
+            // Handle Login
+            loginForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const username = document.getElementById('username').value;
+                const password = document.getElementById('password').value;
+
+                setLoading(loginBtn, true);
+                errorMessage.style.display = 'none';
+
+                try {
+                    const data = await endpoints.auth.login({ username, password });
+
+                    if (data.success) {
+                        // Set in-memory access token
+                        api.setAccessToken(data.accessToken);
+
+                        // Store only non-sensitive user info
+                        localStorage.setItem('user', JSON.stringify(data.user));
+
+                        if (data.user.mustChangePassword) {
+                            window.location.href = 'login.html?mode=change_password';
+                        } else {
+                            if (window.toast) toast.show(`Welcome back, ${data.user.fullName}!`, 'success');
+                            setTimeout(() => window.location.href = 'index.html', 1000);
+                        }
+                    }
+                } catch (error) {
+                    errorMessage.textContent = error.message;
+                    errorMessage.style.display = 'block';
+                } finally {
+                    setLoading(loginBtn, false);
+                }
+            });
+
+            // Handle Change Password
+            changePasswordForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const currentPassword = document.getElementById('currentPassword').value;
+                const newPassword = document.getElementById('newPassword').value;
+                const confirmPassword = document.getElementById('confirmPassword').value;
+
+                if (newPassword !== confirmPassword) {
+                    errorMessage.textContent = 'Passwords do not match';
+                    errorMessage.style.display = 'block';
+                    return;
+                }
+
+                setLoading(changeBtn, true);
+                errorMessage.style.display = 'none';
+
+                try {
+                    const data = await endpoints.auth.changePassword({ currentPassword, newPassword });
+                    if (data.success) {
+                        if (window.toast) toast.show('Password updated successfully!', 'success');
+                        setTimeout(() => window.location.href = 'index.html', 1500);
+                    }
+                } catch (error) {
+                    errorMessage.textContent = error.message;
+                    errorMessage.style.display = 'block';
+                } finally {
+                    setLoading(changeBtn, false);
+                }
+            });
+
+            function setLoading(btn, loading) {
+                const text = btn.querySelector('.btn-text');
+                const loader = btn.querySelector('.loader') || btn.nextElementSibling; // Adjust based on your HTML
+                btn.disabled = loading;
+                if (text) text.style.display = loading ? 'none' : 'block';
+                const spinner = btn.querySelector('.loader') || document.getElementById('loader') || document.getElementById('changeLoader');
+                if (spinner) spinner.style.display = loading ? 'block' : 'none';
+            }
+        });
+    </script>
+</body>
+
+</html>

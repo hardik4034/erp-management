@@ -1,13 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Employee Profile - HRMS</title>
-    <link rel="icon" type="image/x-icon" href="../assets/favicon.png"><link rel="shortcut icon" type="image/x-icon" href="../assets/favicon.png">
+    <link rel="icon" type="image/x-icon" href="../assets/favicon.png">
+    <link rel="shortcut icon" type="image/x-icon" href="../assets/favicon.png">
     <link rel="stylesheet" href="../styles/main.css">
     <link rel="stylesheet" href="../styles/toast.css">
     <link rel="stylesheet" href="../styles/role-selector.css">
+    <link rel="stylesheet" href="../styles/tailwind.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: { DEFAULT: '#ea580c', dark: '#c2410c', light: '#f97316' }
+                    }
+                }
+            }
+        }
+    </script>
     <style>
         .profile-container {
             max-width: 1800px;
@@ -35,7 +49,7 @@
             font-size: 40px;
             font-weight: bold;
             color: #667eea;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
         }
 
         .profile-info h1 {
@@ -51,7 +65,7 @@
         .profile-badge {
             display: inline-block;
             padding: 5px 12px;
-            background: rgba(255,255,255,0.2);
+            background: rgba(255, 255, 255, 0.2);
             border-radius: 20px;
             font-size: 13px;
             margin-right: 10px;
@@ -61,7 +75,7 @@
         .tab-navigation {
             background: white;
             border-radius: 0 0 12px 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
             margin-bottom: 30px;
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
@@ -116,8 +130,15 @@
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .profile-content {
@@ -130,7 +151,7 @@
             background: white;
             border-radius: 12px;
             padding: 25px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
 
         .info-card h3 {
@@ -242,13 +263,13 @@
             display: flex;
             align-items: center;
             gap: 16px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
             transition: transform 0.2s, box-shadow 0.2s;
         }
 
         .quota-card:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
         }
 
         .quota-card.total {
@@ -294,7 +315,7 @@
             background: white;
             border-radius: 12px;
             padding: 24px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
         }
 
         .quota-table-wrapper h3 {
@@ -389,8 +410,162 @@
             background: #fee2e2;
             color: #991b1b;
         }
+
+        /* Documents Tab Styles */
+        .documents-header {
+            margin-bottom: 24px;
+        }
+
+        .documents-header h3 {
+            font-size: 20px;
+            color: #1f2937;
+            margin-bottom: 8px;
+        }
+
+        .documents-header p {
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        .documents-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .document-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            border: 1px solid #e5e7eb;
+            transition: all 0.2s;
+        }
+
+        .document-card:hover {
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+        }
+
+        .document-card.uploaded {
+            border-left: 4px solid #10b981;
+        }
+
+        .document-card.missing {
+            border-left: 4px solid #f3f4f6;
+        }
+
+        .doc-icon {
+            font-size: 32px;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f8fafc;
+            border-radius: 10px;
+        }
+
+        .doc-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .doc-info h4 {
+            margin: 0 0 6px 0;
+            font-size: 14px;
+            color: #111827;
+            font-weight: 600;
+        }
+
+        .doc-status {
+            font-size: 12px;
+            margin: 0 0 4px 0;
+            font-weight: 500;
+        }
+
+        .doc-status.success {
+            color: #059669;
+        }
+
+        .doc-status.pending {
+            color: #6b7280;
+        }
+
+        .doc-filename {
+            font-size: 12px;
+            color: #4b5563;
+            margin: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .doc-date {
+            font-size: 11px;
+            color: #9ca3af;
+            margin: 4px 0 0 0;
+        }
+
+        .doc-actions {
+            display: flex;
+            gap: 8px;
+            flex-direction: column;
+        }
+
+        .btn {
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            text-align: center;
+            text-decoration: none;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-upload {
+            background: #eff6ff;
+            color: #2563eb;
+        }
+
+        .btn-upload:hover {
+            background: #dbeafe;
+        }
+
+        .btn-view {
+            background: #f3f4f6;
+            color: #4b5563;
+        }
+
+        .btn-view:hover {
+            background: #e5e7eb;
+        }
+
+        .btn-delete {
+            background: #fef2f2;
+            color: #dc2626;
+        }
+
+        .btn-delete:hover {
+            background: #fee2e2;
+        }
+
+        .documents-loading {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 40px;
+            color: #6b7280;
+        }
     </style>
 </head>
+
 <body>
     <div class="app-container">
         <!-- Sidebar Overlay -->
@@ -399,65 +574,44 @@
         <!-- Sidebar -->
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
-                <img src="../assets/logo.png" alt="Soleos Logo" class="sidebar-logo">
-                <button class="sidebar-close-btn" id="sidebarClose">&times;</button>
+                <a href="../index.html"><img src="../assets/soleos.png" alt="Soleos Logo" class="sidebar-logo"></a>
+                <button class="sidebar-close-btn" id="sidebarClose">&#x2715;</button>
             </div>
             <nav class="sidebar-nav">
-                <div class="nav-item">
-                    <a href="../index.html" class="nav-link">
-                        <i>📊</i> Dashboard
-                    </a>
+                <div class="nav-section-label">Main</div>
+                <div class="nav-item"><a href="../index.html" class="nav-link"><i>📊</i> Dashboard</a></div>
+                <div class="nav-item"><a href="./profile.html" id="myProfileLink" class="nav-link"><i>👤</i> My
+                        Profile</a></div>
+                <div class="nav-item"><a href="./employees.html" class="nav-link"><i>👥</i> Employees</a></div>
+
+                <div class="nav-section-label">Time & Leave</div>
+                <div class="nav-item"><a href="./attendance.html" class="nav-link"><i>📅</i> Attendance</a></div>
+                <div class="nav-item"><a href="./leaves.html" class="nav-link"><i>🏖️</i> Leaves</a></div>
+                <div class="nav-item"><a href="./holidays.html" class="nav-link"><i>🎉</i> Holidays</a></div>
+                <div class="nav-item"><a href="./calendar.html" class="nav-link"><i>📆</i> Calendar</a></div>
+
+                <div class="nav-section-label">Payroll</div>
+                <div class="nav-item"><a href="./payroll.html" class="nav-link"><i>💰</i> Payroll</a></div>
+                <div class="nav-item"><a href="./employee-salary.html" class="nav-link"><i>💵</i> Employee Salary</a>
                 </div>
-                <div class="nav-item">
-                    <a href="employees.html" class="nav-link active">
-                        <i>👥</i> Employees
-                    </a>
+
+                <div class="nav-section-label">Organisation</div>
+                <div class="nav-item"><a href="./departments.html" class="nav-link"><i>🏢</i> Departments</a></div>
+                <div class="nav-item"><a href="./designations.html" class="nav-link"><i>💼</i> Designations</a></div>
+                <div class="nav-item"><a href="./appreciations.html" class="nav-link"><i>🏆</i> Appreciations</a></div>
+                <div class="nav-item"><a href="./assets.html" class="nav-link hr-only"><i>💻</i> Assets</a></div>
+                <div class="nav-item"><a href="./note.html" class="nav-link"><i>📝</i> Notes</a></div>
+
+                <div class="nav-section-label">Reports</div>
+                <div class="nav-item"><a href="./reports.html" class="nav-link hr-only"><i>📈</i> Reports</a></div>
+
+                <div class="nav-section-label">Settings</div>
+                <div class="nav-item"><a href="./audit-logs.html" class="nav-link admin-only"><i>📜</i> Audit Logs</a>
                 </div>
-                <div class="nav-item">
-                    <a href="attendance.html" class="nav-link">
-                        <i>📅</i> Attendance
-                    </a>
-                </div>
-                <div class="nav-item">
-                    <a href="leaves.html" class="nav-link">
-                        <i>🏖️</i> Leaves
-                    </a>
-                </div>
-                <div class="nav-item">
-                    <a href="holidays.html" class="nav-link">
-                        <i>🎉</i> Holidays
-                    </a>
-                </div>
-                <div class="nav-item">
-                    <a href="payroll.html" class="nav-link">
-                        <i>💰</i> Payroll
-                    </a>
-                </div>
-                <div class="nav-item">
-                    <a href="employee-salary.html" class="nav-link">
-                        <i>💵</i> Employee Salary
-                    </a>
-                </div>
-                <div class="nav-item">
-                    <a href="departments.html" class="nav-link">
-                        <i>🏢</i> Departments
-                    </a>
-                </div>
-                <div class="nav-item">
-                    <a href="designations.html" class="nav-link">
-                        <i>💼</i> Designations
-                    </a>
-                </div>
-                <div class="nav-item">
-                    <a href="appreciations.html" class="nav-link">
-                        <i>🏆</i> Appreciations
-                    </a>
-                </div>
-                <div class="nav-item">
-                    <a href="note.html" class="nav-link">
-                        <i>📝</i> Note
-                    </a>
-                </div>
+                <div class="nav-item"><a href="./biometric-settings.html" class="nav-link hr-only"><i>🔐</i> Biometric
+                        Settings</a></div>
+
+
             </nav>
         </aside>
 
@@ -469,19 +623,33 @@
                     <button class="hamburger-btn" id="sidebarToggle">
                         ☰
                     </button>
-                    <div class="header-title"><h1>Employee Profile</h1></div>
+                    <div class="header-title">
+                        <h1>Employee Profile</h1>
+                    </div>
                 </div>
                 <div class="header-actions">
-                    <div class="role-selector">
-                        <label for="roleDropdown">Current Role:</label>
-                        <select id="roleDropdown">
-                            <option value="admin">Admin</option>
-                            <option value="hr">HR</option>
-                            <option value="manager">Manager</option>
-                            <option value="employee">Employee</option>
-                        </select>
+                    <!-- Global Search -->
+                    <div class="global-search" id="globalSearchWrap">
+                        <span class="global-search-icon">🔍</span>
+                        <input type="text" id="globalSearchInput" class="global-search-input" placeholder="Search pages..." autocomplete="off">
+                        <div class="global-search-dropdown" id="globalSearchDropdown"></div>
                     </div>
-                    <span class="role-badge" id="roleBadge">Employee</span>
+                    <!-- Notification Bell -->
+                    <button class="notif-btn" id="notifBtn" title="Pending approvals">
+                        🔔
+                        <span class="notif-badge" id="notifBadge" style="display:none;">0</span>
+                    </button>
+                    <!-- Dark Mode Toggle -->
+                    <button class="dark-mode-btn" id="darkModeBtn" title="Toggle dark mode">🌙</button>
+                    <!-- User Info -->
+                    <div class="user-info">
+                        <div class="user-avatar" id="userAvatarInitial">?</div>
+                        <div>
+                            <div class="user-name" id="userDisplayName">Loading...</div>
+                            <div class="user-role-badge"><span class="role-badge" id="roleBadge">Loading...</span></div>
+                        </div>
+                    </div>
+                    <button class="btn-logout" id="logoutBtn" onclick="auth.logout()">Logout</button>
                 </div>
             </header>
 
@@ -523,10 +691,7 @@
                                     <a href="#" class="tab-nav-link active" data-tab="profile">Profile</a>
                                 </li>
                                 <li class="tab-nav-item">
-                                    <a href="#" class="tab-nav-link" data-tab="attendance">Attendance</a>
-                                </li>
-                                <li class="tab-nav-item">
-                                    <a href="#" class="tab-nav-link" data-tab="leaves">Leaves</a>
+                                    <a href="#" class="tab-nav-link" data-tab="attendance-leave">Attendance & Leave</a>
                                 </li>
                                 <li class="tab-nav-item">
                                     <a href="#" class="tab-nav-link" data-tab="leave-quota">Leave Quota</a>
@@ -541,7 +706,12 @@
                                 <li class="tab-nav-item">
                                     <a href="#" class="tab-nav-link" data-tab="appreciation">Appreciation</a>
                                 </li>
-
+                                <li class="tab-nav-item">
+                                    <a href="#" class="tab-nav-link" data-tab="asset-details">Asset Details</a>
+                                </li>
+                                <li class="tab-nav-item">
+                                    <a href="#" class="tab-nav-link" data-tab="employee-exit">Employee Exit</a>
+                                </li>
                             </ul>
                         </nav>
 
@@ -614,8 +784,12 @@
                                         <span class="info-value" id="infoCountry">-</span>
                                     </div>
                                     <div class="info-row">
-                                        <span class="info-label">Address</span>
-                                        <span class="info-value" id="infoAddress">-</span>
+                                        <span class="info-label">Permanent Address</span>
+                                        <span class="info-value" id="infoPermanentAddress">-</span>
+                                    </div>
+                                    <div class="info-row">
+                                        <span class="info-label">Temporary Address</span>
+                                        <span class="info-value" id="infoTemporaryAddress">-</span>
                                     </div>
                                     <div class="info-row">
                                         <span class="info-label">Business Address</span>
@@ -650,14 +824,99 @@
                             </div>
                         </div>
 
-                        <!-- Tab Content: Attendance -->
-                        <div id="tab-attendance" class="tab-content">
-                            <iframe src="attendance-by-member.html" frameborder="0" style="width: 100%; height: 800px; border: none;"></iframe>
-                        </div>
+                        <!-- Tab Content: Attendance & Leave -->
+                        <div id="tab-attendance-leave" class="tab-content">
+                            <div class="space-y-8">
 
-                        <!-- Tab Content: Leaves -->
-                        <div id="tab-leaves" class="tab-content">
-                            <iframe src="leaves.html" frameborder="0" style="width: 100%; height: 800px; border: none;"></iframe>
+                                <!-- Approver Info Cards (Read-only for all roles) -->
+                                <div class="bg-white rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.10)] p-6 mb-2">
+                                    <h3
+                                        class="text-lg font-bold text-gray-800 mb-5 flex items-center gap-2 border-b border-gray-100 pb-4">
+                                        <span class="text-2xl">👥</span> Assigned Approvers
+                                    </h3>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5" id="approverInfoCards">
+                                        <!-- Attendance Approver Info -->
+                                        <div
+                                            class="rounded-xl border border-gray-200 bg-gray-50 p-5 flex items-start gap-4">
+                                            <div
+                                                class="w-11 h-11 rounded-full bg-orange-100 flex items-center justify-center text-2xl flex-shrink-0">
+                                                📅</div>
+                                            <div class="min-w-0">
+                                                <p
+                                                    class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">
+                                                    Attendance Approver</p>
+                                                <p class="text-base font-bold text-gray-800"
+                                                    id="attendanceApproverName">—</p>
+                                                <p class="text-xs text-gray-400" id="attendanceApproverCode"></p>
+                                            </div>
+                                        </div>
+                                        <!-- Leave Approver Info -->
+                                        <div
+                                            class="rounded-xl border border-gray-200 bg-gray-50 p-5 flex items-start gap-4">
+                                            <div
+                                                class="w-11 h-11 rounded-full bg-blue-100 flex items-center justify-center text-2xl flex-shrink-0">
+                                                🏖️</div>
+                                            <div class="min-w-0">
+                                                <p
+                                                    class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">
+                                                    Leave Approver</p>
+                                                <p class="text-base font-bold text-gray-800" id="leaveApproverName">—
+                                                </p>
+                                                <p class="text-xs text-gray-400" id="leaveApproverCode"></p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Edit Approvers Section (Admin/HR only) -->
+                                <div class="bg-gray-800 p-6 rounded-xl shadow-lg text-white hr-only"
+                                    id="editApproversSection">
+                                    <h3 class="text-xl font-bold mb-1 flex items-center gap-2">
+                                        <span class="text-2xl">✏️</span> Assign Approvers
+                                        <span
+                                            class="ml-2 text-xs bg-orange-500 text-white px-2 py-0.5 rounded-full font-medium">Admin
+                                            / HR</span>
+                                    </h3>
+                                    <p class="text-gray-400 text-sm mb-6">Select employees to be assigned as approvers
+                                        for this member.</p>
+
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div>
+                                            <label class="block text-gray-400 text-sm mb-2 font-medium"
+                                                for="editAttendanceApproverId">
+                                                Attendance Approver
+                                            </label>
+                                            <select id="editAttendanceApproverId"
+                                                class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-orange-400 focus:ring-1 focus:ring-orange-400 transition">
+                                                <option value="">— None —</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label class="block text-gray-400 text-sm mb-2 font-medium"
+                                                for="editLeaveApproverId">
+                                                Leave Approver
+                                            </label>
+                                            <select id="editLeaveApproverId"
+                                                class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400 transition">
+                                                <option value="">— None —</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="mt-7 flex items-center justify-between">
+                                        <p class="text-gray-400 text-xs" id="approversSavedMsg" style="display:none;">
+                                            ✅ Approvers saved successfully
+                                        </p>
+                                        <div class="flex gap-3 ml-auto">
+                                            <button id="saveApproversBtn"
+                                                class="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2.5 px-7 rounded-lg transition duration-200 flex items-center gap-2 shadow">
+                                                <span>💾</span> Save Approvers
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
                         </div>
 
                         <!-- Tab Content: Leave Quota -->
@@ -701,7 +960,8 @@
                                         </thead>
                                         <tbody id="quotaTableBody">
                                             <tr>
-                                                <td colspan="5" style="text-align: center; padding: 2rem; color: #6b7280;">
+                                                <td colspan="5"
+                                                    style="text-align: center; padding: 2rem; color: #6b7280;">
                                                     Loading leave quota...
                                                 </td>
                                             </tr>
@@ -710,8 +970,6 @@
                                 </div>
                             </div>
                         </div>
-
-
 
                         <!-- Tab Content: Timesheet -->
                         <div id="tab-timesheet" class="tab-content">
@@ -723,17 +981,102 @@
 
                         <!-- Tab Content: Documents -->
                         <div id="tab-documents" class="tab-content">
-                            <div class="empty-state">
-                                <div class="empty-state-icon">📄</div>
-                                <p>Documents page coming soon</p>
-                            </div>
+                            <!-- Handled dynamically by documents.js -->
                         </div>
 
                         <!-- Tab Content: Appreciation -->
                         <div id="tab-appreciation" class="tab-content">
-                            <iframe src="appreciations.html" frameborder="0" style="width: 100%; height: 800px; border: none;"></iframe>
+                            <iframe src="appreciations.html" frameborder="0"
+                                style="width: 100%; height: 800px; border: none;"></iframe>
                         </div>
 
+                        <!-- Tab Content: Asset Details -->
+                        <div id="tab-asset-details" class="tab-content">
+                            <div class="card" style="margin-top:20px;">
+                                <div class="table-container">
+                                    <table class="table" style="width: 100%;">
+                                        <thead>
+                                            <tr style="text-align: left; border-bottom: 1px solid #e2e8f0;">
+                                                <th style="padding: 12px;">ASSET CODE</th>
+                                                <th style="padding: 12px;">ASSET NAME</th>
+                                                <th style="padding: 12px;">BRAND / MODEL</th>
+                                                <th style="padding: 12px;">S/N</th>
+                                                <th style="padding: 12px;">ASSIGN DATE</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="profileAssetsTable">
+                                            <tr>
+                                                <td colspan="5" class="text-center" style="padding: 20px;">Loading
+                                                    assets...</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tab Content: Employee Exit -->
+                        <div id="tab-employee-exit" class="tab-content">
+                            <div class="space-y-8">
+                                <div class="bg-white p-6 rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.1)] text-gray-800">
+                                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                                        <div>
+                                            <p class="text-gray-600 font-semibold text-sm mb-2">Resignation Letter Date
+                                            </p>
+                                            <input type="date" id="exitResignationDate"
+                                                class="w-full bg-white border border-gray-300 rounded-lg px-4 py-2 text-gray-800 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary">
+                                        </div>
+                                        <div>
+                                            <p class="text-gray-600 font-semibold text-sm mb-2">Exit Interview Held On
+                                            </p>
+                                            <input type="date" id="exitInterviewDate"
+                                                class="w-full bg-white border border-gray-300 rounded-lg px-4 py-2 text-gray-800 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary">
+                                        </div>
+                                        <div>
+                                            <p class="text-gray-600 font-semibold text-sm mb-2">Leave Encased?</p>
+                                            <select id="exitLeaveEncased"
+                                                class="w-full bg-white border border-gray-300 rounded-lg px-4 py-2 text-gray-800 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary">
+                                                <option value="">Select...</option>
+                                                <option value="Yes">Yes</option>
+                                                <option value="No">No</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <p class="text-gray-600 font-semibold text-sm mb-2">Relieving Date</p>
+                                            <input type="date" id="exitRelievingDate"
+                                                class="w-full bg-white border border-gray-300 rounded-lg px-4 py-2 text-gray-800 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary">
+                                        </div>
+                                        <div>
+                                            <p class="text-gray-600 font-semibold text-sm mb-2">New Workplace</p>
+                                            <input type="text" id="exitNewWorkplace"
+                                                class="w-full bg-white border border-gray-300 rounded-lg px-4 py-2 text-gray-800 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary">
+                                        </div>
+                                    </div>
+
+                                    <h4 class="text-lg font-bold mb-4 border-b-2 border-primary pb-2 inline-block">
+                                        Feedback</h4>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+                                        <div>
+                                            <p class="text-gray-600 font-semibold text-sm mb-2">Reason for Leaving</p>
+                                            <textarea id="exitReasonForLeaving" rows="4"
+                                                class="w-full bg-white border border-gray-300 rounded-lg px-4 py-2 text-gray-800 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"></textarea>
+                                        </div>
+                                        <div>
+                                            <p class="text-gray-600 font-semibold text-sm mb-2">Feedback</p>
+                                            <textarea id="exitFeedback" rows="4"
+                                                class="w-full bg-white border border-gray-300 rounded-lg px-4 py-2 text-gray-800 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"></textarea>
+                                        </div>
+                                    </div>
+
+                                    <div class="mt-8 flex justify-end">
+                                        <button id="saveExitDetailsBtn"
+                                            class="bg-primary hover:bg-primary-dark text-white font-bold py-2 px-6 rounded-lg transition duration-200 flex items-center gap-2">
+                                            <span>💾</span> Save Details
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
                     </div>
                 </div>
@@ -745,7 +1088,14 @@
     <script src="../scripts/sidebar.js"></script>
     <script src="../scripts/role-manager.js"></script>
     <script src="../scripts/auth.js"></script>
+    <script>
+        auth.initAuth();
+    </script>
     <script src="../scripts/api.js"></script>
+    <script src="../scripts/theme.js"></script>
+    <script src="../scripts/header.js"></script>
+    <script src="../scripts/documents.js"></script>
     <script src="../scripts/profile.js"></script>
 </body>
+
 </html>

@@ -1,0 +1,519 @@
+/* Premium Tables Redesign for Payroll & Salary */
+
+/* 1. Global Page Background & Layout Refinements */
+.content-area {
+    background-color: #fcfcfd;
+    padding: 24px 32px;
+}
+
+/* Base Card Redesign */
+.card, .content-area > .card {
+    border: none;
+    background: #ffffff;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px -8px rgba(0,0,0,0.06), 0 4px 6px -4px rgba(0,0,0,0.04);
+    overflow: visible; /* To allow row hover scale shadow */
+    padding: 24px;
+    margin-bottom: 24px;
+}
+
+.card-header {
+    border-bottom: 1px solid #f1f5f9;
+    padding-bottom: 20px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* 2. Unified Filter Bars & Action Sections */
+.filter-bar, .payroll-filters {
+    display: flex;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    padding: 16px 24px;
+    border-radius: 16px;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
+    margin-bottom: 32px;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    flex-wrap: wrap; /* Ensure responsiveness */
+    gap: 20px;
+}
+
+.filter-row {
+    display: flex;
+    width: 100%;
+    gap: 20px;
+    flex-wrap: nowrap;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1; /* evenly distribute */
+    min-width: 180px;
+}
+
+.filter-group label, .filter-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #64748b;
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.filter-select, .inline-select, .inline-input {
+    padding: 10px 16px;
+    border-radius: 10px;
+    border: 1px solid #e2e8f0;
+    background-color: #f8fafc;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #1e293b;
+    outline: none;
+    transition: all 0.25s ease;
+    cursor: pointer;
+    width: 100%;
+}
+
+.filter-select:focus, .filter-select:hover,
+.inline-select:focus, .inline-select:hover,
+.inline-input:focus, .inline-input:hover {
+    border-color: var(--primary-color);
+    background-color: #ffffff;
+    box-shadow: 0 0 0 4px rgba(234, 88, 12, 0.08);
+}
+
+.inline-input::placeholder {
+    color: #cbd5e1;
+    font-weight: 400;
+}
+
+/* 3. Payroll Generate Section Refinement */
+.generate-payroll-section {
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 24px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+    border: 1px solid #f1f5f9;
+    margin-bottom: 32px;
+}
+
+.generate-header {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 20px;
+    display: block;
+}
+
+.generate-options {
+    display: flex;
+    gap: 32px;
+    flex-wrap: wrap;
+    margin-bottom: 24px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid #f8fafc;
+}
+
+.checkbox-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.checkbox-label {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #334155;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* Custom Checkboxes */
+input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    border-radius: 6px;
+    border: 2px solid #cbd5e1;
+    cursor: pointer;
+    accent-color: var(--primary-color);
+    transition: all 0.2s;
+}
+input[type="checkbox"]:hover {
+    border-color: var(--primary-color);
+}
+
+.info-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    background: #e2e8f0;
+    color: #64748b;
+    border-radius: 50%;
+    font-size: 0.75rem;
+    font-weight: 700;
+    cursor: help;
+}
+
+.employee-select-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 24px;
+}
+
+.generate-btn {
+    background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 1rem;
+    padding: 11px 32px;
+    box-shadow: 0 6px 16px -4px rgba(234, 88, 12, 0.4);
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    cursor: pointer;
+    height: 44px; /* Matches input height */
+}
+.generate-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 24px -4px rgba(234, 88, 12, 0.5);
+}
+
+/* 4. Table UI Modernization */
+.table-container, .payroll-table-container, .salary-table-container {
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 0;
+    border: none;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.03); /* Soft container shadow everywhere */
+    overflow: visible;
+}
+
+.table, .payroll-table, .salary-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table th, .payroll-table th, .salary-table th {
+    background-color: #f8fafc;
+    border-bottom: 2px solid #f1f5f9;
+    color: #64748b;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 16px 24px;
+    border-top: none;
+}
+.table th:first-child, .table td:first-child,
+.payroll-table th:first-child, .payroll-table td:first-child,
+.salary-table th:first-child, .salary-table td:first-child {
+    padding-left: 32px;
+}
+.table th:last-child, .table td:last-child,
+.payroll-table th:last-child, .payroll-table td:last-child,
+.salary-table th:last-child, .salary-table td:last-child {
+    padding-right: 32px;
+}
+
+.table td, .payroll-table td, .salary-table td {
+    padding: 18px 24px;
+    border-bottom: 1px solid #f1f5f9;
+    vertical-align: middle;
+    color: #334155;
+    font-weight: 500;
+    transition: all 0.25s ease;
+}
+
+/* Interactive Floating Rows */
+.table tbody tr, .payroll-table tbody tr, .salary-table tbody tr {
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    background-color: transparent;
+}
+.table tbody tr:hover, .payroll-table tbody tr:hover, .salary-table tbody tr:hover {
+    background-color: #f8fafc;
+}
+
+/* User Identity Cells (Shared with Appreciations) */
+.employee-cell {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.employee-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+}
+
+.employee-avatar {
+    width: 40px !important;
+    height: 40px !important;
+    border-radius: 50% !important;
+    background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%) !important;
+    color: #4f46e5 !important;
+    font-weight: 700;
+    font-size: 0.95rem !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 10px rgba(79, 70, 229, 0.15) !important;
+    border: 2px solid #ffffff;
+}
+
+/* If you want the orange one: */
+.employee-avatar.orange {
+    background: linear-gradient(135deg, #ffedd5 0%, #ffcda2 100%) !important;
+    color: #ea580c !important;
+    box-shadow: 0 4px 10px rgba(234, 88, 12, 0.15) !important;
+}
+
+.employee-name {
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: #0f172a;
+    transition: color 0.2s;
+}
+.employee-name:hover {
+    color: var(--primary-color);
+}
+.employee-code, .employee-designation {
+    font-size: 0.75rem; 
+    color: #64748b;
+    margin-top: 3px;
+    font-weight: 500;
+}
+
+/* 5. Custom Typography inside Grids */
+.currency-cell {
+    font-variant-numeric: tabular-nums;
+    font-weight: 600 !important;
+    letter-spacing: 0.5px;
+}
+.net-salary {
+    color: #10b981 !important; /* Green for Net Salary */
+}
+.ctc-value {
+    color: #0f172a !important; /* Dark for CTC */
+}
+.duration-cell {
+    color: #64748b !important;
+    font-size: 0.85rem !important;
+}
+
+/* Status Badges */
+.status-badge {
+    padding: 6px 14px;
+    border-radius: 99px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    display: inline-block;
+}
+.status-badge.paid {
+    background-color: #dcfce7;
+    color: #15803d;
+}
+.status-badge.approved {
+    background-color: #e0e7ff;
+    color: #4338ca;
+}
+.status-badge.draft {
+    background-color: #f1f5f9;
+    color: #475569;
+}
+.status-badge.cancelled {
+    background-color: #fee2e2;
+    color: #b91c1c;
+}
+
+/* 6. Action Menu & Buttons Upgrade */
+.actions-menu-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    border: none;
+    background: #f8fafc;
+    color: #64748b;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+.payroll-table tbody tr:hover .actions-menu-btn {
+    background: #e2e8f0;
+    color: #0f172a;
+}
+
+.add-salary-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    border: none;
+    background: #eff6ff;
+    color: #3b82f6;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    padding: 0;
+}
+.add-salary-btn:hover {
+    background: #bfdbfe;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+}
+
+/* Toggle Switches */
+.toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 48px;
+    height: 26px;
+}
+.toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+.toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #cbd5e1;
+    transition: .3s ease-in-out;
+    border-radius: 26px;
+}
+.toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 20px;
+    width: 20px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: .3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+input:checked + .toggle-slider {
+    background-color: var(--primary-color);
+}
+input:focus + .toggle-slider {
+    box-shadow: 0 0 1px var(--primary-color);
+}
+input:checked + .toggle-slider:before {
+    transform: translateX(22px);
+}
+
+/* Pagination Control Polishing */
+.pagination-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px;
+    border-top: 1px solid #f1f5f9;
+    border-bottom-left-radius: 20px;
+    border-bottom-right-radius: 20px;
+    background: #ffffff;
+}
+
+.pagination-controls {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+}
+
+.page-btn {
+    padding: 6px 14px;
+    border: 1px solid #e2e8f0;
+    background: white;
+    color: #64748b;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+    cursor: pointer;
+}
+.page-btn:hover:not([disabled]) {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+    color: #0f172a;
+}
+.page-btn.active {
+    background: var(--primary-light);
+    border-color: var(--primary-color);
+    color: white;
+}
+.page-btn[disabled] {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Action Dropdown Polishing */
+.actions-dropdown {
+    position: absolute;
+    right: 32px;
+    margin-top: 8px;
+    background: white;
+    border: 1px solid #f1f5f9;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px -10px rgba(0,0,0,0.15);
+    padding: 8px;
+    z-index: 100;
+    display: none;
+    min-width: 140px;
+}
+.actions-dropdown.active {
+    display: block;
+    animation: fadeIn 0.15s ease-out;
+}
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.actions-dropdown-item {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 8px 16px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #334155;
+    transition: all 0.2s;
+}
+.actions-dropdown-item:hover {
+    background: #f8fafc;
+    color: var(--primary-color);
+}
+.actions-dropdown-item.danger:hover {
+    background: #fef2f2;
+    color: #ef4444;
+}
+
+/* Loading Empty State Adjustments */
+.payroll-loading p, .text-center {
+    font-size: 1rem;
+    font-weight: 500;
+    color: #94a3b8;
+}

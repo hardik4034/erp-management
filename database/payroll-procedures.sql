@@ -313,49 +313,62 @@ BEGIN
     DECLARE @Holidays INT;
     DECLARE @WorkingDays INT;
     
-    -- Calculate total days
+    -- Calculate total days in range
     SET @TotalDays = DATEDIFF(DAY, @StartDate, @EndDate) + 1;
     
-    -- Calculate holidays
+    -- 1. Calculate Holidays
     SELECT @Holidays = COUNT(*)
     FROM Holidays
     WHERE HolidayDate BETWEEN @StartDate AND @EndDate
       AND Status = 'Active';
     
-    -- Calculate present days
+    -- 2. Calculate Working Days (Excluding deterministic Sundays and Holidays)
+    -- Formula (DATEPART(dw, Date) + @@DATEFIRST - 1) % 7: 0=Sun, 1=Mon, ..., 6=Sat
+    SELECT @WorkingDays = COUNT(*)
+    FROM (
+        SELECT DATEADD(DAY, number, @StartDate) AS DateValue
+        FROM master..spt_values
+        WHERE type = 'P' AND number <= DATEDIFF(DAY, @StartDate, @EndDate)
+    ) AS Dates
+    WHERE NOT EXISTS (SELECT 1 FROM Holidays h WHERE h.HolidayDate = Dates.DateValue AND h.Status = 'Active')
+      AND (DATEPART(dw, Dates.DateValue) + @@DATEFIRST - 1) % 7 <> 0; -- Not Sunday
+    
+    -- 3. Calculate Present Days
     SELECT @PresentDays = COUNT(*)
     FROM Attendance
     WHERE EmployeeId = @EmployeeId
       AND AttendanceDate BETWEEN @StartDate AND @EndDate
       AND Status IN ('Present', 'Half Day');
     
-    -- Calculate leave days
-    SELECT @LeaveDays = COUNT(DISTINCT l.FromDate)
-    FROM Leaves l
-    WHERE l.EmployeeId = @EmployeeId
-      AND l.Status = 'Approved'
-      AND l.FromDate BETWEEN @StartDate AND @EndDate;
+    -- 4. Calculate Leave Days (Correctly handling multi-day leaves)
+    -- Only count approved leaves on valid working days (not Sunday/Holiday)
+    SELECT @LeaveDays = COUNT(*)
+    FROM (
+        SELECT DATEADD(DAY, number, @StartDate) AS DateValue
+        FROM master..spt_values
+        WHERE type = 'P' AND number <= DATEDIFF(DAY, @StartDate, @EndDate)
+    ) AS Dates
+    WHERE EXISTS (
+        SELECT 1 FROM Leaves l
+        WHERE l.EmployeeId = @EmployeeId
+          AND l.Status = 'Approved'
+          AND Dates.DateValue BETWEEN l.FromDate AND l.ToDate
+    )
+    AND NOT EXISTS (SELECT 1 FROM Holidays h WHERE h.HolidayDate = Dates.DateValue AND h.Status = 'Active')
+    AND (DATEPART(dw, Dates.DateValue) + @@DATEFIRST - 1) % 7 <> 0; -- Not Sunday
     
-    -- Calculate working days (excluding Sundays and holidays)
-    SET @WorkingDays = @TotalDays - @Holidays - 
-        (SELECT COUNT(*) FROM 
-            (SELECT DATEADD(DAY, number, @StartDate) AS DateValue
-             FROM master..spt_values
-             WHERE type = 'P' AND number <= DATEDIFF(DAY, @StartDate, @EndDate)) AS Dates
-         WHERE DATEPART(WEEKDAY, DateValue) = 1); -- Sunday
-    
-    -- Calculate absent days
+    -- 5. Calculate Absent Days
     SET @AbsentDays = @WorkingDays - @PresentDays - @LeaveDays;
     IF @AbsentDays < 0 SET @AbsentDays = 0;
     
     -- Return results
     SELECT 
-        @WorkingDays AS WorkingDays,
-        @PresentDays AS PresentDays,
-        @AbsentDays AS AbsentDays,
-        @LeaveDays AS LeaveDays,
-        @Holidays AS Holidays,
-        @TotalDays AS TotalDays;
+        ISNULL(@WorkingDays, 0) AS WorkingDays,
+        ISNULL(@PresentDays, 0) AS PresentDays,
+        ISNULL(@AbsentDays, 0) AS AbsentDays,
+        ISNULL(@LeaveDays, 0) AS LeaveDays,
+        ISNULL(@Holidays, 0) AS Holidays,
+        ISNULL(@TotalDays, 0) AS TotalDays;
 END
 GO
 

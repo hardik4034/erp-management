@@ -41,4 +41,7 @@ router.get('/unmapped', biometric.getUnmappedIds);
 /** GET /api/biometric/status — Integration health check */
 router.get('/status', biometric.getStatus);
 
+/** POST /api/biometric/mock-punch — Simulate a biometric punch for testing */
+router.post('/mock-punch', biometric.mockPunch);
+
 module.exports = router;

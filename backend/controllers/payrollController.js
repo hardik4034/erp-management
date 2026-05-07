@@ -1,48 +1,41 @@
 const sql = require('mssql');
 const { getConnection } = require('../config/database');
 const { successResponse, errorResponse } = require('../utils/helpers');
+const logger = require('../utils/logger');
 
 // Get all payroll records
 const getAllPayroll = async (req, res, next) => {
     try {
         const { employeeId, status, fromDate, toDate, year, month, salaryCycle } = req.query;
-        
-        console.log('getAllPayroll called with params:', req.query);
-        
-        const pool = await getConnection();
-        
-        // Convert empty strings to null for proper SQL parameter handling
-        const empId = employeeId && employeeId !== '' ? parseInt(employeeId) : null;
-        const statusVal = status && status !== '' ? status : null;
-        
-        // Validate dates - only pass if they are valid date strings
+
+        // Normalize query params — convert empty strings to null for correct SQL handling
+        const empId      = employeeId && employeeId !== '' ? parseInt(employeeId) : null;
+        const statusVal  = status     && status     !== '' ? status               : null;
+        const yearVal    = year       && year       !== '' ? parseInt(year)        : null;
+        const monthVal   = month      && month      !== '' ? parseInt(month)       : null;
+        const cycleVal   = salaryCycle && salaryCycle !== '' ? salaryCycle         : null;
+
+        // Only pass dates that are valid date strings (avoid sending "undefined" to SQL)
         const fromDateVal = fromDate && fromDate !== '' && !isNaN(Date.parse(fromDate)) ? fromDate : null;
-        const toDateVal = toDate && toDate !== '' && !isNaN(Date.parse(toDate)) ? toDate : null;
-        
-        // Parse year and month
-        const yearVal = year && year !== '' ? parseInt(year) : null;
-        const monthVal = month && month !== '' ? parseInt(month) : null;
-        const cycleVal = salaryCycle && salaryCycle !== '' ? salaryCycle : null;
-        
-        console.log('Executing sp_GetAllPayroll with:', {
-            empId, statusVal, fromDateVal, toDateVal, yearVal, monthVal, cycleVal
-        });
-        
+        const toDateVal   = toDate   && toDate   !== '' && !isNaN(Date.parse(toDate))   ? toDate   : null;
+
+        logger.debug('getAllPayroll', { empId, statusVal, fromDateVal, toDateVal, yearVal, monthVal, cycleVal });
+
+        const pool = await getConnection();
+
         const result = await pool.request()
-            .input('EmployeeId', sql.Int, empId)
-            .input('Status', sql.NVarChar(20), statusVal)
-            .input('FromDate', sql.Date, fromDateVal)
-            .input('ToDate', sql.Date, toDateVal)
-            .input('Year', sql.Int, yearVal)
-            .input('Month', sql.Int, monthVal)
-            .input('SalaryCycle', sql.NVarChar(20), cycleVal)
+            .input('EmployeeId',   sql.Int,          empId)
+            .input('Status',       sql.NVarChar(20),  statusVal)
+            .input('FromDate',     sql.Date,          fromDateVal)
+            .input('ToDate',       sql.Date,          toDateVal)
+            .input('Year',         sql.Int,          yearVal)
+            .input('Month',        sql.Int,          monthVal)
+            .input('SalaryCycle',  sql.NVarChar(20),  cycleVal)
             .execute('sp_GetAllPayroll');
 
-        console.log(`sp_GetAllPayroll returned ${result.recordset.length} records`);
-        
         res.json(successResponse(result.recordset));
     } catch (error) {
-        console.error('Error in getAllPayroll:', error);
+        logger.error('getAllPayroll error', { error: error.message });
         next(error);
     }
 };
@@ -84,19 +77,10 @@ const generatePayroll = async (req, res, next) => {
             useAttendance = true
         } = req.body;
         
-        console.log('Generate Payroll Request:', {
-            employeeId,
-            payPeriodStart,
-            payPeriodEnd,
-            payDate,
-            includeExpenseClaims,
-            addSewerageToSalary,
-            useAttendance
-        });
+        logger.debug('generatePayroll', { employeeId, payPeriodStart, payPeriodEnd });
         
         const pool = await getConnection();
 
-        console.log('Executing sp_GeneratePayroll...');
         const result = await pool.request()
             .input('EmployeeId', sql.Int, employeeId)
             .input('PayPeriodStart', sql.Date, payPeriodStart)
@@ -107,7 +91,6 @@ const generatePayroll = async (req, res, next) => {
             .input('UseAttendance', sql.Bit, useAttendance)
             .execute('sp_GeneratePayroll');
 
-        console.log('sp_GeneratePayroll result:', result.recordset);
         const payrollId = result.recordset[0].PayrollId;
 
         // Get the created payroll
@@ -120,7 +103,7 @@ const generatePayroll = async (req, res, next) => {
 
         res.status(201).json(successResponse(payroll, 'Payroll generated successfully'));
     } catch (error) {
-        console.error('Error in generatePayroll:', error);
+        logger.error('generatePayroll error', { error: error.message });
         next(error);
     }
 };

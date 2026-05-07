@@ -1,167 +1,29 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Employee Salary - HRMS</title>
-    <link rel="icon" type="image/x-icon" href="../assets/favicon.png"><link rel="shortcut icon" type="image/x-icon" href="../assets/favicon.png">
+    <link rel="icon" type="image/x-icon" href="../assets/favicon.png">
+    <link rel="shortcut icon" type="image/x-icon" href="../assets/favicon.png">
     <link rel="stylesheet" href="../styles/main.css">
     <link rel="stylesheet" href="../styles/toast.css">
     <link rel="stylesheet" href="../styles/role-selector.css">
+    <link rel="stylesheet" href="../styles/premium-tables.css">
+    <link rel="stylesheet" href="../styles/tailwind.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: { DEFAULT: '#ea580c', dark: '#c2410c', light: '#f97316' }
+                    }
+                }
+            }
+        }
+    </script>
     <style>
-        .salary-table-container {
-            overflow-x: auto;
-        }
-        
-        .salary-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        
-        .salary-table th,
-        .salary-table td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid #e0e0e0;
-        }
-        
-        .salary-table th {
-            background-color: #f5f5f5;
-            font-weight: 600;
-            font-size: 14px;
-        }
-        
-        .employee-info {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .employee-avatar {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: 600;
-            font-size: 14px;
-        }
-        
-        .employee-details {
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .employee-name {
-            font-weight: 500;
-            font-size: 14px;
-        }
-        
-        .employee-designation {
-            font-size: 12px;
-            color: #888;
-        }
-        
-        .inline-select {
-            padding: 6px 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 13px;
-            min-width: 120px;
-        }
-        
-        .inline-input {
-            padding: 6px 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 13px;
-            width: 120px;
-        }
-        
-        .toggle-switch {
-            position: relative;
-            display: inline-block;
-            width: 44px;
-            height: 24px;
-        }
-        
-        .toggle-switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-        
-        .toggle-slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #ccc;
-            transition: .4s;
-            border-radius: 24px;
-        }
-        
-        .toggle-slider:before {
-            position: absolute;
-            content: "";
-            height: 18px;
-            width: 18px;
-            left: 3px;
-            bottom: 3px;
-            background-color: white;
-            transition: .4s;
-            border-radius: 50%;
-        }
-        
-        input:checked + .toggle-slider {
-            background-color: #2196F3;
-        }
-        
-        input:checked + .toggle-slider:before {
-            transform: translateX(20px);
-        }
-        
-        .add-salary-btn {
-            background: none;
-            border: none;
-            color: #2196F3;
-            cursor: pointer;
-            font-size: 20px;
-            padding: 4px 8px;
-        }
-        
-        .add-salary-btn:hover {
-            background-color: #f0f0f0;
-            border-radius: 4px;
-        }
-        
-        .filter-bar {
-            display: flex;
-            gap: 15px;
-            align-items: center;
-            padding: 15px;
-            background: #f9f9f9;
-            border-radius: 8px;
-            margin-bottom: 20px;
-        }
-        
-        .filter-group {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-        
-        .filter-group label {
-            font-size: 12px;
-            color: #666;
-            font-weight: 500;
-        }
-        
         /* Role Badge in Modal */
         .role-badge-small {
             display: inline-block;
@@ -212,12 +74,13 @@
     <script>
         // Detect if page is loaded in iframe
         if (window.self !== window.top) {
-            document.addEventListener('DOMContentLoaded', function() {
+            document.addEventListener('DOMContentLoaded', function () {
                 document.body.classList.add('in-iframe');
             });
         }
     </script>
 </head>
+
 <body>
     <div class="app-container">
         <!-- Sidebar Overlay -->
@@ -226,66 +89,43 @@
         <!-- Sidebar -->
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
-                <img src="../assets/logo.png" alt="Soleos Logo" class="sidebar-logo">
-                <button class="sidebar-close-btn" id="sidebarClose">&times;</button>
+                <a href="../index.html"><img src="../assets/soleos.png" alt="Soleos Logo" class="sidebar-logo"></a>
+                <button class="sidebar-close-btn" id="sidebarClose">&#x2715;</button>
             </div>
             <nav class="sidebar-nav">
-                <div class="nav-item">
-                    <a href="../index.html" class="nav-link">
-                        <i>📊</i> Dashboard
-                    </a>
-                </div>
-                <div class="nav-item">
-                    <a href="employees.html" class="nav-link">
-                        <i>👥</i> Employees
-                    </a>
-                </div>
-                <div class="nav-item">
-                    <a href="attendance.html" class="nav-link">
-                        <i>📅</i> Attendance
-                    </a>
-                </div>
-                <div class="nav-item">
-                    <a href="leaves.html" class="nav-link">
-                        <i>🏖️</i> Leaves
-                    </a>
-                </div>
-                <div class="nav-item">
-                    <a href="holidays.html" class="nav-link">
-                        <i>🎉</i> Holidays
-                    </a>
-                </div>
-                <div class="nav-item">
-                    <a href="payroll.html" class="nav-link">
-                        <i>💰</i> Payroll
-                    </a>
-                </div>
-                <div class="nav-item">
-                    <a href="employee-salary.html" class="nav-link active">
-                        <i>💵</i> Employee Salary
-                    </a>
-                </div>
-                <div class="nav-item">
-                    <a href="departments.html" class="nav-link">
-                        <i>🏢</i> Departments
-                    </a>
-                </div>
-                <div class="nav-item">
-                    <a href="designations.html" class="nav-link">
-                        <i>💼</i> Designations
-                    </a>
-                </div>
-                <div class="nav-item">
-                    <a href="appreciations.html" class="nav-link">
-                        <i>🏆</i> Appreciations
-                    </a>
+                <div class="nav-section-label">Main</div>
+                <div class="nav-item"><a href="../index.html" class="nav-link"><i>📊</i> Dashboard</a></div>
+                <div class="nav-item"><a href="./profile.html" id="myProfileLink" class="nav-link"><i>👤</i> My
+                        Profile</a></div>
+                <div class="nav-item"><a href="./employees.html" class="nav-link"><i>👥</i> Employees</a></div>
+
+                <div class="nav-section-label">Time & Leave</div>
+                <div class="nav-item"><a href="./attendance.html" class="nav-link"><i>📅</i> Attendance</a></div>
+                <div class="nav-item"><a href="./leaves.html" class="nav-link"><i>🏖️</i> Leaves</a></div>
+                <div class="nav-item"><a href="./holidays.html" class="nav-link"><i>🎉</i> Holidays</a></div>
+                <div class="nav-item"><a href="./calendar.html" class="nav-link"><i>📆</i> Calendar</a></div>
+
+                <div class="nav-section-label">Payroll</div>
+                <div class="nav-item"><a href="./payroll.html" class="nav-link"><i>💰</i> Payroll</a></div>
+                <div class="nav-item"><a href="./employee-salary.html" class="nav-link"><i>💵</i> Employee Salary</a>
                 </div>
 
-                <div class="nav-item">
-                    <a href = "note.html" class="nav-link">
-                        <i>📝</i> Note
-                    </a>
-                </div>
+                <div class="nav-section-label">Organisation</div>
+                <div class="nav-item"><a href="./departments.html" class="nav-link"><i>🏢</i> Departments</a></div>
+                <div class="nav-item"><a href="./designations.html" class="nav-link"><i>💼</i> Designations</a></div>
+                <div class="nav-item"><a href="./appreciations.html" class="nav-link"><i>🏆</i> Appreciations</a></div>
+                <div class="nav-item"><a href="./assets.html" class="nav-link hr-only"><i>💻</i> Assets</a></div>
+                <div class="nav-item"><a href="./note.html" class="nav-link"><i>📝</i> Notes</a></div>
+
+                <div class="nav-section-label">Reports</div>
+                <div class="nav-item"><a href="./reports.html" class="nav-link hr-only"><i>📈</i> Reports</a></div>
+
+                <div class="nav-section-label">Settings</div>
+                <div class="nav-item"><a href="./audit-logs.html" class="nav-link admin-only"><i>📜</i> Audit Logs</a></div>
+                <div class="nav-item"><a href="./biometric-settings.html" class="nav-link hr-only"><i>🔐</i> Biometric
+                        Settings</a></div>
+
+
             </nav>
         </aside>
 
@@ -297,19 +137,33 @@
                     <button class="hamburger-btn" id="sidebarToggle">
                         ☰
                     </button>
-                    <div class="header-title"><h1>Employee Salary</h1></div>
-                </div>
-                <div class="header-actions">
-                    <div class="role-selector">
-                        <label for="roleDropdown">Current Role:</label>
-                        <select id="roleDropdown">
-                            <option value="admin">Admin</option>
-                            <option value="hr">HR</option>
-                            <option value="manager">Manager</option>
-                            <option value="employee">Employee</option>
-                        </select>
+                    <div class="header-title">
+                        <h1>Employee Salary</h1>
                     </div>
-                    <span class="role-badge" id="roleBadge">Employee</span>
+                </div>
+                                <div class="header-actions">
+                    <!-- Global Search -->
+                    <div class="global-search" id="globalSearchWrap">
+                        <span class="global-search-icon">🔍</span>
+                        <input type="text" id="globalSearchInput" class="global-search-input" placeholder="Search pages..." autocomplete="off">
+                        <div class="global-search-dropdown" id="globalSearchDropdown"></div>
+                    </div>
+                    <!-- Notification Bell -->
+                    <button class="notif-btn" id="notifBtn" title="Pending approvals">
+                        🔔
+                        <span class="notif-badge" id="notifBadge" style="display:none;">0</span>
+                    </button>
+                    <!-- Dark Mode Toggle -->
+                    <button class="dark-mode-btn" id="darkModeBtn" title="Toggle dark mode">🌙</button>
+
+                    <div class="user-info">
+                        <div class="user-avatar" id="userAvatarInitial">?</div>
+                        <div>
+                            <div class="user-name" id="userDisplayName">Loading...</div>
+                            <div class="user-role-badge"><span class="role-badge" id="roleBadge">Loading...</span></div>
+                        </div>
+                    </div>
+                    <button class="btn-logout" id="logoutBtn" onclick="auth.logout()">Logout</button>
                 </div>
             </header>
 
@@ -318,9 +172,18 @@
                 <div class="card">
                     <div class="card-header">
                         <h3 class="card-title">Employee Salary Configuration</h3>
-                        <button class="btn btn-outline" onclick="exportSalaries()">
-                            📤 Export
-                        </button>
+                        <div style="display: flex; gap: 10px;">
+                            <button class="btn btn-primary" onclick="openSalaryModal(null)">
+                                ➕ Add Salary
+                            </button>
+                            <button class="btn btn-primary" onclick="openSalaryGroupModal()"
+                                style="background-color: #0d9488;">
+                                ➕ Add Group
+                            </button>
+                            <button class="btn btn-outline" onclick="exportSalaries()">
+                                📤 Export
+                            </button>
+                        </div>
                     </div>
 
                     <!-- Filters -->
@@ -339,7 +202,8 @@
                         </div>
                         <div class="filter-group">
                             <label>Search</label>
-                            <input type="text" id="searchBox" class="inline-input" placeholder="Start typing to search" oninput="applyFilters()">
+                            <input type="text" id="searchBox" class="inline-input" placeholder="Start typing to search"
+                                oninput="applyFilters()">
                         </div>
                     </div>
 
@@ -348,12 +212,16 @@
                         <table class="salary-table">
                             <thead>
                                 <tr>
-                                    <th>Name</th>
-                                    <th>Employee Salary Cycle</th>
-                                    <th>Salary Group</th>
-                                    <th>Allow Payroll Generate</th>
-                                    <th>Net Salary (Monthly)</th>
-                                    <th>Actions</th>
+                                    <th style="width: 40px;">
+                                        <input type="checkbox" id="selectAll" onchange="toggleSelectAll()">
+                                    </th>
+                                    <th>NAME</th>
+                                    <th>NET SALARY</th>
+                                    <th>CTC</th>
+                                    <th>SALARY CYCLE</th>
+                                    <th>SALARY GROUP</th>
+                                    <th style="text-align: center;">GENERATE</th>
+                                    <th style="width: 60px;">ACTIONS</th>
                                 </tr>
                             </thead>
                             <tbody id="salaryTableBody">
@@ -380,64 +248,84 @@
                     <input type="hidden" id="employeeSalaryId">
                     <input type="hidden" id="modalEmployeeId">
 
-                    <!-- Employee Selection with Avatar -->
                     <div class="form-group" style="margin-bottom: 25px;">
-                        <div style="display: flex; align-items: center; gap: 15px; padding: 15px; background: #f9f9f9; border-radius: 8px;">
-                            <div id="modalEmployeeAvatar" class="employee-avatar" style="width: 48px; height: 48px; font-size: 18px;">
-                                RL
-                            </div>
+                        <label class="form-label" style="font-weight: 600; margin-bottom: 8px; display: block;">Select
+                            Employee</label>
+                        <div id="modalEmployeeDisplay"
+                            style="display: flex; align-items: center; gap: 15px; padding: 15px; background: #f9f9f9; border-radius: 8px;">
+                            <div id="modalEmployeeAvatar" class="employee-avatar"
+                                style="width: 48px; height: 48px; font-size: 18px;">RL</div>
                             <div style="flex: 1;">
                                 <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px;">
-                                    <div id="modalEmployeeName" style="font-weight: 600; font-size: 16px;">
-                                        Roselyn Lehner
-                                    </div>
-                                    <span id="modalEmployeeRole" class="role-badge-small employee">
-                                        Employee
-                                    </span>
+                                    <div id="modalEmployeeName" style="font-weight: 600; font-size: 16px;">Roselyn
+                                        Lehner</div>
+                                    <span id="modalEmployeeRole" class="role-badge-small employee">Employee</span>
                                 </div>
-                                <div id="modalEmployeeDesignation" style="font-size: 13px; color: #888;">
-                                    UI/UX Designer
+                                <div id="modalEmployeeDesignation" style="font-size: 13px; color: #888;">UI/UX Designer
                                 </div>
                             </div>
                         </div>
+                        <select id="modalEmployeeSelect" class="form-control" style="display: none;"
+                            onchange="onEmployeeSelectedInModal(this.value)">
+                            <option value="">-- Choose Employee --</option>
+                        </select>
                     </div>
 
-                    <!-- Annual CTC -->
-                    <div class="form-group" style="margin-bottom: 30px;">
-                        <label class="form-label" style="font-weight: 600; margin-bottom: 8px; display: block;">
-                            Annual CTC <span style="color: #e74c3c;">*</span>
-                        </label>
-                        <div style="position: relative;">
-                            <span style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #666; font-weight: 500;">$</span>
-                            <input type="number" id="annualCTC" class="form-control" 
-                                   style="padding-left: 28px; font-size: 16px; font-weight: 500;" 
-                                   placeholder="0.00" step="0.01" required
-                                   oninput="calculateSalaryComponents()">
+                    <div style="display: flex; gap: 20px; margin-bottom: 30px;">
+                        <!-- Annual CTC -->
+                        <div class="form-group" style="flex: 1;">
+                            <label class="form-label" style="font-weight: 600; margin-bottom: 8px; display: block;">
+                                Annual CTC <span style="color: #e74c3c;">*</span>
+                            </label>
+                            <div style="position: relative;">
+                                <span
+                                    style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #666; font-weight: 500;">$</span>
+                                <input type="number" id="annualCTC" class="form-control"
+                                    style="padding-left: 28px; font-size: 16px; font-weight: 500;" placeholder="0.00"
+                                    step="0.01" required oninput="calculateSalaryComponents()">
+                            </div>
+                            <div style="margin-top: 8px; font-size: 13px; color: #666;">
+                                (Cost to company value for the whole year)
+                            </div>
                         </div>
-                        <div style="margin-top: 8px; font-size: 13px; color: #666;">
-                            (Cost to company value for the whole year)
+
+                        <!-- Salary Group Selection -->
+                        <div class="form-group" style="flex: 1;">
+                            <label class="form-label" style="font-weight: 600; margin-bottom: 8px; display: block;">
+                                Salary Group (Option Set)
+                            </label>
+                            <select id="modalSalaryGroup" class="form-control" style="font-size: 15px;">
+                                <option value="">-- No Group --</option>
+                            </select>
+                            <div style="margin-top: 8px; font-size: 13px; color: #666;">
+                                (Select a predefined salary option set)
+                            </div>
                         </div>
                     </div>
 
                     <!-- Salary Component Section -->
                     <div style="margin-bottom: 25px;">
-                        
+
 
                         <!-- Salary Components Table -->
                         <div style="border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden;">
                             <table style="width: 100%; border-collapse: collapse;">
                                 <thead>
                                     <tr style="background: #f5f5f5;">
-                                        <th style="padding: 12px; text-align: left; font-size: 13px; font-weight: 600; border-bottom: 1px solid #e0e0e0;">
+                                        <th
+                                            style="padding: 12px; text-align: left; font-size: 13px; font-weight: 600; border-bottom: 1px solid #e0e0e0;">
                                             Salary Component
                                         </th>
-                                        <th style="padding: 12px; text-align: left; font-size: 13px; font-weight: 600; border-bottom: 1px solid #e0e0e0; width: 200px;">
+                                        <th
+                                            style="padding: 12px; text-align: left; font-size: 13px; font-weight: 600; border-bottom: 1px solid #e0e0e0; width: 200px;">
                                             Calculation Type
                                         </th>
-                                        <th style="padding: 12px; text-align: right; font-size: 13px; font-weight: 600; border-bottom: 1px solid #e0e0e0; width: 150px;">
+                                        <th
+                                            style="padding: 12px; text-align: right; font-size: 13px; font-weight: 600; border-bottom: 1px solid #e0e0e0; width: 150px;">
                                             Monthly Amount
                                         </th>
-                                        <th style="padding: 12px; text-align: right; font-size: 13px; font-weight: 600; border-bottom: 1px solid #e0e0e0; width: 150px;">
+                                        <th
+                                            style="padding: 12px; text-align: right; font-size: 13px; font-weight: 600; border-bottom: 1px solid #e0e0e0; width: 150px;">
                                             Annual Amount
                                         </th>
                                     </tr>
@@ -445,7 +333,8 @@
                                 <tbody>
                                     <!-- Earnings Section Header -->
                                     <tr style="background: #fafafa;">
-                                        <td colspan="4" style="padding: 10px 12px; font-weight: 600; font-size: 14px; border-bottom: 1px solid #e0e0e0;">
+                                        <td colspan="4"
+                                            style="padding: 10px 12px; font-weight: 600; font-size: 14px; border-bottom: 1px solid #e0e0e0;">
                                             Earnings
                                         </td>
                                     </tr>
@@ -457,24 +346,27 @@
                                         </td>
                                         <td style="padding: 12px; border-bottom: 1px solid #e0e0e0;">
                                             <div style="display: flex; align-items: center; gap: 8px;">
-                                                <input type="number" id="basicSalaryPercent" 
-                                                       style="width: 70px; padding: 6px 8px; border: 1px solid #ddd; border-radius: 4px; text-align: right;"
-                                                       value="50" min="0" max="100" step="0.01"
-                                                       oninput="calculateSalaryComponents()">
-                                                <select style="flex: 1; padding: 6px 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px;">
+                                                <input type="number" id="basicSalaryPercent"
+                                                    style="width: 70px; padding: 6px 8px; border: 1px solid #ddd; border-radius: 4px; text-align: right;"
+                                                    value="50" min="0" max="100" step="0.01"
+                                                    oninput="calculateSalaryComponents()">
+                                                <select
+                                                    style="flex: 1; padding: 6px 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px;">
                                                     <option value="percent">% of CTC</option>
                                                     <option value="fixed">Fixed Amount</option>
                                                 </select>
                                             </div>
                                         </td>
                                         <td style="padding: 12px; text-align: right; border-bottom: 1px solid #e0e0e0;">
-                                            <div style="display: flex; align-items: center; justify-content: flex-end; gap: 6px;">
+                                            <div
+                                                style="display: flex; align-items: center; justify-content: flex-end; gap: 6px;">
                                                 <span style="color: #666;">$</span>
                                                 <span id="basicSalaryMonthly" style="font-weight: 500;">0.00</span>
                                             </div>
                                         </td>
                                         <td style="padding: 12px; text-align: right; border-bottom: 1px solid #e0e0e0;">
-                                            <div style="display: flex; align-items: center; justify-content: flex-end; gap: 6px;">
+                                            <div
+                                                style="display: flex; align-items: center; justify-content: flex-end; gap: 6px;">
                                                 <span style="color: #666;">$</span>
                                                 <span id="basicSalaryAnnual" style="font-weight: 500;">0.00</span>
                                             </div>
@@ -487,20 +379,23 @@
                                             <div style="font-weight: 500;">Special Allowance</div>
                                         </td>
                                         <td style="padding: 12px; border-bottom: 1px solid #e0e0e0;">
-                                            <select style="width: 100%; padding: 6px 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px;">
+                                            <select
+                                                style="width: 100%; padding: 6px 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px;">
                                                 <option value="special">Special Allowance</option>
                                                 <option value="hra">HRA</option>
                                                 <option value="transport">Transport Allowance</option>
                                             </select>
                                         </td>
                                         <td style="padding: 12px; text-align: right; border-bottom: 1px solid #e0e0e0;">
-                                            <div style="display: flex; align-items: center; justify-content: flex-end; gap: 6px;">
+                                            <div
+                                                style="display: flex; align-items: center; justify-content: flex-end; gap: 6px;">
                                                 <span style="color: #666;">$</span>
                                                 <span id="specialAllowanceMonthly" style="font-weight: 500;">0.00</span>
                                             </div>
                                         </td>
                                         <td style="padding: 12px; text-align: right; border-bottom: 1px solid #e0e0e0;">
-                                            <div style="display: flex; align-items: center; justify-content: flex-end; gap: 6px;">
+                                            <div
+                                                style="display: flex; align-items: center; justify-content: flex-end; gap: 6px;">
                                                 <span style="color: #666;">$</span>
                                                 <span id="specialAllowanceAnnual" style="font-weight: 500;">0.00</span>
                                             </div>
@@ -509,7 +404,8 @@
 
                                     <!-- Additional Components Note -->
                                     <tr>
-                                        <td colspan="4" style="padding: 12px; text-align: center; color: #888; font-size: 13px; font-style: italic;">
+                                        <td colspan="4"
+                                            style="padding: 12px; text-align: center; color: #888; font-size: 13px; font-style: italic;">
                                             (Annual CTC = Sum of all other components)
                                         </td>
                                     </tr>
@@ -519,7 +415,8 @@
                     </div>
 
                     <!-- Cost To Company Summary -->
-                    <div style="background: #f0f8ff; border: 1px solid #b3d9ff; border-radius: 8px; padding: 20px; margin-bottom: 25px;">
+                    <div
+                        style="background: #f0f8ff; border: 1px solid #b3d9ff; border-radius: 8px; padding: 20px; margin-bottom: 25px;">
                         <div style="display: flex; justify-content: space-between; align-items: center;">
                             <div>
                                 <div style="font-size: 14px; color: #666; margin-bottom: 6px;">Cost To Company</div>
@@ -561,11 +458,43 @@
         </div>
     </div>
 
+    <!-- Add Salary Group Modal -->
+    <div class="modal" id="salaryGroupModal">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h3 class="modal-title">Add Salary Group</h3>
+                <button class="modal-close" onclick="closeSalaryGroupModal()">&times;</button>
+            </div>
+            <div class="modal-body" style="padding: 20px;">
+                <form id="salaryGroupForm">
+                    <div class="form-group" style="margin-bottom: 20px;">
+                        <label class="form-label" style="font-weight: 600;">Group Name <span
+                                style="color: #e74c3c;">*</span></label>
+                        <input type="text" id="groupName" class="form-control" placeholder="e.g. Senior Management"
+                            required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" style="font-weight: 600;">Description</label>
+                        <textarea id="groupDescription" class="form-control" rows="3"
+                            placeholder="Enter group description..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer" style="padding: 15px 20px;">
+                <button class="btn btn-primary" onclick="saveSalaryGroup()">✓ Save</button>
+                <button class="btn btn-outline" onclick="closeSalaryGroupModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
     <script src="../scripts/toast.js"></script>
     <script src="../scripts/sidebar.js"></script>
     <script src="../scripts/role-manager.js"></script>
     <script src="../scripts/auth.js"></script>
     <script src="../scripts/api.js"></script>
+    <script src="../scripts/theme.js"></script>
+    <script src="../scripts/header.js"></script>
+
     <script>
         // Initialize Auth
         auth.initAuth();
@@ -592,7 +521,7 @@
                 // If viewing specific employee, filter to only that employee
                 if (specificEmployeeId) {
                     employees = employees.filter(emp => emp.EmployeeId == specificEmployeeId);
-                    
+
                     // Hide filters and export button when viewing single employee
                     const filterBar = document.querySelector('.filter-bar');
                     const exportBtn = document.querySelector('.btn-outline');
@@ -635,10 +564,10 @@
             const desSelect = document.getElementById('filterDesignation');
             const deptSelect = document.getElementById('filterDepartment');
 
-            desSelect.innerHTML = '<option value="">All</option>' + 
+            desSelect.innerHTML = '<option value="">All</option>' +
                 designations.map(d => `<option value="${d.DesignationId}">${d.DesignationName}</option>`).join('');
 
-            deptSelect.innerHTML = '<option value="">All</option>' + 
+            deptSelect.innerHTML = '<option value="">All</option>' +
                 departments.map(d => `<option value="${d.DepartmentId}">${d.DepartmentName}</option>`).join('');
         }
 
@@ -651,7 +580,7 @@
             filteredEmployees = employees.filter(emp => {
                 const matchesDes = !desFilter || emp.DesignationId == desFilter;
                 const matchesDept = !deptFilter || emp.DepartmentId == deptFilter;
-                const matchesSearch = !searchText || 
+                const matchesSearch = !searchText ||
                     emp.FirstName.toLowerCase().includes(searchText) ||
                     emp.LastName.toLowerCase().includes(searchText) ||
                     emp.EmployeeCode.toLowerCase().includes(searchText);
@@ -678,13 +607,22 @@
                 return `
                 <tr>
                     <td>
-                        <div class="employee-info">
-                            <div class="employee-avatar">${initials}</div>
-                            <div class="employee-details">
+                        <input type="checkbox" class="row-checkbox" data-id="${emp.EmployeeId}">
+                    </td>
+                    <td>
+                        <div class="employee-cell">
+                            <div class="employee-avatar orange">${initials}</div>
+                            <div class="employee-info">
                                 <div class="employee-name">${emp.FirstName} ${emp.LastName}</div>
-                                <div class="employee-designation">${emp.DesignationName || 'N/A'}</div>
+                                <div class="employee-code">${emp.EmployeeCode}</div>
                             </div>
                         </div>
+                    </td>
+                    <td class="currency-cell net-salary">
+                        $${parseFloat(salary?.NetSalaryMonthly || 0).toFixed(2)}
+                    </td>
+                    <td class="currency-cell ctc-value">
+                        $${parseFloat(salary?.BaseSalary || 0).toFixed(2)}
                     </td>
                     <td>
                         <select class="inline-select" ${!canManage ? 'disabled' : ''} 
@@ -699,27 +637,28 @@
                         <select class="inline-select" ${!canManage ? 'disabled' : ''}
                                 onchange="updateSalaryField(${emp.EmployeeId}, 'salaryGroup', this.value)">
                             <option value="">-- Select --</option>
-                            ${salaryGroups.map(g => 
-                                `<option value="${g.SalaryGroupId}" ${salary?.SalaryGroupId == g.SalaryGroupId ? 'selected' : ''}>${g.GroupName}</option>`
-                            ).join('')}
+                            ${salaryGroups.map(g =>
+                    `<option value="${g.SalaryGroupId}" ${salary?.SalaryGroupId == g.SalaryGroupId ? 'selected' : ''}>${g.GroupName}</option>`
+                ).join('')}
                         </select>
                     </td>
-                    <td>
-                        <label class="toggle-switch">
+                    <td style="text-align: center;">
+                        <label class="toggle-switch" style="margin: 0 auto;">
                             <input type="checkbox" ${salary?.AllowPayrollGenerate ? 'checked' : ''} ${!canManage ? 'disabled' : ''}
                                    onchange="updateSalaryField(${emp.EmployeeId}, 'allowPayroll', this.checked)">
                             <span class="toggle-slider"></span>
                         </label>
                     </td>
-                    <td>
-                        <input type="number" class="inline-input" 
-                               value="${salary?.NetSalaryMonthly || ''}" 
-                               placeholder="--"
-                               ${!canManage ? 'disabled' : ''}
-                               onblur="updateSalaryField(${emp.EmployeeId}, 'netSalary', this.value)">
-                    </td>
-                    <td>
-                        ${canManage ? `<button class="add-salary-btn" onclick="openSalaryModal(${emp.EmployeeId})" title="Add/Edit Salary">+</button>` : '-'}
+                    <td class="actions-cell">
+                        <button class="actions-menu-btn" onclick="toggleActionsMenu(event, ${emp.EmployeeId})">⋮</button>
+                        <div class="actions-dropdown" id="actions-${emp.EmployeeId}">
+                            <button class="actions-dropdown-item" onclick="openSalaryModal(${emp.EmployeeId})">
+                                ${salary ? '✏️ Edit Salary' : '➕ Add Salary'}
+                            </button>
+                            <button class="actions-dropdown-item" onclick="viewSalaryHistory(${emp.EmployeeId})">
+                                🕒 View History
+                            </button>
+                        </div>
                     </td>
                 </tr>
                 `;
@@ -727,6 +666,31 @@
         }
 
         // Update salary field inline
+        function toggleActionsMenu(event, employeeId) {
+            event.stopPropagation();
+            const dropdown = document.getElementById(`actions-${employeeId}`);
+
+            // Close all other dropdowns
+            document.querySelectorAll('.actions-dropdown').forEach(d => {
+                if (d.id !== `actions-${employeeId}`) {
+                    d.classList.remove('active');
+                }
+            });
+
+            dropdown.classList.toggle('active');
+        }
+
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', () => {
+            document.querySelectorAll('.actions-dropdown').forEach(d => {
+                d.classList.remove('active');
+            });
+        });
+
+        async function viewSalaryHistory(employeeId) {
+            utils.showAlert('Salary history feature coming soon', 'info');
+        }
+
         async function updateSalaryField(employeeId, field, value) {
             if (!canManage) return;
 
@@ -781,46 +745,64 @@
 
         // Open salary modal
         function openSalaryModal(employeeId) {
-            const employee = employees.find(e => e.EmployeeId === employeeId);
-            const salary = salaries.find(s => s.EmployeeId === employeeId && s.IsActive);
+            const isNew = employeeId === null;
+            const employee = isNew ? null : employees.find(e => e.EmployeeId === employeeId);
+            const salary = isNew ? null : salaries.find(s => s.EmployeeId === employeeId && s.IsActive);
 
             document.getElementById('modalTitle').textContent = salary ? 'Edit Salary' : 'Add Salary';
             document.getElementById('employeeSalaryId').value = salary?.EmployeeSalaryId || '';
-            document.getElementById('modalEmployeeId').value = employeeId;
-            
-            // Set employee details with avatar
-            const initials = (employee.FirstName[0] + employee.LastName[0]).toUpperCase();
-            document.getElementById('modalEmployeeAvatar').textContent = initials;
-            document.getElementById('modalEmployeeName').textContent = `${employee.FirstName} ${employee.LastName}`;
-            document.getElementById('modalEmployeeDesignation').textContent = employee.DesignationName || 'Employee';
-            
-            // Set employee role badge
-            const roleElement = document.getElementById('modalEmployeeRole');
-            const userRole = employee.Role || 'Employee'; // Get role from employee data
-            roleElement.textContent = userRole;
-            roleElement.className = `role-badge-small ${userRole.toLowerCase()}`;
+            document.getElementById('modalEmployeeId').value = employeeId || '';
+
+            // Handle employee selection UI
+            const displayEl = document.getElementById('modalEmployeeDisplay');
+            const selectEl = document.getElementById('modalEmployeeSelect');
+
+            if (isNew) {
+                displayEl.style.display = 'none';
+                selectEl.style.display = 'block';
+
+                // Populate dropdown with employees who don't have active salaries
+                const availableEmps = employees.filter(e => !salaries.some(s => s.EmployeeId === e.EmployeeId && s.IsActive));
+                selectEl.innerHTML = '<option value="">-- Choose Employee --</option>' +
+                    availableEmps.map(e => `<option value="${e.EmployeeId}">${e.FirstName} ${e.LastName} (${e.EmployeeCode})</option>`).join('');
+                selectEl.value = '';
+            } else {
+                displayEl.style.display = 'flex';
+                selectEl.style.display = 'none';
+
+                const initials = (employee.FirstName[0] + employee.LastName[0]).toUpperCase();
+                document.getElementById('modalEmployeeAvatar').textContent = initials;
+                document.getElementById('modalEmployeeName').textContent = `${employee.FirstName} ${employee.LastName}`;
+                document.getElementById('modalEmployeeDesignation').textContent = employee.DesignationName || 'Employee';
+
+                const roleElement = document.getElementById('modalEmployeeRole');
+                const userRole = employee.Role || 'Employee';
+                roleElement.textContent = userRole;
+                roleElement.className = `role-badge-small ${userRole.toLowerCase()}`;
+            }
+
+            // Populate Salary Group dropdown in modal
+            const groupSelect = document.getElementById('modalSalaryGroup');
+            groupSelect.innerHTML = '<option value="">-- No Group --</option>' +
+                salaryGroups.map(g => `<option value="${g.SalaryGroupId}">${g.GroupName}</option>`).join('');
 
             if (salary) {
-                // Calculate annual CTC from base salary (assuming base salary is annual)
+                // ... same as before ...
                 const annualCTC = salary.BaseSalary || 0;
                 document.getElementById('annualCTC').value = annualCTC;
-                
-                // Set hidden fields
+                document.getElementById('modalSalaryGroup').value = salary.SalaryGroupId || '';
                 document.getElementById('effectiveFrom').value = salary.EffectiveFrom.split('T')[0];
                 document.getElementById('currency').value = salary.Currency;
                 document.getElementById('salaryCycle').value = salary.SalaryCycle;
-                
-                // Calculate components
                 calculateSalaryComponents();
             } else {
-                // Reset form for new salary
+                // ... same as before ...
                 document.getElementById('annualCTC').value = '';
                 document.getElementById('basicSalaryPercent').value = '50';
                 document.getElementById('effectiveFrom').value = new Date().toISOString().split('T')[0];
                 document.getElementById('currency').value = 'USD';
                 document.getElementById('salaryCycle').value = 'Monthly';
-                
-                // Reset calculations
+
                 document.getElementById('basicSalaryMonthly').textContent = '0.00';
                 document.getElementById('basicSalaryAnnual').textContent = '0.00';
                 document.getElementById('specialAllowanceMonthly').textContent = '0.00';
@@ -830,6 +812,26 @@
             }
 
             document.getElementById('salaryModal').classList.add('active');
+        }
+
+        function onEmployeeSelectedInModal(employeeId) {
+            if (!employeeId) return;
+            const employee = employees.find(e => e.EmployeeId == employeeId);
+            document.getElementById('modalEmployeeId').value = employeeId;
+
+            // Show the display bar and hide select once picked (optional, but good for UI)
+            const initials = (employee.FirstName[0] + employee.LastName[0]).toUpperCase();
+            document.getElementById('modalEmployeeAvatar').textContent = initials;
+            document.getElementById('modalEmployeeName').textContent = `${employee.FirstName} ${employee.LastName}`;
+            document.getElementById('modalEmployeeDesignation').textContent = employee.DesignationName || 'Employee';
+
+            const roleElement = document.getElementById('modalEmployeeRole');
+            const userRole = employee.Role || 'Employee';
+            roleElement.textContent = userRole;
+            roleElement.className = `role-badge-small ${userRole.toLowerCase()}`;
+
+            document.getElementById('modalEmployeeDisplay').style.display = 'flex';
+            document.getElementById('modalEmployeeSelect').style.display = 'none';
         }
 
         // Calculate salary components based on CTC
@@ -844,6 +846,7 @@
             // Calculate special allowance (remaining amount)
             const specialAllowanceAnnual = annualCTC - basicSalaryAnnual;
             const specialAllowanceMonthly = specialAllowanceAnnual / 12;
+
 
             // Update display
             document.getElementById('basicSalaryMonthly').textContent = basicSalaryMonthly.toFixed(2);
@@ -861,11 +864,47 @@
             document.getElementById('netSalaryMonthly').value = monthlyCost.toFixed(2);
         }
 
-        
+
 
         function closeSalaryModal() {
             document.getElementById('salaryModal').classList.remove('active');
         }
+
+        // --- Salary Group Functions ---
+        function openSalaryGroupModal() {
+            document.getElementById('groupName').value = '';
+            document.getElementById('groupDescription').value = '';
+            document.getElementById('salaryGroupModal').classList.add('active');
+        }
+
+        function closeSalaryGroupModal() {
+            document.getElementById('salaryGroupModal').classList.remove('active');
+        }
+
+        async function saveSalaryGroup() {
+            const groupName = document.getElementById('groupName').value;
+            const description = document.getElementById('groupDescription').value;
+
+            if (!groupName) {
+                utils.showAlert('Group name is required', 'error');
+                return;
+            }
+
+            try {
+                await endpoints.salary.createGroup({ groupName, description });
+                utils.showAlert('Salary group created successfully', 'success');
+                closeSalaryGroupModal();
+
+                // Reload groups and re-render table to update dropdowns
+                const groupsResponse = await endpoints.salary.getGroups();
+                salaryGroups = groupsResponse.data || [];
+                renderTable();
+            } catch (error) {
+                console.error('Error creating salary group:', error);
+                utils.showAlert(error.message || 'Failed to create salary group', 'error');
+            }
+        }
+        // ------------------------------
 
         // Save salary
         async function saveSalary() {
@@ -881,12 +920,12 @@
 
             const salaryId = document.getElementById('employeeSalaryId').value;
             const employeeId = parseInt(document.getElementById('modalEmployeeId').value);
-            
+
             // Get values from hidden fields (populated by calculateSalaryComponents)
             const baseSalary = parseFloat(document.getElementById('baseSalary').value);
             const netSalaryMonthly = parseFloat(document.getElementById('netSalaryMonthly').value);
             const effectiveFrom = document.getElementById('effectiveFrom').value;
-            
+
             if (!effectiveFrom) {
                 utils.showAlert('Effective date is required', 'error');
                 return;
@@ -897,7 +936,7 @@
                 baseSalary: baseSalary,
                 salaryCycle: document.getElementById('salaryCycle').value,
                 currency: document.getElementById('currency').value,
-                salaryGroupId: null, // Not used in new interface
+                salaryGroupId: document.getElementById('modalSalaryGroup').value || null,
                 netSalaryMonthly: netSalaryMonthly,
                 effectiveFrom: effectiveFrom,
                 effectiveTo: null,
@@ -914,7 +953,7 @@
                 }
 
                 closeSalaryModal();
-                
+
                 // Reload salaries
                 const response = await endpoints.salary.getAll();
                 salaries = response.data || [];
@@ -961,4 +1000,5 @@
         loadData();
     </script>
 </body>
+
 </html>

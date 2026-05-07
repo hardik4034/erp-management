@@ -11,7 +11,7 @@ let activeDropdown = null;
 const canManage = auth.hasRole('Admin', 'HR');
 
 // ========== MY LEAVES SECTION ==========
-const CURRENT_EMPLOYEE_ID = 1; // For testing - can be changed to logged-in user
+const getCurrentEmpId = () => window.roleManager ? window.roleManager.getCurrentEmployeeId() : 1;
 let employeeData = null;
 let leaveBalanceData = [];
 
@@ -20,14 +20,22 @@ let leaveBalanceData = [];
 async function loadLeaves() {
     try {
         const params = {};
-        const status = document.getElementById('filterStatus').value;
-        const empId = document.getElementById('filterEmployee').value;
-        const leaveTypeId = document.getElementById('filterLeaveType').value;
-        const fromDate = document.getElementById('filterFromDate').value;
-        const toDate = document.getElementById('filterToDate').value;
+        const status = document.getElementById('filterStatus')?.value;
+        const empId = document.getElementById('filterEmployee')?.value;
+        const leaveTypeId = document.getElementById('filterLeaveType')?.value;
+        const fromDate = document.getElementById('filterFromDate')?.value;
+        const toDate = document.getElementById('filterToDate')?.value;
         
         if (status) params.status = status;
         if (empId) params.employeeId = empId;
+
+        const showDeleted = document.getElementById('showDeletedToggle')?.checked;
+        if (showDeleted) params.showDeleted = 'true';
+
+        // Load employee data for the profile card for "My Leaves" mode
+        if (window.roleManager) {
+            loadEmployeeProfile(getCurrentEmpId());
+        }
 
         const response = await endpoints.leaves.getAll(params);
         let allLeaves = response.data || [];
@@ -109,7 +117,7 @@ async function loadLeaves() {
             filteredLeaves = filteredLeaves.filter(l => new Date(l.ToDate) <= new Date(toDate));
         }
         
-        renderTable(filteredLeaves);
+        displayLeaves(filteredLeaves);
         
         // Ensure UI permissions are applied
         if (window.roleManager) {
@@ -168,92 +176,106 @@ function getInitials(firstName, lastName) {
     return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
 }
 
-function renderTable(leavesToRender = leaves) {
-    const tbody = document.getElementById('leavesTable');
+function renderTable(leavesToRender, tableId) {
+    const tbody = document.getElementById(tableId);
+    if (!tbody) return;
+
     if (leavesToRender.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="8" class="text-center">No leave requests found</td></tr>';
+        tbody.innerHTML = `<tr><td colspan="7" class="text-center">No leave records found</td></tr>`;
         return;
     }
 
     tbody.innerHTML = leavesToRender.map((leave, index) => {
+        const isDeleted = leave.IsDeleted === true || leave.IsDeleted === 1;
         const duration = getDuration(leave.FromDate, leave.ToDate);
-        const leaveTypeBadge = getLeaveTypeBadgeClass(leave.LeaveType);
-        const initials = getInitials(leave.FirstName, leave.LastName);
-        const isPaid = leave.LeaveType.toLowerCase().includes('paid') && !leave.LeaveType.toLowerCase().includes('unpaid');
+        const leaveTypeBadge = getLeaveTypeBadgeClass(leave.LeaveTypeName || leave.LeaveType || '');
+        const initials = leave.EmployeeName ? 
+            leave.EmployeeName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : 
+            getInitials(leave.FirstName || 'U', leave.LastName || 'N');
+        const status = (leave.Status || 'Pending').toLowerCase();
         
-        // Determine permissions
-        // Use roleManager if available, otherwise fallback to auth (which might be mock)
-        // Employee role should NOT see actions
-        let canShowActions = false;
-        if (window.roleManager) {
-            const role = window.roleManager.getCurrentRole();
-            // Show actions for Admin, HR, Manager. Hide for Employee.
-            canShowActions = ['admin', 'hr', 'manager'].includes(role);
+        // Role-based permissions
+        const currentRole = window.roleManager ? window.roleManager.getCurrentRole() : 'employee';
+        const currentEmpId = window.roleManager ? window.roleManager.getCurrentEmployeeId() : null;
+        const isAdminHR = ['admin', 'hr'].includes(currentRole);
+        const isManager = currentRole === 'manager';
+        const isOwnLeave = leave.EmployeeId == currentEmpId;
+        
+        // Action visibility logic
+        const canApprove = (isAdminHR || isManager) && !isOwnLeave && status === 'pending';
+        const canEdit = isAdminHR || (isOwnLeave && status === 'pending');
+        const canDelete = isAdminHR || (isOwnLeave && status === 'pending');
+        const canView = true;
+
+        const actionHtml = `
+            <div class="action-dropdown">
+                <button class="action-btn" onclick="toggleActionMenu(this)">⋮</button>
+                <div class="action-menu">
+                    ${isDeleted ? `
+                        ${isAdminHR ? `
+                            <div class="action-menu-item text-green-600" onclick="restoreLeave(${leave.LeaveId})">&#x267B; Restore</div>
+                            <div class="action-menu-item text-red-600" onclick="hardDeleteLeave(${leave.LeaveId})">🗑️ Permanent Delete</div>
+                        ` : '<div class="action-menu-item text-gray-400">No actions</div>'}
+                    ` : `
+                        <div class="action-menu-item" onclick="viewLeave(${leave.LeaveId})">👁️ View</div>
+                        ${canEdit ? `<div class="action-menu-item" onclick="editLeave(${leave.LeaveId})">✏️ Edit</div>` : ''}
+                        ${canApprove ? `
+                            <div class="action-menu-item success" onclick="approveLeave(${leave.LeaveId})">✅ Approve</div>
+                            <div class="action-menu-item warning" onclick="rejectLeave(${leave.LeaveId})">❌ Reject</div>
+                        ` : ''}
+                        ${canDelete ? `<div class="action-menu-item danger" onclick="openDeleteModal(${leave.LeaveId})">🗑️ Delete</div>` : ''}
+                    `}
+                </div>
+            </div>`;
+
+        const rowStyle = isDeleted ? 'opacity:0.6;background:#fef2f2;' : '';
+        const statusBadgeClass = `status-badge ${status}`;
+
+        if (tableId === 'myLeavesTableBody') {
+            const reasonStr = leave.Reason ? (leave.Reason.length > 25 ? leave.Reason.substring(0, 25) + '...' : leave.Reason) : '-';
+            return `
+                <tr style="${rowStyle}">
+                    <td><span class="leave-type-badge ${leaveTypeBadge}">${leave.LeaveTypeName || leave.LeaveType || '-'}</span></td>
+                    <td>${formatLeaveDate(leave.FromDate)}</td>
+                    <td>${formatLeaveDate(leave.ToDate)}</td>
+                    <td><span class="duration-badge ${duration.type}">${duration.label}</span></td>
+                    <td><span title="${leave.Reason || ''}">${reasonStr}</span></td>
+                    <td>
+                        <span class="${statusBadgeClass}">${leave.Status || 'Pending'}</span>
+                        ${isDeleted ? '<span class="deleted-tag">Deleted</span>' : ''}
+                    </td>
+                    <td>${actionHtml}</td>
+                </tr>
+            `;
         } else {
-             canShowActions = canManage; // Fallback
+            return `
+                <tr style="${rowStyle}">
+                    <td>
+                        <div class="employee-cell">
+                            <div class="employee-avatar">
+                                ${leave.ProfilePicture ? 
+                                    `<img src="${leave.ProfilePicture}" alt="${leave.EmployeeName || ''}">` : 
+                                    initials
+                                }
+                            </div>
+                            <div class="employee-info">
+                                <div class="employee-name" onclick="window.utils.navigateToProfile(${leave.EmployeeId})">${leave.EmployeeName || (leave.FirstName + ' ' + (leave.LastName || '')) || 'Unknown'}</div>
+                                <div class="employee-role text-xs text-gray-500">${leave.DesignationName || 'Employee'}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td><span class="leave-type-badge ${leaveTypeBadge}">${leave.LeaveTypeName || leave.LeaveType || '-'}</span></td>
+                    <td>${formatLeaveDate(leave.FromDate)}</td>
+                    <td>${formatLeaveDate(leave.ToDate)}</td>
+                    <td><span class="duration-badge ${duration.type}">${duration.label}</span></td>
+                    <td>
+                        <span class="${statusBadgeClass}">${leave.Status || 'Pending'}</span>
+                        ${isDeleted ? '<span class="deleted-tag text-xs bg-red-100 text-red-600 px-1 rounded ml-1">Deleted</span>' : ''}
+                    </td>
+                    <td>${actionHtml}</td>
+                </tr>
+            `;
         }
-        return `
-            <tr>
-                <td class="checkbox-cell">
-                    <input type="checkbox" class="leave-checkbox" data-leave-id="${leave.LeaveId}" 
-                           onchange="toggleLeaveSelection(${leave.LeaveId})" 
-                           ${selectedLeaves.has(leave.LeaveId) ? 'checked' : ''}>
-                </td>
-                <td>
-                    <div class="employee-cell">
-                        <div class="employee-avatar">
-                            ${leave.ProfilePicture ? 
-                                `<img src="${leave.ProfilePicture}" alt="${leave.FirstName}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">` : 
-                                initials
-                            }
-                        </div>
-                        <div class="employee-info">
-                            <div class="employee-name" style="cursor: pointer; color: var(--primary-color);" 
-                                 onclick="window.utils.navigateToProfile(${leave.EmployeeId})" 
-                                 title="View ${leave.FirstName} ${leave.LastName}'s profile">${leave.FirstName} ${leave.LastName}</div>
-                            <div class="employee-role">${leave.DesignationName || 'Trainee'}</div>
-                        </div>
-                    </div>
-                </td>
-                <td>${formatLeaveDate(leave.FromDate)}</td>
-                <td>
-                    <span class="duration-badge ${duration.type}">${duration.label}</span>
-                </td>
-                <td>
-                    <span class="badge badge-${leave.Status.toLowerCase()}">${leave.Status}</span>
-                </td>
-                <td>
-                    <span class="leave-type-badge ${leaveTypeBadge}">${leave.LeaveType}</span>
-                </td>
-                <td>
-                    <span class="paid-icon ${isPaid ? 'yes' : 'no'}">${isPaid ? '✓' : '✗'}</span>
-                </td>
-                <td>
-                    <div class="action-dropdown">
-                        <button class="action-btn" onclick="toggleActionMenu(this)">⋮</button>
-                        <div class="action-menu">
-                            <div class="action-menu-item" onclick="viewLeave(${leave.LeaveId})">
-                                👁️ View
-                            </div>
-                            ${canShowActions ? `
-                            <div class="action-menu-item" onclick="editLeave(${leave.LeaveId})">
-                                ✏️ Edit
-                            </div>
-                            <div class="action-menu-item success" onclick="approveLeave(${leave.LeaveId})">
-                                ✅ Approve
-                            </div>
-                            <div class="action-menu-item warning" onclick="rejectLeave(${leave.LeaveId})">
-                                ❌ Reject
-                            </div>
-                            <div class="action-menu-item danger" onclick="deleteLeave(${leave.LeaveId})">
-                                🗑️ Delete
-                            </div>
-                            ` : ''}
-                        </div>
-                    </div>
-                </td>
-            </tr>
-        `;
     }).join('');
 }
 
@@ -283,20 +305,22 @@ function viewLeave(id) {
     if (leave) {
         document.getElementById('viewEmployeeName').textContent = `${leave.FirstName} ${leave.LastName}`;
         document.getElementById('viewLeaveType').textContent = leave.LeaveType;
-        document.getElementById('viewFromDate').textContent = utils.formatDate(leave.FromDate);
-        document.getElementById('viewToDate').textContent = utils.formatDate(leave.ToDate);
+        document.getElementById('viewFromDate').textContent = formatLeaveDate(leave.FromDate);
+        document.getElementById('viewToDate').textContent = formatLeaveDate(leave.ToDate);
         
-        const days = calculateDays(leave.FromDate, leave.ToDate);
-        document.getElementById('viewDuration').textContent = `${days} Day(s)`;
+        const duration = getDuration(leave.FromDate, leave.ToDate);
+        document.getElementById('viewDuration').textContent = duration.label;
         
         const statusEl = document.getElementById('viewStatus');
         statusEl.textContent = leave.Status;
-        statusEl.className = 'form-control-static'; // Reset class
-        if (leave.Status === 'Approved') statusEl.style.color = 'var(--secondary-color)';
-        if (leave.Status === 'Rejected') statusEl.style.color = 'var(--danger-color)';
+        statusEl.className = 'font-semibold'; // Reset class
+        
+        const status = (leave.Status || 'Pending').toLowerCase();
+        if (status === 'approved') statusEl.classList.add('text-green-600');
+        else if (status === 'rejected') statusEl.classList.add('text-red-600');
+        else statusEl.classList.add('text-amber-600');
         
         document.getElementById('viewReason').textContent = leave.Reason || 'No reason provided';
-        
         document.getElementById('viewLeaveModal').classList.add('active');
     }
 }
@@ -308,12 +332,20 @@ function closeViewModal() {
 function approveLeave(id) {
     document.getElementById('statusLeaveId').value = id;
     document.getElementById('leaveStatus').value = 'Approved';
+    document.getElementById('statusModalTitle').textContent = 'Approve Leave';
+    document.getElementById('statusConfirmationText').textContent = 'Are you sure you want to APPROVE this leave request?';
+    document.getElementById('rejectionReasonWrapper').style.display = 'none';
+    document.getElementById('statusSubmitBtn').className = 'btn btn-primary bg-green-600 hover:bg-green-700';
     document.getElementById('statusModal').classList.add('active');
 }
 
 function rejectLeave(id) {
     document.getElementById('statusLeaveId').value = id;
     document.getElementById('leaveStatus').value = 'Rejected';
+    document.getElementById('statusModalTitle').textContent = 'Reject Leave';
+    document.getElementById('statusConfirmationText').textContent = 'Please provide a reason for rejecting this leave request.';
+    document.getElementById('rejectionReasonWrapper').style.display = 'block';
+    document.getElementById('statusSubmitBtn').className = 'btn btn-primary bg-red-600 hover:bg-red-700';
     document.getElementById('statusModal').classList.add('active');
 }
 
@@ -414,7 +446,7 @@ function handleSearch() {
     searchTimeout = setTimeout(() => {
         const searchTerm = document.getElementById('searchInput').value.toLowerCase();
         if (!searchTerm) {
-            renderTable(leaves);
+            displayLeaves(leaves);
             return;
         }
         
@@ -424,8 +456,34 @@ function handleSearch() {
             leave.Status.toLowerCase().includes(searchTerm)
         );
         
-        renderTable(filtered);
+        displayLeaves(filtered);
     }, 300);
+}
+
+// Display leaves in their respective sections/tables
+function displayLeaves(filteredLeaves) {
+    const isManager = window.roleManager && window.roleManager.isRole('manager');
+    const isStaff = window.roleManager && (window.roleManager.isRole('admin') || window.roleManager.isRole('hr') || isManager);
+    const isOwn = true; // Everyone should be able to see their own leaves
+
+    const mySection = document.getElementById('myLeavesSection');
+    const staffSection = document.getElementById('staffLeavesSection');
+
+    if (mySection) mySection.style.display = isOwn ? 'block' : 'none';
+    if (staffSection) staffSection.style.display = isStaff ? 'block' : 'none';
+
+    // Render to appropriate tables
+    if (isOwn) {
+        const ownLeaves = filteredLeaves.filter(l => l.EmployeeId == getCurrentEmpId());
+        renderTable(ownLeaves, 'myLeavesTableBody');
+    }
+
+    if (isStaff) {
+        const staffLeaves = isManager ?
+            filteredLeaves.filter(l => l.EmployeeId != getCurrentEmpId()) :
+            filteredLeaves;
+        renderTable(staffLeaves, 'staffLeavesTableBody');
+    }
 }
 
 // Toggle Filters
@@ -541,57 +599,128 @@ async function loadLeaveTypes() {
         leaveTypes = response.data || [];
         
         // Populate modal select
-        const select = document.getElementById('leaveTypeId');
-        select.innerHTML = '<option value="">Select Leave Type</option>' +
-            leaveTypes.map(lt => `<option value="${lt.LeaveTypeId}">${lt.TypeName} (${lt.MaxDaysPerYear} days/year)</option>`).join('');
+        const select = document.getElementById('newLeaveTypeId');
+        if (select) {
+            select.innerHTML = '<option value="">Select Leave Type</option>' +
+                leaveTypes.map(lt => `<option value="${lt.LeaveTypeId}">${lt.TypeName} (${lt.MaxDaysPerYear} days/year)</option>`).join('');
+        }
         
         // Populate filter select
         const filterSelect = document.getElementById('filterLeaveType');
-        filterSelect.innerHTML = '<option value="">All Types</option>' +
-            leaveTypes.map(lt => `<option value="${lt.LeaveTypeId}">${lt.TypeName}</option>`).join('');
+        if (filterSelect) {
+            filterSelect.innerHTML = '<option value="">All Types</option>' +
+                leaveTypes.map(lt => `<option value="${lt.LeaveTypeId}">${lt.TypeName}</option>`).join('');
+        }
     } catch (error) {
         console.error('Error loading leave types:', error);
     }
 }
 
 // Modal Functions
-function openAddModal() {
-    document.getElementById('leaveForm').reset();
-    document.getElementById('leaveModal').classList.add('active');
-}
-
-async function saveLeave() {
-    const form = document.getElementById('leaveForm');
-    if (!form.checkValidity()) {
-        form.reportValidity();
+async function editLeave(id) {
+    const leave = leaves.find(l => l.LeaveId == id);
+    if (!leave) {
+        console.error('Leave not found for editing:', id);
         return;
     }
 
-    const data = {
-        employeeId: parseInt(document.getElementById('employeeId').value),
-        leaveTypeId: parseInt(document.getElementById('leaveTypeId').value),
-        fromDate: document.getElementById('fromDate').value,
-        toDate: document.getElementById('toDate').value,
-        reason: document.getElementById('reason').value
-    };
-
-    try {
-        await endpoints.leaves.create(data);
-        utils.showAlert('Leave applied successfully', 'success');
-        closeModal();
-        loadLeaves();
-    } catch (error) {
-        console.error('Error applying leave:', error);
-        utils.showAlert(error.message || 'Failed to apply leave', 'error');
+    // Reset and open modal
+    await openNewLeaveModal();
+    
+    // Change title to reflect editing
+    document.querySelector('#newLeaveModal .modal-title').textContent = 'Edit Leave Request';
+    document.getElementById('newLeaveId').value = leave.LeaveId;
+    
+    // Populate fields
+    const memberSelect = document.getElementById('newMemberId');
+    if (memberSelect) {
+        memberSelect.value = leave.EmployeeId;
     }
+    
+    document.getElementById('newLeaveTypeId').value = leave.LeaveTypeId;
+    document.getElementById('newReason').value = leave.Reason || '';
+    
+    if (document.getElementById('newLeaveStatus')) {
+        document.getElementById('newLeaveStatus').value = leave.Status || 'Pending';
+    }
+
+    // Handle duration (safe split)
+    const fromDate = (leave.FromDate || '').split('T')[0];
+    const toDate = (leave.ToDate || '').split('T')[0];
+    
+    if (fromDate === toDate) {
+        document.querySelector('input[name="newDuration"][value="full-day"]').checked = true;
+        document.getElementById('newSingleDate').value = fromDate;
+    } else {
+        document.querySelector('input[name="newDuration"][value="multiple"]').checked = true;
+        document.getElementById('newFromDate').value = fromDate;
+        document.getElementById('newToDate').value = toDate;
+    }
+    
+    toggleNewDateInputs();
 }
 
 function openStatusModal(id, status) {
+    const leave = leaves.find(l => l.LeaveId === id);
+    if (!leave) return;
+
     document.getElementById('statusLeaveId').value = id;
-    if (status) {
-        document.getElementById('leaveStatus').value = status;
+    document.getElementById('leaveStatus').value = status;
+    
+    // Customize based on status
+    const titleEl = document.getElementById('statusModalTitle');
+    const submitBtn = document.getElementById('statusSubmitBtn');
+    const confirmationText = document.getElementById('statusConfirmationText');
+    const reasonWrapper = document.getElementById('rejectionReasonWrapper');
+
+    if (status === 'Approved') {
+        titleEl.textContent = 'Approve Leave Request';
+        submitBtn.className = 'btn btn-primary bg-green-600 hover:bg-green-700 text-white';
+        submitBtn.textContent = 'Approve';
+        confirmationText.textContent = `Are you sure you want to approve the leave for ${leave.FirstName} ${leave.LastName}?`;
+    } else {
+        titleEl.textContent = 'Reject Leave Request';
+        submitBtn.className = 'btn btn-primary bg-red-600 hover:bg-red-700 text-white';
+        submitBtn.textContent = 'Reject';
+        confirmationText.textContent = `Are you sure you want to reject the leave for ${leave.FirstName} ${leave.LastName}?`;
     }
+
+    // Reset reason
+    document.getElementById('rejectionReason').value = '';
+    
     document.getElementById('statusModal').classList.add('active');
+}
+
+function approveLeave(id) {
+    openStatusModal(id, 'Approved');
+}
+
+function rejectLeave(id) {
+    openStatusModal(id, 'Rejected');
+}
+
+async function viewLeave(id) {
+    const leave = leaves.find(l => l.LeaveId === id);
+    if (!leave) return;
+    
+    const duration = getDuration(leave.FromDate, leave.ToDate);
+    
+    document.getElementById('viewEmployeeName').textContent = `${leave.FirstName} ${leave.LastName}`;
+    document.getElementById('viewLeaveType').textContent = leave.LeaveType || '-';
+    document.getElementById('viewFromDate').textContent = formatLeaveDate(leave.FromDate);
+    document.getElementById('viewToDate').textContent = formatLeaveDate(leave.ToDate);
+    document.getElementById('viewDuration').textContent = duration.label;
+    document.getElementById('viewReason').textContent = leave.Reason || '-';
+    
+    const statusEl = document.getElementById('viewStatus');
+    statusEl.textContent = leave.Status;
+    statusEl.className = `status-badge ${leave.Status.toLowerCase()}`;
+    
+    document.getElementById('viewLeaveModal').classList.add('active');
+}
+
+function closeViewModal() {
+    document.getElementById('viewLeaveModal').classList.remove('active');
 }
 
 async function updateStatus() {
@@ -618,21 +747,54 @@ async function updateStatus() {
     }
 }
 
-async function deleteLeave(id) {
-    if (!confirm('Are you sure you want to cancel this leave request?')) return;
+let _pendingDeleteLeaveId = null;
+
+function openDeleteModal(id) {
+    _pendingDeleteLeaveId = id;
+    document.getElementById('leaveDeleteReasonInput').value = '';
+    document.getElementById('softDeleteModal').classList.add('active');
+}
+
+function closeSoftDeleteModal() {
+    document.getElementById('softDeleteModal').classList.remove('active');
+    _pendingDeleteLeaveId = null;
+}
+
+async function confirmSoftDelete() {
+    const reason = document.getElementById('leaveDeleteReasonInput').value.trim();
     try {
-        await endpoints.leaves.delete(id);
-        utils.showAlert('Leave cancelled successfully', 'success');
+        await endpoints.leaves.delete(_pendingDeleteLeaveId, { reason });
+        utils.showAlert('Leave deleted successfully', 'success');
+        closeSoftDeleteModal();
         loadLeaves();
     } catch (error) {
-        console.error('Error deleting leave:', error);
-        utils.showAlert('Failed to cancel leave', 'error');
+        utils.showAlert('Failed to delete leave', 'error');
     }
 }
 
-function closeModal() {
-    document.getElementById('leaveModal').classList.remove('active');
+async function restoreLeave(id) {
+    if (!confirm('Restore this leave?')) return;
+    try {
+        await endpoints.leaves.restore(id);
+        utils.showAlert('Leave restored successfully', 'success');
+        loadLeaves();
+    } catch (error) {
+        utils.showAlert('Failed to restore leave', 'error');
+    }
 }
+
+async function hardDeleteLeave(id) {
+    if (!confirm('⚠️ Permanently delete? This CANNOT be undone.')) return;
+    try {
+        await endpoints.leaves.hardDelete(id);
+        utils.showAlert('Leave permanently deleted', 'success');
+        loadLeaves();
+    } catch (error) {
+        utils.showAlert('Failed to permanently delete leave', 'error');
+    }
+}
+
+// Removed legacy closeModal function
 
 function closeStatusModal() {
     document.getElementById('statusModal').classList.remove('active');
@@ -644,13 +806,8 @@ let newLeaveSelectedFile = null;
 
 // Open New Leave Modal
 async function openNewLeaveModal() {
-    // Reset form
     document.getElementById('newLeaveForm').reset();
     newLeaveSelectedFile = null;
-    
-    // Reset file upload UI
-    document.getElementById('newFileUploadContent').style.display = 'block';
-    document.getElementById('newFilePreview').style.display = 'none';
     
     // Set default date
     const today = new Date().toISOString().split('T')[0];
@@ -673,9 +830,6 @@ async function openNewLeaveModal() {
     document.querySelector('#newLeaveModal .modal-title').textContent = 'Assign Leave';
     document.getElementById('newLeaveId').value = ''; // Clear ID
     document.getElementById('newLeaveModal').classList.add('active');
-    
-    // Setup file upload
-    setupNewFileUpload();
 }
 
 // Close New Leave Modal
@@ -912,7 +1066,7 @@ function showHostingSuggestions() {
     }
 }
 
-// Save new leave
+// Save Leave
 async function saveNewLeave() {
     const form = document.getElementById('newLeaveForm');
     if (!form.checkValidity()) {
@@ -931,33 +1085,26 @@ async function saveNewLeave() {
         toDate = fromDate;
     }
     
+    const id = document.getElementById('newLeaveId').value;
+    const currentEmpId = window.roleManager ? window.roleManager.getCurrentEmployeeId() : null;
+    const canManageLeaves = window.roleManager && ['admin', 'hr', 'manager'].includes(window.roleManager.getCurrentRole());
+
     const data = {
-        employeeId: parseInt(document.getElementById('newMemberId').value),
+        employeeId: !canManageLeaves ? currentEmpId : parseInt(document.getElementById('newMemberId').value),
         leaveTypeId: parseInt(document.getElementById('newLeaveTypeId').value),
         fromDate: fromDate,
         toDate: toDate,
         reason: document.getElementById('newReason').value,
-        status: document.getElementById('newLeaveStatus').value,
-        durationType: duration
+        status: canManageLeaves ? document.getElementById('newLeaveStatus').value : 'Pending'
     };
     
-    const id = document.getElementById('newLeaveId').value;
-
     try {
-        console.log('💾 Saving leave with data:', data);
-        
         if (id) {
             await endpoints.leaves.update(id, data);
             utils.showAlert('Leave updated successfully', 'success');
         } else {
-            const response = await endpoints.leaves.create(data);
-            console.log('✅ Leave created successfully:', response);
-            utils.showAlert('Leave created successfully', 'success');
-        }
-        
-        // TODO: Handle file upload if file is selected
-        if (newLeaveSelectedFile) {
-            console.log('File upload not yet implemented:', newLeaveSelectedFile.name);
+            await endpoints.leaves.create(data);
+            utils.showAlert('Leave applied successfully', 'success');
         }
         
         closeNewLeaveModal();
@@ -968,40 +1115,67 @@ async function saveNewLeave() {
     }
 }
 
+function toggleNewDateInputs() {
+    const duration = document.querySelector('input[name="newDuration"]:checked').value;
+    const singleWrapper = document.getElementById('newSingleDateWrapper');
+    const rangeWrapper = document.getElementById('newDateRangeWrapper');
+    
+    if (duration === 'multiple') {
+        singleWrapper.style.display = 'none';
+        rangeWrapper.style.display = 'block';
+        document.getElementById('newSingleDate').removeAttribute('required');
+        document.getElementById('newFromDate').setAttribute('required', 'required');
+        document.getElementById('newToDate').setAttribute('required', 'required');
+    } else {
+        singleWrapper.style.display = 'block';
+        rangeWrapper.style.display = 'none';
+        document.getElementById('newSingleDate').setAttribute('required', 'required');
+        document.getElementById('newFromDate').removeAttribute('required');
+        document.getElementById('newToDate').removeAttribute('required');
+    }
+}
+
 // ========== MY LEAVES FUNCTIONS ==========
 
 // Load employee profile
-async function loadEmployeeProfile() {
+async function loadEmployeeProfile(id = null) {
+    if (!id) id = getCurrentEmpId();
+    if (!id) return;
     try {
-        const response = await endpoints.employees.getById(CURRENT_EMPLOYEE_ID);
-        employeeData = response.data;
-        renderProfile(employeeData);
+        const response = await endpoints.employees.getById(id);
+        const emp = response.data;
+        if (!emp) return;
+        employeeData = emp;
+
+        const nameEl = document.getElementById('profileName');
+        const roleEl = document.getElementById('profileRole');
+        const emailEl = document.getElementById('profileEmail');
+        const phoneEl = document.getElementById('profilePhone');
+        const avatarEl = document.getElementById('profileAvatar');
+
+        if (nameEl) nameEl.textContent = `${emp.FirstName} ${emp.LastName}`;
+        if (roleEl) roleEl.textContent = emp.DesignationName || emp.UserRole || 'Employee';
+        if (emailEl) emailEl.textContent = emp.Email || '-';
+        if (phoneEl) phoneEl.textContent = emp.Phone || '-';
+        if (avatarEl) avatarEl.textContent = getInitials(emp.FirstName, emp.LastName);
+        
+        // Also load balance
+        loadLeaveBalance(id);
     } catch (error) {
-        console.error('Error loading employee profile:', error);
-        // Silently fail - profile section will show loading state
+        console.warn('Error loading employee profile for leave card:', error);
     }
 }
 
 // Load leave balance
-async function loadLeaveBalance() {
+async function loadLeaveBalance(id = null) {
+    if (!id) id = getCurrentEmpId();
+    if (!id) return;
     try {
-        const response = await endpoints.leaves.getBalance(CURRENT_EMPLOYEE_ID);
+        const response = await endpoints.leaves.getBalance(id);
         leaveBalanceData = response.data || [];
-        renderLeaveQuota(leaveBalanceData);
         calculateAndDisplayRemainingLeaves(leaveBalanceData);
     } catch (error) {
         console.error('Error loading leave balance:', error);
-        const tbody = document.getElementById('quotaTableBody');
-        if (tbody) {
-            tbody.innerHTML = `
-                <tr>
-                    <td colspan="7" class="empty-state">
-                        <div class="empty-state-icon">⚠️</div>
-                        <div>Failed to load leave quota data</div>
-                    </td>
-                </tr>
-            `;
-        }
     }
 }
 
@@ -1150,8 +1324,15 @@ function scrollToMyLeaves() {
 }
 
 // Initialize
-loadEmployees();
-loadLeaveTypes();
-loadLeaves();
-loadEmployeeProfile();
-loadLeaveBalance();
+async function init() {
+    try {
+        await loadEmployees();
+        await loadLeaveTypes();
+        await loadLeaves();
+        console.log('🚀 Leave Management initialized successfully');
+    } catch (error) {
+        console.error('❌ Initialization failed:', error);
+    }
+}
+
+init();

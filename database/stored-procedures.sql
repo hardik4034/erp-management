@@ -10,10 +10,27 @@ GO
 -- EMPLOYEE STORED PROCEDURES
 -- =============================================
 
--- Get All Employees
+-- Get All Employees (Paginated & Soft-delete ready)
 CREATE OR ALTER PROCEDURE sp_GetAllEmployees
+    @ShowDeleted BIT = 0,
+    @PageNumber  INT = 1,
+    @PageSize    INT = 50,
+    @SearchTerm  NVARCHAR(100) = NULL
 AS
 BEGIN
+    SET NOCOUNT ON;
+    DECLARE @Offset INT = (@PageNumber - 1) * @PageSize;
+    
+    -- 1. Get Total Count
+    SELECT COUNT(*) AS TotalCount
+    FROM Employees e
+    WHERE (@ShowDeleted = 1 OR e.IsDeleted = 0)
+      AND (@SearchTerm IS NULL 
+           OR (e.FirstName + ' ' + e.LastName LIKE '%' + @SearchTerm + '%') 
+           OR e.EmployeeCode LIKE '%' + @SearchTerm + '%'
+           OR e.Email LIKE '%' + @SearchTerm + '%');
+    
+    -- 2. Get Paginated Data
     SELECT 
         e.*,
         d.DepartmentName,
@@ -23,8 +40,14 @@ BEGIN
     LEFT JOIN Departments d ON e.DepartmentId = d.DepartmentId
     LEFT JOIN Designations des ON e.DesignationId = des.DesignationId
     LEFT JOIN Employees m ON e.ReportingTo = m.EmployeeId
-    WHERE e.Status = 'Active'
-    ORDER BY e.CreatedAt DESC;
+    WHERE (@ShowDeleted = 1 OR e.IsDeleted = 0)
+      AND (@SearchTerm IS NULL 
+           OR (e.FirstName + ' ' + e.LastName LIKE '%' + @SearchTerm + '%') 
+           OR e.EmployeeCode LIKE '%' + @SearchTerm + '%'
+           OR e.Email LIKE '%' + @SearchTerm + '%')
+    ORDER BY e.CreatedAt DESC
+    OFFSET @Offset ROWS
+    FETCH NEXT @PageSize ROWS ONLY;
 END
 GO
 
@@ -57,7 +80,6 @@ CREATE OR ALTER PROCEDURE sp_CreateEmployee
     @DepartmentId INT,
     @DesignationId INT,
     @Salutation NVARCHAR(10) = NULL,
-    @Password NVARCHAR(255) = NULL,
     @Country NVARCHAR(100) = NULL,
     @Gender NVARCHAR(20) = NULL,
     @DateOfBirth DATE = NULL,
@@ -92,14 +114,14 @@ BEGIN
     
     INSERT INTO Employees (
         EmployeeCode, FirstName, LastName, Email, Phone, DateOfJoining, DepartmentId, DesignationId,
-        Salutation, Password, Country, Gender, DateOfBirth, ReportingTo, Language, UserRole,
+        Salutation, Country, Gender, DateOfBirth, ReportingTo, Language, UserRole,
         Address, About, ProfilePicture, LoginAllowed, ReceiveEmailNotifications,
         Skills, ProbationEndDate, NoticePeriodStartDate, NoticePeriodEndDate,
         EmploymentType, MaritalStatus, BusinessAddress
     )
     VALUES (
         @EmployeeCode, @FirstName, @LastName, @Email, @Phone, @DateOfJoining, @DepartmentId, @DesignationId,
-        @Salutation, @Password, @Country, @Gender, @DateOfBirth, @ReportingTo, @Language, @UserRole,
+        @Salutation, @Country, @Gender, @DateOfBirth, @ReportingTo, @Language, @UserRole,
         @Address, @About, @ProfilePicture, @LoginAllowed, @ReceiveEmailNotifications,
         @Skills, @ProbationEndDate, @NoticePeriodStartDate, @NoticePeriodEndDate,
         @EmploymentType, @MaritalStatus, @BusinessAddress
@@ -120,7 +142,6 @@ CREATE OR ALTER PROCEDURE sp_UpdateEmployee
     @DepartmentId INT,
     @DesignationId INT,
     @Salutation NVARCHAR(10) = NULL,
-    @Password NVARCHAR(255) = NULL,
     @Country NVARCHAR(100) = NULL,
     @Gender NVARCHAR(20) = NULL,
     @DateOfBirth DATE = NULL,
@@ -150,7 +171,6 @@ BEGIN
         DepartmentId = @DepartmentId,
         DesignationId = @DesignationId,
         Salutation = @Salutation,
-        Password = ISNULL(@Password, Password), -- Only update password if provided
         Country = @Country,
         Gender = @Gender,
         DateOfBirth = @DateOfBirth,
@@ -345,10 +365,11 @@ GO
 
 -- Get All Leaves
 CREATE OR ALTER PROCEDURE sp_GetAllLeaves
-    @EmployeeId INT = NULL,
-    @Status NVARCHAR(20) = NULL,
-    @UserRole NVARCHAR(50) = NULL,
-    @RequestingEmployeeId INT = NULL
+    @EmployeeId          INT = NULL,
+    @Status              NVARCHAR(20) = NULL,
+    @UserRole            NVARCHAR(50) = NULL,
+    @RequestingEmployeeId INT = NULL,
+    @ShowDeleted         BIT = 0
 AS
 BEGIN
     -- SECURITY: If Employee role, force filter to requesting employee's data only
@@ -358,31 +379,16 @@ BEGIN
     END
 
     SELECT 
-        l.LeaveId,
-        l.EmployeeId,
-        l.LeaveTypeId,
-        l.FromDate,
-        l.ToDate,
-        l.Reason,
-        l.Status,
-        l.ApprovedBy,
-        l.ApprovedDate,
-        l.RejectionReason,
-        l.CreatedAt,
-        l.UpdatedAt,
-        e.FirstName,
-        e.LastName,
-        e.EmployeeCode,
-        e.ProfilePicture,
-        e.DesignationId,
-        des.DesignationName,
-        lt.TypeName AS LeaveType
+        l.*,
+        lt.TypeName AS LeaveTypeName,
+        e.FirstName + ' ' + e.LastName AS EmployeeName,
+        e.EmployeeCode
     FROM Leaves l
-    JOIN Employees e ON l.EmployeeId = e.EmployeeId
-    JOIN LeaveTypes lt ON l.LeaveTypeId = lt.LeaveTypeId
-    LEFT JOIN Designations des ON e.DesignationId = des.DesignationId
+    INNER JOIN LeaveTypes lt ON l.LeaveTypeId = lt.LeaveTypeId
+    INNER JOIN Employees e ON l.EmployeeId = e.EmployeeId
     WHERE (@EmployeeId IS NULL OR l.EmployeeId = @EmployeeId)
       AND (@Status IS NULL OR l.Status = @Status)
+      AND (@ShowDeleted = 1 OR l.IsDeleted = 0)
     ORDER BY l.CreatedAt DESC;
 END
 GO
@@ -559,20 +565,14 @@ GO
 
 -- Get All Departments
 CREATE OR ALTER PROCEDURE sp_GetAllDepartments
+    @ShowDeleted BIT = 0
 AS
 BEGIN
     SELECT 
-        d.DepartmentId,
-        d.DepartmentName,
-        d.Description,
-        d.Status,
-        d.CreatedAt,
-        d.UpdatedAt,
-        COUNT(e.EmployeeId) AS EmployeeCount
+        d.*,
+        (SELECT COUNT(*) FROM Employees e WHERE e.DepartmentId = d.DepartmentId AND e.IsDeleted = 0) AS EmployeeCount
     FROM Departments d
-    LEFT JOIN Employees e ON d.DepartmentId = e.DepartmentId AND e.Status = 'Active'
-    WHERE d.Status = 'Active'
-    GROUP BY d.DepartmentId, d.DepartmentName, d.Description, d.Status, d.CreatedAt, d.UpdatedAt
+    WHERE (@ShowDeleted = 1 OR d.IsDeleted = 0)
     ORDER BY d.DepartmentName;
 END
 GO
@@ -687,30 +687,18 @@ GO
 
 -- Get All Appreciations
 CREATE OR ALTER PROCEDURE sp_GetAllAppreciations
-    @EmployeeId INT = NULL
+    @EmployeeId  INT = NULL,
+    @ShowDeleted BIT = 0
 AS
 BEGIN
     SELECT 
-        a.AppreciationId,
-        a.EmployeeId,
-        a.Title,
-        a.Description,
-        a.AppreciationDate,
-        a.AwardedBy,
-        a.Photo,
-        a.Status,
-        a.CreatedAt,
-        a.UpdatedAt,
-        e.FirstName,
-        e.LastName,
-        e.EmployeeCode,
-        des.DesignationName,
-        a.AwardedBy AS AwardedByName
+        a.*,
+        e.FirstName + ' ' + e.LastName AS EmployeeName,
+        e.EmployeeCode
     FROM Appreciations a
-    JOIN Employees e ON a.EmployeeId = e.EmployeeId
-    LEFT JOIN Designations des ON e.DesignationId = des.DesignationId
-    WHERE a.Status = 'Active'
-      AND (@EmployeeId IS NULL OR a.EmployeeId = @EmployeeId)
+    INNER JOIN Employees e ON a.EmployeeId = e.EmployeeId
+    WHERE (@EmployeeId IS NULL OR a.EmployeeId = @EmployeeId)
+      AND (@ShowDeleted = 1 OR a.IsDeleted = 0)
     ORDER BY a.AppreciationDate DESC;
 END
 GO

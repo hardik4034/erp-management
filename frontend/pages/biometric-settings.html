@@ -6,6 +6,18 @@
     <title>Biometric Settings - HRMS</title>
     <link rel="icon" type="image/x-icon" href="../assets/favicon.png"><link rel="shortcut icon" type="image/x-icon" href="../assets/favicon.png">
     <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../styles/tailwind.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: { DEFAULT: '#ea580c', dark: '#c2410c', light: '#f97316' }
+                    }
+                }
+            }
+        }
+    </script>
     <style>
         * {
             margin: 0;
@@ -376,20 +388,40 @@
 <body>
     <div class="container">
         <!-- Header -->
-        <div class="header">
-            <a href="../index.html" class="back-link">
-                ← Back to Dashboard
-            </a>
+        <header class="header">
             <div class="header-left">
-                    <button class="hamburger-btn" id="sidebarToggle">
-                        ☰
-                    </button>
-                    <div class="header-title">
-                        <h1>🔐 Biometric Settings</h1>
+                <button class="hamburger-btn" id="sidebarToggle">
+                    ☰
+                </button>
+                <div class="header-title">
+                    <h1>🔐 Biometric Settings</h1>
+                </div>
+            </div>
+            <div class="header-actions">
+                <!-- Global Search -->
+                <div class="global-search" id="globalSearchWrap">
+                    <span class="global-search-icon">🔍</span>
+                    <input type="text" id="globalSearchInput" class="global-search-input" placeholder="Search pages..." autocomplete="off">
+                    <div class="global-search-dropdown" id="globalSearchDropdown"></div>
+                </div>
+                <!-- Notification Bell -->
+                <button class="notif-btn" id="notifBtn" title="Pending approvals">
+                    🔔
+                    <span class="notif-badge" id="notifBadge" style="display:none;">0</span>
+                </button>
+                <!-- Dark Mode Toggle -->
+                <button class="dark-mode-btn" id="darkModeBtn" title="Toggle dark mode">🌙</button>
+                <!-- User Info -->
+                <div class="user-info">
+                    <div class="user-avatar" id="userAvatarInitial">?</div>
+                    <div>
+                        <div class="user-name" id="userDisplayName">Loading...</div>
+                        <div class="user-role-badge"><span class="role-badge" id="roleBadge">Loading...</span></div>
                     </div>
                 </div>
-            <p>Connect and manage eSSL biometric devices</p>
-        </div>
+                <button class="btn-logout" id="logoutBtn" onclick="auth.logout()">Logout</button>
+            </div>
+        </header>
 
         <!-- Alert Messages -->
         <div id="alertBox" class="alert"></div>
@@ -488,19 +520,30 @@
 
     </div>
 
+    <script src="../scripts/toast.js"></script>
+    <script src="../scripts/sidebar.js"></script>
+    <script src="../scripts/auth.js"></script>
+    <script src="../scripts/role-manager.js"></script>
+    <script src="../scripts/api.js"></script>
+    <script src="../scripts/theme.js"></script>
+    <script src="../scripts/header.js"></script>
     <script>
-        const API_BASE_URL = 'http://localhost:5000/api';
+        // Initialize Auth
+        auth.initAuth();
 
-        // Show alert message
+        // Show alert message using utils
         function showAlert(message, type = 'info') {
-            const alertBox = document.getElementById('alertBox');
-            alertBox.className = `alert alert-${type}`;
-            alertBox.textContent = message;
-            alertBox.style.display = 'block';
-
-            setTimeout(() => {
-                alertBox.style.display = 'none';
-            }, 5000);
+            if (window.utils && window.utils.showAlert) {
+                window.utils.showAlert(message, type);
+            } else {
+                const alertBox = document.getElementById('alertBox');
+                if (alertBox) {
+                    alertBox.className = `alert alert-${type}`;
+                    alertBox.textContent = message;
+                    alertBox.style.display = 'block';
+                    setTimeout(() => { alertBox.style.display = 'none'; }, 5000);
+                }
+            }
         }
 
         // Connect device form submission
@@ -523,15 +566,7 @@
             connectSpinner.style.display = 'block';
 
             try {
-                const response = await fetch(`${API_BASE_URL}/biometric/connect`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ deviceId })
-                });
-
-                const data = await response.json();
+                const data = await endpoints.biometric.connect({ deviceId });
 
                 if (data.success) {
                     showAlert(data.message || 'Device connected successfully!', 'success');
@@ -543,7 +578,7 @@
 
             } catch (error) {
                 console.error('Error connecting device:', error);
-                showAlert('Network error. Please check your connection.', 'error');
+                showAlert(error.message || 'Network error.', 'error');
             } finally {
                 // Reset button state
                 connectBtn.disabled = false;
@@ -556,8 +591,7 @@
         async function loadDevices() {
             const container = document.getElementById('devicesContainer');
             try {
-                const response = await fetch(`${API_BASE_URL}/biometric/devices`);
-                const data = await response.json();
+                const data = await endpoints.biometric.getDevices();
 
                 if (data.success && data.devices.length > 0) {
                     let rows = '';
@@ -612,8 +646,7 @@
             if (!confirm(`Sync attendance logs from device ${deviceId}?`)) return;
             showAlert('Syncing attendance logs...', 'info');
             try {
-                const res  = await fetch(`${API_BASE_URL}/biometric/sync/${deviceId}`, { method: 'POST' });
-                const data = await res.json();
+                const data = await endpoints.biometric.sync(deviceId);
                 if (data.success) {
                     showAlert(`${data.message} (${data.count} new logs)`, 'success');
                     loadDevices();
@@ -629,19 +662,21 @@
         async function syncAll() {
             if (!confirm('Trigger sync for ALL active devices?')) return;
             const btn = document.getElementById('syncAllBtn');
-            document.getElementById('syncAllText').textContent = 'Syncing...';
-            document.getElementById('syncAllSpinner').style.display = 'block';
+            const btnText = document.getElementById('syncAllText');
+            const btnSpinner = document.getElementById('syncAllSpinner');
+            
+            if (btnText) btnText.textContent = 'Syncing...';
+            if (btnSpinner) btnSpinner.style.display = 'block';
             btn.disabled = true;
             try {
-                const res  = await fetch(`${API_BASE_URL}/biometric/sync-all`, { method: 'POST' });
-                const data = await res.json();
+                const data = await endpoints.biometric.syncAll();
                 showAlert(data.message || (data.success ? 'Sync triggered!' : 'Sync failed'), data.success ? 'success' : 'error');
                 setTimeout(loadDevices, 3000);
             } catch (err) {
                 showAlert('Network error during sync', 'error');
             } finally {
-                document.getElementById('syncAllText').textContent = '🔄 Sync All Devices';
-                document.getElementById('syncAllSpinner').style.display = 'none';
+                if (btnText) btnText.textContent = '🔄 Sync All Devices';
+                if (btnSpinner) btnSpinner.style.display = 'none';
                 btn.disabled = false;
             }
         }
@@ -652,8 +687,11 @@
             const endDate   = document.getElementById('processEnd').value;
             const btn       = document.getElementById('processBtn');
 
-            document.getElementById('processBtnText').textContent = 'Processing...';
-            document.getElementById('processSpinner').style.display = 'block';
+            const btnText = document.getElementById('processBtnText');
+            const btnSpinner = document.getElementById('processSpinner');
+
+            if (btnText) btnText.textContent = 'Processing...';
+            if (btnSpinner) btnSpinner.style.display = 'block';
             btn.disabled = true;
             document.getElementById('processResult').style.display = 'none';
 
@@ -662,12 +700,7 @@
                 if (startDate) body.startDate = startDate;
                 if (endDate)   body.endDate   = endDate;
 
-                const res  = await fetch(`${API_BASE_URL}/biometric/process`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(body)
-                });
-                const data = await res.json();
+                const data = await endpoints.biometric.process(body);
 
                 const resultDiv = document.getElementById('processResult');
                 resultDiv.style.display = 'block';
@@ -692,8 +725,8 @@
             } catch (err) {
                 showAlert('Network error during processing', 'error');
             } finally {
-                document.getElementById('processBtnText').textContent = '▶ Process Logs Now';
-                document.getElementById('processSpinner').style.display = 'none';
+                if (btnText) btnText.textContent = '▶ Process Logs Now';
+                if (btnSpinner) btnSpinner.style.display = 'none';
                 btn.disabled = false;
             }
         }
@@ -702,8 +735,7 @@
         async function loadStatus() {
             const container = document.getElementById('statusContainer');
             try {
-                const res  = await fetch(`${API_BASE_URL}/biometric/status`);
-                const data = await res.json();
+                const data = await endpoints.biometric.getStatus();
                 if (!data.success) { container.innerHTML = `<p style="color:red;">Failed to load status.</p>`; return; }
                 const s = data.stats || {};
                 const credOk    = data.credentialsConfigured;
@@ -748,8 +780,7 @@
             const container = document.getElementById('unmappedContainer');
             container.innerHTML = '<p style="color:#999;">Loading...</p>';
             try {
-                const res  = await fetch(`${API_BASE_URL}/biometric/unmapped`);
-                const data = await res.json();
+                const data = await endpoints.biometric.getUnmapped();
                 if (!data.success) { container.innerHTML = `<p style="color:red;">Failed to load.</p>`; return; }
 
                 const ids       = data.unmappedBiometricIds || [];
@@ -795,11 +826,7 @@
             }
 
             try {
-                const response = await fetch(`${API_BASE_URL}/biometric/devices/${deviceId}`, {
-                    method: 'DELETE'
-                });
-
-                const data = await response.json();
+                const data = await api.delete(`/biometric/devices/${deviceId}`);
 
                 if (data.success) {
                     showAlert(data.message || 'Device deleted successfully', 'success');
@@ -814,12 +841,11 @@
             }
         }
 
-        // Load devices on page load
+        // Initial load
         document.addEventListener('DOMContentLoaded', () => {
             loadDevices();
             loadStatus();
         });
     </script>
-    <script src="../scripts/sidebar.js"></script>
 </body>
 </html>

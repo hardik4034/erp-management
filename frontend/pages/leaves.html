@@ -1,616 +1,56 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Leaves - HRMS</title>
-    <link rel="icon" type="image/x-icon" href="../assets/favicon.png"><link rel="shortcut icon" type="image/x-icon" href="../assets/favicon.png">
+    <link rel="icon" type="image/x-icon" href="../assets/favicon.png">
+    <link rel="shortcut icon" type="image/x-icon" href="../assets/favicon.png">
     <link rel="stylesheet" href="../styles/main.css">
     <link rel="stylesheet" href="../styles/toast.css">
-    <link rel="stylesheet" href="../styles/role-selector.css">
     <style>
-        /* Leaves Page Specific Styles */
-        .leaves-toolbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: var(--spacing-lg);
-            gap: var(--spacing-md);
-            flex-wrap: wrap;
-        }
-
-        .leaves-filters {
-            display: flex;
-            align-items: center;
-            gap: var(--spacing-md);
-            flex: 1;
-        }
-
-        .filter-group {
-            display: flex;
-            align-items: center;
-            gap: var(--spacing-xs);
-        }
-
-        .filter-group label {
-            font-size: 0.875rem;
-            color: var(--text-secondary);
-            white-space: nowrap;
-        }
-
-        .filter-group select,
-        .filter-group input {
-            padding: 0.5rem;
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-md);
-            font-size: 0.875rem;
-        }
-
-        .search-box {
-            position: relative;
-            flex: 1;
-            max-width: 300px;
-        }
-
-        .search-box input {
-            width: 100%;
-            padding: 0.5rem 0.5rem 0.5rem 2rem;
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-md);
-            font-size: 0.875rem;
-        }
-
-        .search-box::before {
-            content: "🔍";
-            position: absolute;
-            left: 0.5rem;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 0.875rem;
-        }
-
-        .leaves-actions {
-            display: flex;
-            gap: var(--spacing-sm);
-        }
-
-        /* Table Styles */
-        .leaves-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .leaves-table thead {
-            background-color: var(--bg-color);
-        }
-
-        .leaves-table th {
-            padding: var(--spacing-md);
-            text-align: left;
+        .leave-status-badge {
+            padding: 4px 12px;
+            border-radius: 999px;
+            font-size: 12px;
             font-weight: 600;
-            color: var(--text-secondary);
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            border-bottom: 2px solid var(--border-color);
         }
 
-        .leaves-table td {
-            padding: var(--spacing-md);
-            border-bottom: 1px solid var(--border-color);
-            vertical-align: middle;
+        .status-pending {
+            background-color: #fef3c7;
+            color: #92400e;
         }
 
-        .leaves-table tbody tr:hover {
-            background-color: #f9fafb;
-        }
-
-        /* Checkbox */
-        .checkbox-cell {
-            width: 40px;
-            text-align: center;
-        }
-
-        .checkbox-cell input[type="checkbox"] {
-            width: 16px;
-            height: 16px;
-            cursor: pointer;
-            accent-color: var(--primary-color);
-        }
-
-        /* Employee Cell */
-        .employee-cell {
-            display: flex;
-            align-items: center;
-            gap: var(--spacing-md);
-        }
-
-        .employee-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            object-fit: cover;
-            background-color: var(--primary-color);
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 600;
-            font-size: 0.875rem;
-            flex-shrink: 0;
-        }
-
-        .employee-info {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .employee-name {
-            font-weight: 500;
-            color: var(--text-primary);
-        }
-
-        .employee-role {
-            font-size: 0.75rem;
-            color: var(--text-secondary);
-        }
-
-        /* Duration Badge */
-        .duration-badge {
-            display: inline-block;
-            padding: 0.25rem 0.75rem;
-            border-radius: 9999px;
-            font-size: 0.75rem;
-            font-weight: 500;
-        }
-
-        .duration-badge.half-day {
+        .status-approved {
             background-color: #d1fae5;
             color: #065f46;
         }
 
-        .duration-badge.full-day {
-            background-color: #dbeafe;
-            color: #1e40af;
-        }
-
-        /* Leave Type Badge */
-        .leave-type-badge {
-            display: inline-block;
-            padding: 0.25rem 0.75rem;
-            border-radius: 9999px;
-            font-size: 0.75rem;
-            font-weight: 500;
-        }
-
-        .leave-type-badge.sick {
+        .status-rejected {
             background-color: #fee2e2;
             color: #991b1b;
         }
 
-        .leave-type-badge.casual {
-            background-color: #dbeafe;
-            color: #1e40af;
-        }
-
-        .leave-type-badge.paid {
-            background-color: #d1fae5;
-            color: #065f46;
-        }
-
-        .leave-type-badge.unpaid {
-            background-color: #f3f4f6;
-            color: #4b5563;
-        }
-
-        /* Paid Icon */
-        .paid-icon {
-            font-size: 1.25rem;
-        }
-
-        .paid-icon.yes {
-            color: var(--secondary-color);
-        }
-
-        .paid-icon.no {
-            color: var(--danger-color);
-        }
-
-        /* Action Dropdown */
-        .action-dropdown {
-            position: relative;
-        }
-
-        .action-btn {
-            background: none;
-            border: none;
-            cursor: pointer;
-            padding: 0.25rem 0.5rem;
-            font-size: 1.25rem;
-            color: var(--text-secondary);
-            border-radius: var(--radius-sm);
-        }
-
-        .action-btn:hover {
-            background-color: var(--bg-color);
-        }
-
-        .action-menu {
-            display: none;
-            position: absolute;
-            right: 0;
-            top: 100%;
-            background-color: white;
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-md);
-            box-shadow: var(--shadow-lg);
-            min-width: 150px;
-            z-index: 100;
-            margin-top: 0.25rem;
-        }
-
-        .action-menu.active {
-            display: block;
-        }
-
-        .action-menu-item {
-            padding: 0.625rem 1rem;
-            cursor: pointer;
-            font-size: 0.875rem;
-            color: var(--text-primary);
-            border-bottom: 1px solid var(--border-color);
-            display: flex;
-            align-items: center;
-            gap: var(--spacing-sm);
-        }
-
-        .action-menu-item:last-child {
-            border-bottom: none;
-        }
-
-        .action-menu-item:hover {
-            background-color: var(--bg-color);
-        }
-
-        .action-menu-item.danger {
-            color: var(--danger-color);
-        }
-
-        .action-menu-item.success {
-            color: var(--secondary-color);
-        }
-
-        .action-menu-item.warning {
-            color: #f59e0b;
-        }
-
-        .action-menu-item svg {
-            flex-shrink: 0;
-        }
-
-        /* New Leave Form Styles */
-        .form-control-static {
-            padding: 0.625rem;
-            background-color: #f9fafb;
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-md);
-            color: var(--text-primary);
-            min-height: 42px;
-        }
-
-        .new-leave-modal .modal-content {
-            max-width: 1000px;
-        }
-
-        .section-title {
-            font-size: 1.125rem;
-            font-weight: 600;
-            color: var(--text-primary);
-            margin-bottom: var(--spacing-lg);
-        }
-
-        .form-row.three-col {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: var(--spacing-lg);
-            margin-bottom: var(--spacing-lg);
-        }
-
-        .form-row.two-col {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: var(--spacing-lg);
-            margin-bottom: var(--spacing-lg);
-        }
-
-        .required {
-            color: var(--danger-color);
-        }
-
-        .input-with-button {
-            display: flex;
-            gap: var(--spacing-sm);
-            align-items: center;
-        }
-
-        .input-with-button .form-control {
-            flex: 1;
-        }
-
-        .btn-add {
-            padding: 0.625rem 1rem;
-            background-color: white;
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-md);
-            font-size: 0.875rem;
-            color: var(--text-primary);
-            cursor: pointer;
-            white-space: nowrap;
-            transition: all 0.2s;
-        }
-
-        .btn-add:hover {
-            background-color: var(--bg-color);
-            border-color: var(--primary-color);
-            color: var(--primary-color);
-        }
-
-        .radio-group {
-            display: flex;
-            gap: var(--spacing-md);
-            flex-wrap: wrap;
-        }
-
-        .radio-label {
-            display: flex;
-            align-items: center;
-            gap: var(--spacing-xs);
-            cursor: pointer;
-            font-size: 0.875rem;
-            color: var(--text-primary);
-        }
-
-        .radio-label input[type="radio"] {
-            width: 16px;
-            height: 16px;
-            cursor: pointer;
-            accent-color: var(--primary-color);
-        }
-
-        .radio-label span {
-            user-select: none;
-        }
-
-        .date-input-wrapper {
-            position: relative;
-        }
-
-        .date-input {
-            padding-right: 2.5rem;
-        }
-
-        .calendar-icon {
-            position: absolute;
-            right: 0.875rem;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 1.125rem;
-            pointer-events: none;
-            color: var(--text-secondary);
-        }
-
-        .date-range-wrapper {
-            margin-top: var(--spacing-sm);
-        }
-
-        .date-range-inputs {
-            display: flex;
-            align-items: center;
-            gap: var(--spacing-sm);
-        }
-
-        .date-separator {
-            color: var(--text-secondary);
-            font-size: 0.875rem;
-        }
-
-        .textarea-wrapper {
-            position: relative;
-        }
-
-        .textarea-wrapper textarea {
-            resize: vertical;
-            min-height: 100px;
-        }
-
-        .btn-suggestions {
-            position: absolute;
-            top: 0.5rem;
-            right: 0.5rem;
-            padding: 0.5rem 1rem;
-            background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
-            color: white;
-            border: none;
-            border-radius: var(--radius-md);
-            font-size: 0.75rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s;
-            box-shadow: 0 2px 4px rgba(6, 182, 212, 0.2);
-        }
-
-        .btn-suggestions:hover {
-            background: linear-gradient(135deg, #0891b2 0%, #0e7490 100%);
-            box-shadow: 0 4px 8px rgba(6, 182, 212, 0.3);
-            transform: translateY(-1px);
-        }
-
-        .file-upload-zone {
-            position: relative;
-            border: 2px dashed var(--border-color);
-            border-radius: var(--radius-md);
-            padding: var(--spacing-xl);
-            text-align: center;
-            background-color: #fafafa;
-            transition: all 0.2s;
-            cursor: pointer;
-        }
-
-        .file-upload-zone:hover {
-            border-color: var(--primary-color);
-            background-color: #f0f9ff;
-        }
-
-        .file-upload-zone.drag-over {
-            border-color: var(--primary-color);
-            background-color: #dbeafe;
-        }
-
-        .file-input {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            opacity: 0;
-            cursor: pointer;
-        }
-
-        .file-upload-content {
-            pointer-events: none;
-        }
-
-        .file-upload-text {
-            color: var(--text-secondary);
-            font-size: 0.875rem;
-            margin: 0;
-        }
-
-        .info-icon {
-            display: inline-block;
-            margin-left: var(--spacing-xs);
-            color: var(--text-secondary);
-            cursor: help;
-            font-size: 0.875rem;
-        }
-
-        .file-preview {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: var(--spacing-md);
-            background-color: white;
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-md);
-        }
-
-        .file-info {
-            display: flex;
-            align-items: center;
-            gap: var(--spacing-md);
-        }
-
-        .file-icon {
-            font-size: 1.5rem;
-        }
-
-        .file-details {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .file-name {
-            font-size: 0.875rem;
-            font-weight: 500;
-            color: var(--text-primary);
-        }
-
-        .file-size {
-            font-size: 0.75rem;
-            color: var(--text-secondary);
-        }
-
-        .file-remove {
-            background: none;
-            border: none;
-            color: var(--danger-color);
-            cursor: pointer;
-            font-size: 1.25rem;
-            padding: 0.25rem;
-            transition: all 0.2s;
-        }
-
-        .file-remove:hover {
-            transform: scale(1.2);
-        }
-
-        .btn-icon {
-            margin-right: var(--spacing-xs);
-        }
-
-        .btn-text {
-            background: none;
-            border: none;
-            color: var(--text-secondary);
-            padding: 0.625rem 1rem;
-            cursor: pointer;
-            font-size: 0.875rem;
-            transition: all 0.2s;
-        }
-
-        .btn-text:hover {
-            color: var(--text-primary);
-        }
-
-        @media (max-width: 768px) {
-            .form-row.three-col,
-            .form-row.two-col {
-                grid-template-columns: 1fr;
-            }
-            
-            .radio-group {
-                flex-direction: column;
-            }
-            
-            .btn-suggestions {
-                position: static;
-                margin-top: var(--spacing-sm);
-                width: 100%;
-            }
-        }
-
-        /* ========== MY LEAVES SECTION STYLES ========== */
-        
-        /* Profile Card */
         .profile-card {
             display: flex;
             align-items: center;
-            gap: var(--spacing-lg);
-            padding: var(--spacing-xl);
-            background: white;
-            border-radius: var(--radius-lg);
-            box-shadow: var(--shadow-sm);
-            margin-bottom: var(--spacing-lg);
+            gap: 24px;
+            padding: 24px;
+            margin-bottom: 24px;
         }
 
         .profile-avatar {
             width: 80px;
             height: 80px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            background-color: #e2e8f0;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 2rem;
-            font-weight: 600;
-            flex-shrink: 0;
-        }
-
-        .profile-avatar img {
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            object-fit: cover;
+            font-size: 32px;
+            font-weight: 700;
+            color: #475569;
         }
 
         .profile-info {
@@ -618,241 +58,146 @@
         }
 
         .profile-name {
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: var(--text-primary);
-            margin-bottom: var(--spacing-xs);
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 4px;
+            color: #1e293b;
         }
 
         .profile-role {
-            font-size: 0.875rem;
-            color: var(--text-secondary);
+            font-size: 14px;
+            color: #64748b;
+            margin-bottom: 12px;
         }
 
         .profile-meta {
             display: flex;
-            align-items: center;
-            gap: var(--spacing-sm);
-            margin-top: var(--spacing-sm);
-            font-size: 0.75rem;
-            color: var(--text-secondary);
+            gap: 20px;
             flex-wrap: wrap;
         }
 
         .profile-meta-item {
             display: flex;
             align-items: center;
-            gap: var(--spacing-xs);
+            gap: 8px;
+            font-size: 13px;
+            color: #475569;
         }
 
-        /* Remaining Leaves Card */
         .remaining-leaves-card {
-            background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 20px;
+            background: linear-gradient(135deg, #ea580c, #f97316);
             color: white;
-            padding: var(--spacing-xl);
-            border-radius: var(--radius-lg);
-            box-shadow: var(--shadow-md);
-            text-align: center;
-            margin-bottom: var(--spacing-lg);
-        }
-
-        .remaining-leaves-label {
-            font-size: 0.875rem;
-            opacity: 0.9;
-            margin-bottom: var(--spacing-sm);
-        }
-
-        .remaining-leaves-count {
-            font-size: 3rem;
-            font-weight: 700;
-            margin-bottom: var(--spacing-xs);
+            border-radius: 12px;
+            margin-bottom: 24px;
         }
 
         .remaining-leaves-icon {
-            font-size: 2rem;
-            margin-bottom: var(--spacing-sm);
+            font-size: 32px;
         }
 
-        /* Leave Quota Table */
-        .quota-table-container {
-            background: white;
-            border-radius: var(--radius-lg);
-            box-shadow: var(--shadow-sm);
-            overflow: hidden;
-            margin-bottom: var(--spacing-lg);
-        }
-
-        .quota-table-header {
-            padding: var(--spacing-lg);
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .quota-table-title {
-            font-size: 1.125rem;
+        .remaining-leaves-label {
             font-weight: 600;
-            color: var(--text-primary);
+            flex: 1;
         }
 
-        .quota-table {
-            width: 100%;
-            border-collapse: collapse;
+        .remaining-leaves-count {
+            font-size: 32px;
+            font-weight: 800;
         }
 
-        .quota-table thead {
-            background-color: #f9fafb;
+        /* Action Dropdown Menu */
+        .action-dropdown {
+            position: relative;
+            display: inline-block;
         }
 
-        .quota-table th {
-            padding: var(--spacing-md);
-            text-align: left;
-            font-weight: 600;
-            color: var(--text-secondary);
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            border-bottom: 2px solid var(--border-color);
+        .action-menu {
+            position: absolute;
+            right: 0;
+            margin-top: 8px;
+            background: #ffffff;
+            border: 1px solid #f1f5f9;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.15);
+            padding: 8px;
+            z-index: 100;
+            display: none;
+            min-width: 140px;
         }
 
-        .quota-table td {
-            padding: var(--spacing-md);
-            border-bottom: 1px solid var(--border-color);
-            vertical-align: middle;
+        .action-menu.active {
+            display: block;
+            animation: fadeIn 0.15s ease-out;
         }
 
-        .quota-table tbody tr:hover {
-            background-color: #f9fafb;
-        }
-
-        .quota-table tbody tr:last-child td {
-            border-bottom: none;
-        }
-
-        .leave-type-cell {
+        .action-menu-item {
             display: flex;
             align-items: center;
-            gap: var(--spacing-sm);
-        }
-
-        .leave-type-indicator {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            flex-shrink: 0;
-        }
-
-        .leave-type-indicator.casual {
-            background-color: #3b82f6;
-        }
-
-        .leave-type-indicator.sick {
-            background-color: #ef4444;
-        }
-
-        .leave-type-indicator.earned,
-        .leave-type-indicator.paid {
-            background-color: #10b981;
-        }
-
-        .leave-type-name {
+            gap: 8px;
+            width: 100%;
+            text-align: left;
+            padding: 10px 16px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            border-radius: 8px;
+            font-size: 0.85rem;
             font-weight: 500;
-            color: var(--text-primary);
+            color: #334155;
+            transition: all 0.2s;
         }
 
-        .quota-number {
-            font-weight: 500;
-            color: var(--text-primary);
+        .action-menu-item:hover {
+            background: #f8fafc;
+            color: var(--primary-color);
         }
 
-        .quota-number.zero {
-            color: var(--text-secondary);
+        .action-menu-item.success:hover {
+            background: #dcfce7;
+            color: #16a34a;
         }
 
-        .quota-number.negative {
-            color: var(--danger-color);
+        .action-menu-item.warning:hover {
+            background: #fef9c3;
+            color: #ca8a04;
         }
 
-        .quota-number.positive {
-            color: var(--secondary-color);
+        .action-menu-item.danger:hover {
+            background: #fee2e2;
+            color: #dc2626;
         }
 
-        /* Loading State */
-        .loading-state {
-            text-align: center;
-            padding: var(--spacing-xl);
-            color: var(--text-secondary);
+        .action-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: #94a3b8;
+            cursor: pointer;
+            padding: 4px 8px;
         }
 
-        .loading-spinner {
-            display: inline-block;
-            width: 40px;
-            height: 40px;
-            border: 4px solid var(--border-color);
-            border-top-color: var(--primary-color);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        /* Empty State */
-        .empty-state {
-            text-align: center;
-            padding: var(--spacing-xl);
-            color: var(--text-secondary);
-        }
-
-        .empty-state-icon {
-            font-size: 3rem;
-            margin-bottom: var(--spacing-md);
-        }
-
-        /* Responsive adjustments for My Leaves section */
-        @media (max-width: 768px) {
-            .profile-card {
-                flex-direction: column;
-                text-align: center;
-            }
-
-            .quota-table {
-                font-size: 0.875rem;
-            }
-
-            .quota-table th,
-            .quota-table td {
-                padding: var(--spacing-sm);
-            }
-
-            .remaining-leaves-count {
-                font-size: 2rem;
-            }
-        }
-        
-        /* Hide sidebar and header when in iframe */
-        body.in-iframe .sidebar,
-        body.in-iframe .sidebar-overlay,
-        body.in-iframe .header {
-            display: none !important;
-        }
-
-        body.in-iframe .main-content {
-            margin-left: 0 !important;
-            width: 100% !important;
-        }
-
-        body.in-iframe .content-area {
-            padding-top: 0 !important;
+        .action-btn:hover {
+            color: #0f172a;
         }
     </style>
+    <link rel="stylesheet" href="../styles/tailwind.min.css">
     <script>
-        // Detect if page is loaded in iframe
-        if (window.self !== window.top) {
-            document.addEventListener('DOMContentLoaded', function() {
-                document.body.classList.add('in-iframe');
-            });
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: { DEFAULT: '#ea580c', dark: '#c2410c', light: '#f97316' }
+                    }
+                }
+            }
         }
     </script>
 </head>
+
 <body>
     <div class="app-container">
         <!-- Sidebar Overlay -->
@@ -861,21 +206,44 @@
         <!-- Sidebar -->
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
-                <img src="../assets/logo.png" alt="Soleos Logo" class="sidebar-logo">
-                <button class="sidebar-close-btn" id="sidebarClose">&times;</button>
+                <a href="../index.html"><img src="../assets/soleos.png" alt="Soleos Logo" class="sidebar-logo"></a>
+                <button class="sidebar-close-btn" id="sidebarClose">&#x2715;</button>
             </div>
             <nav class="sidebar-nav">
+                <div class="nav-section-label">Main</div>
                 <div class="nav-item"><a href="../index.html" class="nav-link"><i>📊</i> Dashboard</a></div>
-                <div class="nav-item"><a href="employees.html" class="nav-link"><i>👥</i> Employees</a></div>
-                <div class="nav-item"><a href="attendance.html" class="nav-link"><i>📅</i> Attendance</a></div>
-                <div class="nav-item"><a href="leaves.html" class="nav-link active"><i>🏖️</i> Leaves</a></div>
-                <div class="nav-item"><a href="holidays.html" class="nav-link"><i>🎉</i> Holidays</a></div>
-                <div class="nav-item"><a href="payroll.html" class="nav-link"><i>💰</i> Payroll</a></div>
-                <div class="nav-item"><a href="employee-salary.html" class="nav-link"><i>💵</i> Employee Salary</a></div>
-                <div class="nav-item"><a href="departments.html" class="nav-link"><i>🏢</i> Departments</a></div>
-                <div class="nav-item"><a href="designations.html" class="nav-link"><i>💼</i> Designations</a></div>
-                <div class="nav-item"><a href="appreciations.html" class="nav-link"><i>🏆</i> Appreciations</a></div>
-                <div class="nav-item"><a href="note.html" class="nav-link"><i>📝</i> Note</a></div>
+                <div class="nav-item"><a href="./profile.html" id="myProfileLink" class="nav-link"><i>👤</i> My
+                        Profile</a></div>
+                <div class="nav-item"><a href="./employees.html" class="nav-link"><i>👥</i> Employees</a></div>
+
+                <div class="nav-section-label">Time & Leave</div>
+                <div class="nav-item"><a href="./attendance.html" class="nav-link"><i>📅</i> Attendance</a></div>
+                <div class="nav-item"><a href="./leaves.html" class="nav-link"><i>🏖️</i> Leaves</a></div>
+                <div class="nav-item"><a href="./holidays.html" class="nav-link"><i>🎉</i> Holidays</a></div>
+                <div class="nav-item"><a href="./calendar.html" class="nav-link"><i>📆</i> Calendar</a></div>
+
+                <div class="nav-section-label">Payroll</div>
+                <div class="nav-item"><a href="./payroll.html" class="nav-link"><i>💰</i> Payroll</a></div>
+                <div class="nav-item"><a href="./employee-salary.html" class="nav-link"><i>💵</i> Employee Salary</a>
+                </div>
+
+                <div class="nav-section-label">Organisation</div>
+                <div class="nav-item"><a href="./departments.html" class="nav-link"><i>🏢</i> Departments</a></div>
+                <div class="nav-item"><a href="./designations.html" class="nav-link"><i>💼</i> Designations</a></div>
+                <div class="nav-item"><a href="./appreciations.html" class="nav-link"><i>🏆</i> Appreciations</a></div>
+                <div class="nav-item"><a href="./assets.html" class="nav-link hr-only"><i>💻</i> Assets</a></div>
+                <div class="nav-item"><a href="./note.html" class="nav-link"><i>📝</i> Notes</a></div>
+
+                <div class="nav-section-label">Reports</div>
+                <div class="nav-item"><a href="./reports.html" class="nav-link hr-only"><i>📈</i> Reports</a></div>
+
+                <div class="nav-section-label">Settings</div>
+                <div class="nav-item"><a href="./audit-logs.html" class="nav-link admin-only"><i>📜</i> Audit Logs</a>
+                </div>
+                <div class="nav-item"><a href="./biometric-settings.html" class="nav-link hr-only"><i>🔐</i> Biometric
+                        Settings</a></div>
+
+
             </nav>
         </aside>
 
@@ -886,26 +254,40 @@
                     <button class="hamburger-btn" id="sidebarToggle">
                         ☰
                     </button>
-                    <div class="header-title"><h1>Leave Management</h1></div>
+                    <div class="header-title">
+                        <h1>Leave Management</h1>
+                    </div>
                 </div>
                 <div class="header-actions">
-                    <div class="role-selector">
-                        <label for="roleDropdown">Current Role:</label>
-                        <select id="roleDropdown">
-                            <option value="admin">Admin</option>
-                            <option value="hr">HR</option>
-                            <option value="manager">Manager</option>
-                            <option value="employee">Employee</option>
-                        </select>
+                    <!-- Global Search -->
+                    <div class="global-search" id="globalSearchWrap">
+                        <span class="global-search-icon">🔍</span>
+                        <input type="text" id="globalSearchInput" class="global-search-input" placeholder="Search pages..." autocomplete="off">
+                        <div class="global-search-dropdown" id="globalSearchDropdown"></div>
                     </div>
-                    <span class="role-badge" id="roleBadge">Employee</span>
+                    <!-- Notification Bell -->
+                    <button class="notif-btn" id="notifBtn" title="Pending approvals">
+                        🔔
+                        <span class="notif-badge" id="notifBadge" style="display:none;">0</span>
+                    </button>
+                    <!-- Dark Mode Toggle -->
+                    <button class="dark-mode-btn" id="darkModeBtn" title="Toggle dark mode">🌙</button>
+                    <!-- User Info -->
+                    <div class="user-info">
+                        <div class="user-avatar" id="userAvatarInitial">?</div>
+                        <div>
+                            <div class="user-name" id="userDisplayName">Loading...</div>
+                            <div class="user-role-badge"><span class="role-badge" id="roleBadge">Loading...</span></div>
+                        </div>
+                    </div>
+                    <button class="btn-logout" id="logoutBtn" onclick="auth.logout()">Logout</button>
                 </div>
             </header>
 
             <div class="content-area">
                 <!-- ========== MY LEAVES SECTION (Hidden by default) ========== -->
                 <div id="myLeavesSection" style="display:none;">
-                    
+
                     <!-- Profile Card -->
                     <div class="card profile-card" id="profileCard">
                         <div class="profile-avatar" id="profileAvatar">
@@ -938,359 +320,263 @@
                         <div class="remaining-leaves-count" id="remainingLeavesCount">-</div>
                     </div>
 
-                    <!-- Leaves Quota Table -->
-                    <div class="card quota-table-container">
-                        <div class="quota-table-header">
-                            <h3 class="quota-table-title">Leaves Quota</h3>
+                    <!-- Leaves Table Card -->
+                    <div class="card">
+                        <div class="card-header" style="justify-content: space-between;">
+                            <h3 class="card-title">My Leave History</h3>
+                            <button class="btn btn-primary" onclick="openNewLeaveModal()">+ Apply Leave</button>
                         </div>
                         <div class="table-container">
-                            <table class="quota-table">
+                            <table class="table">
                                 <thead>
                                     <tr>
-                                        <th>Leave Type</th>
-                                        <th>No of Leaves</th>
-                                        <th>Monthly Limit</th>
-                                        <th>Total Leaves Taken</th>
-                                        <th>Remaining Leaves</th>
-                                        <th>Over Utilized</th>
-                                        <th>Unused Leaves</th>
+                                        <th>TYPE</th>
+                                        <th>FROM</th>
+                                        <th>TO</th>
+                                        <th>DAYS</th>
+                                        <th>REASON</th>
+                                        <th>STATUS</th>
+                                        <th style="width: 100px;">ACTION</th>
                                     </tr>
                                 </thead>
-                                <tbody id="quotaTableBody">
+                                <tbody id="myLeavesTableBody">
                                     <tr>
-                                        <td colspan="7" class="loading-state">
-                                            <div class="loading-spinner"></div>
-                                            <div style="margin-top: var(--spacing-md);">Loading leave quota...</div>
-                                        </td>
+                                        <td colspan="7" class="text-center">Loading leave history...</td>
                                     </tr>
                                 </tbody>
                             </table>
                         </div>
                     </div>
-
                 </div>
-                <!-- ========== END MY LEAVES SECTION ========== -->
 
-                <!-- ========== LEAVE MANAGEMENT SECTION ========== -->
-                
-                <!-- Toolbar -->
-                <div class="card">
-                    <div class="leaves-toolbar">
-                        <div class="leaves-filters">
-                            <div class="filter-group">
-                                <label>Duration:</label>
-                                <input type="date" id="filterFromDate" class="form-control" onchange="loadLeaves()">
-                                <span style="color: var(--text-secondary);">To</span>
-                                <input type="date" id="filterToDate" class="form-control" onchange="loadLeaves()">
-                            </div>
-                            <div class="search-box">
-                                <input type="text" id="searchInput" placeholder="Start typing to search" onkeyup="handleSearch()">
+                <!-- ========== STAFF LEAVES SECTION (For HR/Admin/Manager) ========== -->
+                <div id="staffLeavesSection" style="display:none;">
+                    <div class="card">
+                        <div class="card-header" style="justify-content: space-between;">
+                            <h3 class="card-title">Staff Leave Requests</h3>
+                            <div class="flex gap-2">
+                                <button class="btn btn-outline" onclick="loadLeaves()">Refresh</button>
                             </div>
                         </div>
-                        <div class="leaves-actions">
-                            <button class="btn btn-secondary" onclick="scrollToMyLeaves()">📋 My Leaves</button>
-                            <button class="btn btn-primary" onclick="openNewLeaveModal()">+ New Leave</button>
-                            <button class="btn btn-outline" onclick="exportLeaves()">📤 Export</button>
-                        </div>
-                    </div>
-
-                    <!-- Additional Filters (Always Visible) -->
-                    <div id="additionalFilters" style="margin-top: var(--spacing-md); padding-top: var(--spacing-md); border-top: 1px solid var(--border-color);">
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label class="form-label">Status</label>
-                                <select id="filterStatus" class="form-control" onchange="loadLeaves()">
-                                    <option value="">All Status</option>
-                                    <option value="Pending">Pending</option>
-                                    <option value="Approved">Approved</option>
-                                    <option value="Rejected">Rejected</option>
-                                </select>
-                            </div>
-                            <div class="form-group hr-only">
-                                <label class="form-label">Employee</label>
-                                <select id="filterEmployee" class="form-control" onchange="loadLeaves()">
-                                    <option value="">All Employees</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">Leave Type</label>
-                                <select id="filterLeaveType" class="form-control" onchange="loadLeaves()">
-                                    <option value="">All Types</option>
-                                </select>
-                            </div>
+                        <div class="table-container">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>EMPLOYEE</th>
+                                        <th>TYPE</th>
+                                        <th>FROM</th>
+                                        <th>TO</th>
+                                        <th>DAYS</th>
+                                        <th>STATUS</th>
+                                        <th style="width: 150px;">ACTION</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="staffLeavesTableBody">
+                                    <tr>
+                                        <td colspan="7" class="text-center">Loading requests...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
 
-                <!-- Leaves Table -->
-                <div class="card">
-                    <div class="table-container">
-                        <table class="leaves-table">
-                            <thead>
-                                <tr>
-                                    <th class="checkbox-cell">
-                                        <input type="checkbox" id="selectAll" onchange="toggleSelectAll()">
-                                    </th>
-                                    <th>Employee</th>
-                                    <th>Leave Date</th>
-                                    <th>Duration</th>
-                                    <th>Leave Status</th>
-                                    <th>Leave Type</th>
-                                    <th>Paid</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
-                            <tbody id="leavesTable">
-                                <tr><td colspan="8" class="text-center">Loading...</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
             </div>
         </main>
     </div>
 
-    <!-- Apply Leave Modal -->
-    <div class="modal" id="leaveModal">
-        <div class="modal-content" style="width: 1200px" >
+    <!-- Modal for Applying/Editing Leave (Unified AS newLeaveModal for consistency) -->
+    <div class="modal" id="newLeaveModal">
+        <div class="modal-content">
             <div class="modal-header">
                 <h3 class="modal-title">Apply Leave</h3>
-                <button class="modal-close" onclick="closeModal()">&times;</button>
-            </div>
-            <div class="modal-body">
-                <form id="leaveForm">
-                    <div class="form-group">
-                        <label class="form-label">Employee *</label>
-                        <select id="employeeId" class="form-control" required>
-                            <option value="">Select Employee</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Leave Type *</label>
-                        <select id="leaveTypeId" class="form-control" required>
-                            <option value="">Select Leave Type</option>
-                        </select>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label class="form-label">From Date *</label>
-                            <input type="date" id="fromDate" class="form-control" required>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">To Date *</label>
-                            <input type="date" id="toDate" class="form-control" required>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Reason *</label>
-                        <textarea id="reason" class="form-control" rows="3" required></textarea>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
-                <button class="btn btn-primary" onclick="saveLeave()">Apply</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Approve/Reject Modal -->
-    <div class="modal" id="statusModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 class="modal-title">Update Leave Status</h3>
-                <button class="modal-close" onclick="closeStatusModal()">&times;</button>
-            </div>
-            <div class="modal-body">
-                <form id="statusForm">
-                    <input type="hidden" id="statusLeaveId">
-                    <div class="form-group">
-                        <label class="form-label">Status *</label>
-                        <select id="leaveStatus" class="form-control" required>
-                            <option value="Approved">Approve</option>
-                            <option value="Rejected">Reject</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Rejection Reason (if rejecting)</label>
-                        <textarea id="rejectionReason" class="form-control" rows="3"></textarea>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-outline" onclick="closeStatusModal()">Cancel</button>
-                <button class="btn btn-primary" onclick="updateStatus()">Update</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- New Leave Modal -->
-    <div class="modal new-leave-modal" id="newLeaveModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 class="modal-title">Assign Leave</h3>
                 <button class="modal-close" onclick="closeNewLeaveModal()">&times;</button>
             </div>
             <div class="modal-body">
                 <form id="newLeaveForm">
                     <input type="hidden" id="newLeaveId">
-                    <!-- Row 1: Member, Leave Type, Status -->
-                    <div class="form-row three-col">
-                        <div class="form-group">
-                            <label class="form-label">Choose Member <span class="required">*</span></label>
-                            <select id="newMemberId" class="form-control" required>
-                                <option value="">--</option>
-                            </select>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label class="form-label">Leave Type <span class="required">*</span></label>
-                            <div class="input-with-button">
-                                <select id="newLeaveTypeId" class="form-control" required>
-                                    <option value="">--</option>
-                                </select>
-                                <button type="button" class="btn-add" onclick="addLeaveType()">Add</button>
-                            </div>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label class="form-label">Status</label>
-                            <select id="newLeaveStatus" class="form-control">
-                                <option value="Pending">Pending</option>
-                                <option value="Approved">Approved</option>
-                                <option value="Rejected">Rejected</option>
-                            </select>
-                        </div>
+
+                    <div class="form-group" id="newMemberGroup">
+                        <label class="form-label" for="newMemberId">Select Employee *</label>
+                        <select id="newMemberId" class="form-control" required>
+                            <option value="">Select Employee</option>
+                        </select>
                     </div>
 
-                    <!-- Row 2: Duration and Date -->
-                    <div class="form-row two-col">
-                        <div class="form-group">
-                            <label class="form-label">Select Duration</label>
-                            <div class="radio-group">
-                                <label class="radio-label">
-                                    <input type="radio" name="newDuration" value="full-day" checked onchange="handleNewDurationChange()">
-                                    <span>Full Day</span>
-                                </label>
-                                <label class="radio-label">
-                                    <input type="radio" name="newDuration" value="multiple" onchange="handleNewDurationChange()">
-                                    <span>Multiple</span>
-                                </label>
-                                <label class="radio-label">
-                                    <input type="radio" name="newDuration" value="first-half" onchange="handleNewDurationChange()">
-                                    <span>First Half</span>
-                                </label>
-                                <label class="radio-label">
-                                    <input type="radio" name="newDuration" value="second-half" onchange="handleNewDurationChange()">
-                                    <span>Second Half</span>
-                                </label>
-                            </div>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label class="form-label">Date</label>
-                            <div class="date-input-wrapper" id="newSingleDateWrapper">
-                                <input type="date" id="newSingleDate" class="form-control date-input" required>
-                                <span class="calendar-icon">📅</span>
-                            </div>
-                            
-                            <!-- Date range for multiple days (hidden by default) -->
-                            <div id="newDateRangeWrapper" class="date-range-wrapper" style="display: none;">
-                                <div class="date-range-inputs">
-                                    <input type="date" id="newFromDate" class="form-control date-input">
-                                    <span class="date-separator">to</span>
-                                    <input type="date" id="newToDate" class="form-control date-input">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Row 3: Reason -->
                     <div class="form-group">
-                        <label class="form-label">Reason for absence <span class="required">*</span></label>
-                        <div class="textarea-wrapper">
-                            <textarea id="newReason" class="form-control" rows="4" placeholder="e.g. Feeling not well" required></textarea>
-                            
+                        <label class="form-label" for="newLeaveTypeId">Leave Type *</label>
+                        <select id="newLeaveTypeId" class="form-control" required>
+                            <option value="">Select Leave Type</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Duration Type</label>
+                        <div class="flex gap-4 mt-2">
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="radio" name="newDuration" value="full-day" checked
+                                    onchange="toggleNewDateInputs()">
+                                <span>Single Day</span>
+                            </label>
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="radio" name="newDuration" value="multiple"
+                                    onchange="toggleNewDateInputs()">
+                                <span>Multiple Days</span>
+                            </label>
                         </div>
                     </div>
 
-                    <!-- Row 4: File Upload -->
-                    <div class="form-group">
-                        <label class="form-label">
-                            Add File 
-                            <span class="info-icon" title="Upload supporting documents (max 5MB)">ℹ️</span>
-                        </label>
-                        <div class="file-upload-zone" id="newFileUploadZone">
-                            <input type="file" id="newFileInput" class="file-input" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" onchange="handleNewFileSelect(event)">
-                            <div class="file-upload-content" id="newFileUploadContent">
-                                <p class="file-upload-text">Choose a file</p>
-                            </div>
-                            <div id="newFilePreview" class="file-preview" style="display: none;"></div>
+                    <div id="newSingleDateWrapper">
+                        <div class="form-group">
+                            <label class="form-label" for="newSingleDate">Date *</label>
+                            <input type="date" id="newSingleDate" class="form-control" required>
                         </div>
+                    </div>
+
+                    <div id="newDateRangeWrapper" style="display:none;">
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label class="form-label" for="newFromDate">Start Date *</label>
+                                <input type="date" id="newFromDate" class="form-control">
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label class="form-label" for="newToDate">End Date *</label>
+                                <input type="date" id="newToDate" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="newReason">Reason *</label>
+                        <textarea id="newReason" class="form-control" rows="3" required
+                            placeholder="Describe the reason for your leave"></textarea>
+                    </div>
+
+                    <div class="form-group admin-only" id="newStatusGroup">
+                        <label class="form-label" for="newLeaveStatus">Status</label>
+                        <select id="newLeaveStatus" class="form-control">
+                            <option value="Pending">Pending</option>
+                            <option value="Approved">Approved</option>
+                            <option value="Rejected">Rejected</option>
+                        </select>
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-text" onclick="closeNewLeaveModal()">Cancel</button>
-                <button class="btn btn-primary" onclick="saveNewLeave()">
-                    <span class="btn-icon">✓</span> Save
-                </button>
+                <button class="btn btn-outline" onclick="closeNewLeaveModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="saveNewLeave()">Save Changes</button>
             </div>
         </div>
     </div>
 
-    <script src="../scripts/toast.js"></script>
-
     <!-- View Leave Modal -->
     <div class="modal" id="viewLeaveModal">
-        <div class="modal-content">
+        <div class="modal-content" style="max-width: 500px;">
             <div class="modal-header">
                 <h3 class="modal-title">Leave Details</h3>
                 <button class="modal-close" onclick="closeViewModal()">&times;</button>
             </div>
             <div class="modal-body">
-                <div class="form-row two-col">
-                    <div class="form-group">
-                        <label class="form-label">Employee</label>
-                        <div id="viewEmployeeName" class="form-control-static"></div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-xs font-bold text-gray-500 uppercase">Employee</label>
+                        <p id="viewEmployeeName" class="font-semibold text-gray-800">-</p>
                     </div>
-                    <div class="form-group">
-                        <label class="form-label">Leave Type</label>
-                        <div id="viewLeaveType" class="form-control-static"></div>
+                    <div>
+                        <label class="text-xs font-bold text-gray-500 uppercase">Leave Type</label>
+                        <p id="viewLeaveType" class="font-semibold text-gray-800">-</p>
                     </div>
-                </div>
-                <div class="form-row two-col">
-                    <div class="form-group">
-                        <label class="form-label">From Date</label>
-                        <div id="viewFromDate" class="form-control-static"></div>
+                    <div>
+                        <label class="text-xs font-bold text-gray-500 uppercase">From</label>
+                        <p id="viewFromDate" class="font-semibold text-gray-800">-</p>
                     </div>
-                    <div class="form-group">
-                        <label class="form-label">To Date</label>
-                        <div id="viewToDate" class="form-control-static"></div>
+                    <div>
+                        <label class="text-xs font-bold text-gray-500 uppercase">To</label>
+                        <p id="viewToDate" class="font-semibold text-gray-800">-</p>
                     </div>
-                </div>
-                <div class="form-row two-col">
-                    <div class="form-group">
-                        <label class="form-label">Duration</label>
-                        <div id="viewDuration" class="form-control-static"></div>
+                    <div>
+                        <label class="text-xs font-bold text-gray-500 uppercase">Duration</label>
+                        <p id="viewDuration" class="font-semibold text-gray-800">-</p>
                     </div>
-                    <div class="form-group">
-                        <label class="form-label">Status</label>
-                        <div id="viewStatus" class="form-control-static"></div>
+                    <div>
+                        <label class="text-xs font-bold text-gray-500 uppercase">Status</label>
+                        <p id="viewStatus" class="font-semibold">-</p>
                     </div>
                 </div>
-                 <div class="form-group">
-                    <label class="form-label">Reason</label>
-                    <div id="viewReason" class="form-control-static" style="min-height: 80px;"></div>
+                <div class="mt-4">
+                    <label class="text-xs font-bold text-gray-500 uppercase">Reason</label>
+                    <p id="viewReason" class="text-gray-700 bg-gray-50 p-3 rounded-lg border border-gray-100 mt-1">-</p>
                 </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary w-full" onclick="closeViewModal()">Close</button>
             </div>
         </div>
     </div>
+
+    <!-- Status Change Modal (Approve/Reject) -->
+    <div class="modal" id="statusModal">
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-header">
+                <h3 class="modal-title" id="statusModalTitle">Update Leave Status</h3>
+                <button class="modal-close" onclick="closeStatusModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="statusForm">
+                    <input type="hidden" id="statusLeaveId">
+                    <input type="hidden" id="leaveStatus">
+
+                    <div id="rejectionReasonWrapper">
+                        <label class="form-label" for="rejectionReason">Reason (Optional)</label>
+                        <textarea id="rejectionReason" class="form-control" rows="3"
+                            placeholder="Add a comment or reason..."></textarea>
+                    </div>
+                    <p id="statusConfirmationText" class="mt-2 text-gray-600">Are you sure you want to update the status
+                        of this leave request?</p>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeStatusModal()">Cancel</button>
+                <button id="statusSubmitBtn" class="btn btn-primary" onclick="updateStatus()">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Soft Delete Modal -->
+    <div class="modal" id="softDeleteModal">
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-header" style="border-bottom-color: #fee2e2;">
+                <h3 class="modal-title text-red-600">Delete Leave Request</h3>
+                <button class="modal-close" onclick="closeSoftDeleteModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p class="text-gray-600 mb-4">This will mark the leave request as deleted. This action can be undone by
+                    an Admin.</p>
+                <div class="form-group">
+                    <label class="form-label" for="leaveDeleteReasonInput">Reason for Deletion</label>
+                    <textarea id="leaveDeleteReasonInput" class="form-control" rows="2"
+                        placeholder="Optional reason..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeSoftDeleteModal()">Cancel</button>
+                <button class="btn bg-red-600 text-white hover:bg-red-700" onclick="confirmSoftDelete()">Delete
+                    Request</button>
+            </div>
+        </div>
+    </div>
+
     <script src="../scripts/toast.js"></script>
     <script src="../scripts/sidebar.js"></script>
     <script src="../scripts/role-manager.js"></script>
     <script src="../scripts/auth.js"></script>
     <script src="../scripts/api.js"></script>
-    <script src="../scripts/leaves.js"></script>
+    <script src="../scripts/theme.js"></script>
+    <script src="../scripts/header.js"></script>
+    <script src="../scripts/leaves.js?v=2"></script>
+    <script>
+        auth.initAuth();
+    </script>
 </body>
+
 </html>

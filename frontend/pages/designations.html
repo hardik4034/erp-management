@@ -1,14 +1,29 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Designations - HRMS</title>
-    <link rel="icon" type="image/x-icon" href="../assets/favicon.png"><link rel="shortcut icon" type="image/x-icon" href="../assets/favicon.png">
+    <link rel="icon" type="image/x-icon" href="../assets/favicon.png">
+    <link rel="shortcut icon" type="image/x-icon" href="../assets/favicon.png">
     <link rel="stylesheet" href="../styles/main.css">
     <link rel="stylesheet" href="../styles/toast.css">
     <link rel="stylesheet" href="../styles/role-selector.css">
+    <link rel="stylesheet" href="../styles/tailwind.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: { DEFAULT: '#ea580c', dark: '#c2410c', light: '#f97316' }
+                    }
+                }
+            }
+        }
+    </script>
 </head>
+
 <body>
     <div class="app-container">
         <!-- Sidebar Overlay -->
@@ -17,21 +32,43 @@
         <!-- Sidebar -->
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
-                <img src="../assets/logo.png" alt="Soleos Logo" class="sidebar-logo">
-                <button class="sidebar-close-btn" id="sidebarClose">&times;</button>
+                <a href="../index.html"><img src="../assets/soleos.png" alt="Soleos Logo" class="sidebar-logo"></a>
+                <button class="sidebar-close-btn" id="sidebarClose">&#x2715;</button>
             </div>
             <nav class="sidebar-nav">
+                <div class="nav-section-label">Main</div>
                 <div class="nav-item"><a href="../index.html" class="nav-link"><i>📊</i> Dashboard</a></div>
-                <div class="nav-item"><a href="employees.html" class="nav-link"><i>👥</i> Employees</a></div>
-                <div class="nav-item"><a href="attendance.html" class="nav-link"><i>📅</i> Attendance</a></div>
-                <div class="nav-item"><a href="leaves.html" class="nav-link"><i>🏖️</i> Leaves</a></div>
-                <div class="nav-item"><a href="holidays.html" class="nav-link"><i>🎉</i> Holidays</a></div>
-                <div class="nav-item"><a href="payroll.html" class="nav-link"><i>💰</i> Payroll</a></div>
-                <div class="nav-item"><a href="employee-salary.html" class="nav-link"><i>💵</i> Employee Salary</a></div>
-                <div class="nav-item"><a href="departments.html" class="nav-link"><i>🏢</i> Departments</a></div>
-                <div class="nav-item"><a href="designations.html" class="nav-link active"><i>💼</i> Designations</a></div>
-                <div class="nav-item"><a href="appreciations.html" class="nav-link"><i>🏆</i> Appreciations</a></div>
-                <div class="nav-item"><a href="note.html" class="nav-link"><i>📝</i> Note</a></div>
+                <div class="nav-item"><a href="./profile.html" id="myProfileLink" class="nav-link"><i>👤</i> My
+                        Profile</a></div>
+                <div class="nav-item"><a href="./employees.html" class="nav-link"><i>👥</i> Employees</a></div>
+
+                <div class="nav-section-label">Time & Leave</div>
+                <div class="nav-item"><a href="./attendance.html" class="nav-link"><i>📅</i> Attendance</a></div>
+                <div class="nav-item"><a href="./leaves.html" class="nav-link"><i>🏖️</i> Leaves</a></div>
+                <div class="nav-item"><a href="./holidays.html" class="nav-link"><i>🎉</i> Holidays</a></div>
+                <div class="nav-item"><a href="./calendar.html" class="nav-link"><i>📆</i> Calendar</a></div>
+
+                <div class="nav-section-label">Payroll</div>
+                <div class="nav-item"><a href="./payroll.html" class="nav-link"><i>💰</i> Payroll</a></div>
+                <div class="nav-item"><a href="./employee-salary.html" class="nav-link"><i>💵</i> Employee Salary</a>
+                </div>
+
+                <div class="nav-section-label">Organisation</div>
+                <div class="nav-item"><a href="./departments.html" class="nav-link"><i>🏢</i> Departments</a></div>
+                <div class="nav-item"><a href="./designations.html" class="nav-link"><i>💼</i> Designations</a></div>
+                <div class="nav-item"><a href="./appreciations.html" class="nav-link"><i>🏆</i> Appreciations</a></div>
+                <div class="nav-item"><a href="./assets.html" class="nav-link hr-only"><i>💻</i> Assets</a></div>
+                <div class="nav-item"><a href="./note.html" class="nav-link"><i>📝</i> Notes</a></div>
+
+                <div class="nav-section-label">Reports</div>
+                <div class="nav-item"><a href="./reports.html" class="nav-link hr-only"><i>📈</i> Reports</a></div>
+
+                <div class="nav-section-label">Settings</div>
+                <div class="nav-item"><a href="./audit-logs.html" class="nav-link admin-only"><i>📜</i> Audit Logs</a></div>
+                <div class="nav-item"><a href="./biometric-settings.html" class="nav-link hr-only"><i>🔐</i> Biometric
+                        Settings</a></div>
+
+
             </nav>
         </aside>
 
@@ -42,19 +79,33 @@
                     <button class="hamburger-btn" id="sidebarToggle">
                         ☰
                     </button>
-                    <div class="header-title"><h1>Designation Management</h1></div>
-                </div>
-                <div class="header-actions">
-                    <div class="role-selector">
-                        <label for="roleDropdown">Current Role:</label>
-                        <select id="roleDropdown">
-                            <option value="admin">Admin</option>
-                            <option value="hr">HR</option>
-                            <option value="manager">Manager</option>
-                            <option value="employee">Employee</option>
-                        </select>
+                    <div class="header-title">
+                        <h1>Designation Management</h1>
                     </div>
-                    <span class="role-badge" id="roleBadge">Employee</span>
+                </div>
+                                <div class="header-actions">
+                    <!-- Global Search -->
+                    <div class="global-search" id="globalSearchWrap">
+                        <span class="global-search-icon">🔍</span>
+                        <input type="text" id="globalSearchInput" class="global-search-input" placeholder="Search pages..." autocomplete="off">
+                        <div class="global-search-dropdown" id="globalSearchDropdown"></div>
+                    </div>
+                    <!-- Notification Bell -->
+                    <button class="notif-btn" id="notifBtn" title="Pending approvals">
+                        🔔
+                        <span class="notif-badge" id="notifBadge" style="display:none;">0</span>
+                    </button>
+                    <!-- Dark Mode Toggle -->
+                    <button class="dark-mode-btn" id="darkModeBtn" title="Toggle dark mode">🌙</button>
+
+                    <div class="user-info">
+                        <div class="user-avatar" id="userAvatarInitial">?</div>
+                        <div>
+                            <div class="user-name" id="userDisplayName">Loading...</div>
+                            <div class="user-role-badge"><span class="role-badge" id="roleBadge">Loading...</span></div>
+                        </div>
+                    </div>
+                    <button class="btn-logout" id="logoutBtn" onclick="auth.logout()">Logout</button>
                 </div>
             </header>
 
@@ -74,7 +125,16 @@
                 <div class="card">
                     <div class="card-header">
                         <h3 class="card-title">Designations</h3>
-                        <button class="btn btn-primary admin-only create-btn" onclick="openAddModal()" id="addBtn">+ Add Designation</button>
+                        <div style="display:flex;gap:10px;align-items:center;">
+                            <label id="showDeletedLabel"
+                                style="display:none;align-items:center;gap:6px;cursor:pointer;font-size:0.85rem;color:#dc2626;">
+                                <input type="checkbox" id="showDeletedToggle" onchange="loadDesignations()"
+                                    style="accent-color:#dc2626;">
+                                Show Deleted
+                            </label>
+                            <button class="btn btn-primary admin-only create-btn" onclick="openAddModal()" id="addBtn">+
+                                Add Designation</button>
+                        </div>
                     </div>
                     <div class="table-container">
                         <table class="table">
@@ -89,7 +149,9 @@
                                 </tr>
                             </thead>
                             <tbody id="designationsTable">
-                                <tr><td colspan="6" class="text-center">Loading...</td></tr>
+                                <tr>
+                                    <td colspan="6" class="text-center">Loading...</td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
@@ -131,19 +193,56 @@
         </div>
     </div>
 
+    <!-- Soft Delete Modal -->
+    <div class="modal" id="softDeleteModal">
+        <div class="modal-content" style="max-width:480px;">
+            <div class="modal-header" style="border-bottom:1px solid #fee2e2;">
+                <h3 class="modal-title" style="color:#dc2626;">🗑️ Delete Designation</h3>
+                <button class="modal-close" onclick="closeSoftDeleteModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p style="margin-bottom:12px; color:#374151;">This will be <strong>soft deleted</strong> — hidden but
+                    recoverable by Admin/HR.</p>
+                <div class="form-group">
+                    <label class="form-label">Reason <span style="color:#9ca3af;">(optional)</span></label>
+                    <textarea id="deleteReasonInput" class="form-control" rows="3"
+                        placeholder="Reason for deletion..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeSoftDeleteModal()">Cancel</button>
+                <button class="btn" style="background:#dc2626;color:#fff;" onclick="confirmSoftDelete()">Confirm
+                    Delete</button>
+            </div>
+        </div>
+    </div>
+
     <script src="../scripts/toast.js"></script>
     <script src="../scripts/sidebar.js"></script>
     <script src="../scripts/role-manager.js"></script>
     <script src="../scripts/auth.js"></script>
     <script src="../scripts/api.js"></script>
+    <script src="../scripts/theme.js"></script>
+    <script src="../scripts/header.js"></script>
+
     <script>
         auth.requireAuth();
         auth.initAuth();
+        window.addEventListener('roleChanged', () => {
+            const lbl = document.getElementById('showDeletedLabel');
+            const ok = window.roleManager && window.roleManager.isRole('admin');
+            if (lbl) lbl.style.display = ok ? 'flex' : 'none';
+        });
+        document.addEventListener('DOMContentLoaded', () => setTimeout(() => {
+            const lbl = document.getElementById('showDeletedLabel');
+            const ok = window.roleManager && window.roleManager.isRole('admin');
+            if (lbl) lbl.style.display = ok ? 'flex' : 'none';
+        }, 200));
 
         let designations = [];
         let departments = [];
         const canManage = auth.hasRole('Admin', 'HR');
-        
+
         if (!canManage) {
             document.getElementById('addBtn').style.display = 'none';
         }
@@ -153,6 +252,8 @@
                 const params = {};
                 const deptId = document.getElementById('filterDepartment').value;
                 if (deptId) params.departmentId = deptId;
+                const showDeleted = document.getElementById('showDeletedToggle')?.checked;
+                if (showDeleted) params.showDeleted = 'true';
 
                 const response = await endpoints.designations.getAll(params);
                 designations = response.data || [];
@@ -170,32 +271,43 @@
                 return;
             }
 
-            tbody.innerHTML = designations.map(desig => `
-                <tr>
-                    <td><strong>${desig.DesignationName}</strong></td>
+            tbody.innerHTML = designations.map(desig => {
+                const isDeleted = desig.IsDeleted === true || desig.IsDeleted === 1;
+                return `
+                <tr style="${isDeleted ? 'opacity:0.6;background:#fef2f2;' : ''}">
+                    <td><strong>${desig.DesignationName}</strong>
+                        ${isDeleted ? '<span style="margin-left:6px;background:#dc2626;color:#fff;border-radius:4px;padding:1px 7px;font-size:0.72rem;font-weight:600;">Deleted</span>' : ''}
+                    </td>
                     <td>${desig.DepartmentName}</td>
                     <td>${desig.Description || '-'}</td>
                     <td><span class="badge badge-info">${desig.EmployeeCount || 0} employees</span></td>
                     <td><span class="badge badge-success">${desig.Status}</span></td>
                     <td>
-                        ${canManage ? `
+                        ${isDeleted ? `
+                            ${canManage ? `
+                            <button class="btn btn-sm" style="background:#16a34a;color:#fff;" onclick="restoreDesignation(${desig.DesignationId})">&#x267B; Restore</button>
+                            ${window.roleManager && window.roleManager.hasPermission('delete') ? `<button class="btn btn-sm btn-danger" onclick="hardDeleteDesignation(${desig.DesignationId})">🗑 Permanent Delete</button>` : ''}
+                            ` : ''}
+                        ` : `
+                            ${canManage ? `
                             <button class="btn btn-sm btn-outline" onclick="editDesignation(${desig.DesignationId})">Edit</button>
-                            <button class="btn btn-sm btn-danger" onclick="deleteDesignation(${desig.DesignationId})">Delete</button>
-                        ` : ''}
+                            ${window.roleManager && window.roleManager.hasPermission('delete') ? `<button class="btn btn-sm btn-danger" onclick="openDeleteModal(${desig.DesignationId})">Delete</button>` : ''}
+                            ` : ''}
+                        `}
                     </td>
                 </tr>
-            `).join('');
+            `}).join('');
         }
 
         async function loadDepartments() {
             try {
                 const response = await endpoints.departments.getAll();
                 departments = response.data || [];
-                
+
                 const selects = [document.getElementById('departmentId'), document.getElementById('filterDepartment')];
                 selects.forEach((select, idx) => {
                     const options = idx === 1 ? '<option value="">All Departments</option>' : '<option value="">Select Department</option>';
-                    select.innerHTML = options + departments.map(d => 
+                    select.innerHTML = options + departments.map(d =>
                         `<option value="${d.DepartmentId}">${d.DepartmentName}</option>`
                     ).join('');
                 });
@@ -253,15 +365,50 @@
             }
         }
 
-        async function deleteDesignation(id) {
-            if (!confirm('Are you sure you want to delete this designation?')) return;
+        let _pendingDeleteId = null;
+
+        function openDeleteModal(id) {
+            _pendingDeleteId = id;
+            document.getElementById('deleteReasonInput').value = '';
+            document.getElementById('softDeleteModal').classList.add('active');
+        }
+
+        function closeSoftDeleteModal() {
+            document.getElementById('softDeleteModal').classList.remove('active');
+            _pendingDeleteId = null;
+        }
+
+        async function confirmSoftDelete() {
+            const reason = document.getElementById('deleteReasonInput').value.trim();
             try {
-                await endpoints.designations.delete(id);
+                await endpoints.designations.delete(_pendingDeleteId, { reason });
                 utils.showAlert('Designation deleted successfully', 'success');
+                closeSoftDeleteModal();
                 loadDesignations();
             } catch (error) {
-                console.error('Error deleting designation:', error);
                 utils.showAlert('Failed to delete designation', 'error');
+            }
+        }
+
+        async function restoreDesignation(id) {
+            if (!confirm('Restore this designation?')) return;
+            try {
+                await endpoints.designations.restore(id);
+                utils.showAlert('Designation restored successfully', 'success');
+                loadDesignations();
+            } catch (error) {
+                utils.showAlert('Failed to restore designation', 'error');
+            }
+        }
+
+        async function hardDeleteDesignation(id) {
+            if (!confirm('⚠️ Permanently delete? This CANNOT be undone.')) return;
+            try {
+                await endpoints.designations.hardDelete(id);
+                utils.showAlert('Designation permanently deleted', 'success');
+                loadDesignations();
+            } catch (error) {
+                utils.showAlert('Failed to permanently delete designation', 'error');
             }
         }
 
@@ -273,4 +420,5 @@
         loadDesignations();
     </script>
 </body>
+
 </html>

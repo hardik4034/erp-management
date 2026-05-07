@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Management - HRMS</title>
+    <link rel="icon" type="image/x-icon" href="../assets/favicon.png">
+    <link rel="shortcut icon" type="image/x-icon" href="../assets/favicon.png">
+    <link rel="stylesheet" href="../styles/main.css">
+    <link rel="stylesheet" href="../styles/toast.css">
+    <link rel="stylesheet" href="../styles/role-selector.css">
+    <link rel="stylesheet" href="../styles/tailwind.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: { DEFAULT: '#ea580c', dark: '#c2410c', light: '#f97316' }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .error-text {
+            color: #dc2626;
+            font-size: 0.85rem;
+            margin-top: 4px;
+            display: none;
+        }
+        .error-text.active {
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-container" style="display: none;" id="secureAppContainer">
+        <!-- Sidebar Overlay -->
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <a href="../index.html"><img src="../assets/soleos.png" alt="Soleos Logo" class="sidebar-logo"></a>
+                <button class="sidebar-close-btn" id="sidebarClose">&#x2715;</button>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section-label">Main</div>
+                <div class="nav-item"><a href="../index.html" class="nav-link"><i>📊</i> Dashboard</a></div>
+                <div class="nav-item"><a href="./profile.html" id="myProfileLink" class="nav-link"><i>👤</i> My
+                        Profile</a></div>
+                <div class="nav-item"><a href="./employees.html" class="nav-link"><i>👥</i> Employees</a></div>
+
+                <div class="nav-section-label">Time & Leave</div>
+                <div class="nav-item"><a href="./attendance.html" class="nav-link"><i>📅</i> Attendance</a></div>
+                <div class="nav-item"><a href="./leaves.html" class="nav-link"><i>🏖️</i> Leaves</a></div>
+                <div class="nav-item"><a href="./holidays.html" class="nav-link"><i>🎉</i> Holidays</a></div>
+                <div class="nav-item"><a href="./calendar.html" class="nav-link"><i>📆</i> Calendar</a></div>
+
+                <div class="nav-section-label">Payroll</div>
+                <div class="nav-item"><a href="./payroll.html" class="nav-link"><i>💰</i> Payroll</a></div>
+                <div class="nav-item"><a href="./employee-salary.html" class="nav-link"><i>💵</i> Employee Salary</a>
+                </div>
+
+                <div class="nav-section-label">Organisation</div>
+                <div class="nav-item"><a href="./departments.html" class="nav-link"><i>🏢</i> Departments</a></div>
+                <div class="nav-item"><a href="./designations.html" class="nav-link"><i>💼</i> Designations</a></div>
+                <div class="nav-item"><a href="./appreciations.html" class="nav-link"><i>🏆</i> Appreciations</a></div>
+                <div class="nav-item"><a href="./assets.html" class="nav-link hr-only"><i>💻</i> Assets</a></div>
+                <div class="nav-item"><a href="./note.html" class="nav-link"><i>📝</i> Notes</a></div>
+
+                <div class="nav-section-label">Reports</div>
+                <div class="nav-item"><a href="./reports.html" class="nav-link hr-only"><i>📈</i> Reports</a></div>
+
+                <div class="nav-section-label">Settings</div>
+                <div class="nav-item"><a href="./audit-logs.html" class="nav-link admin-only"><i>📜</i> Audit Logs</a></div>
+                <div class="nav-item"><a href="./biometric-settings.html" class="nav-link hr-only"><i>🔐</i> Biometric
+                        Settings</a></div>
+                <div class="nav-item"><a href="./users.html" class="nav-link active admin-only"><i>⚙️</i> System Setting</a></div>
+
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="header">
+                <div class="header-left">
+                    <button class="hamburger-btn" id="sidebarToggle">
+                        ☰
+                    </button>
+                    <div class="header-title">
+                        <h1>Admin User Management</h1>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <!-- Global Search -->
+                    <div class="global-search" id="globalSearchWrap">
+                        <span class="global-search-icon">🔍</span>
+                        <input type="text" id="globalSearchInput" class="global-search-input" placeholder="Search pages..." autocomplete="off">
+                        <div class="global-search-dropdown" id="globalSearchDropdown"></div>
+                    </div>
+                    <!-- Notification Bell -->
+                    <button class="notif-btn" id="notifBtn" title="Pending approvals">
+                        🔔
+                        <span class="notif-badge" id="notifBadge" style="display:none;">0</span>
+                    </button>
+                    <!-- Dark Mode Toggle -->
+                    <button class="dark-mode-btn" id="darkModeBtn" title="Toggle dark mode">🌙</button>
+
+                    <div class="user-info">
+                        <div class="user-avatar" id="userAvatarInitial">?</div>
+                        <div>
+                            <div class="user-name" id="userDisplayName">Loading...</div>
+                            <div class="user-role-badge"><span class="role-badge" id="roleBadge">Loading...</span></div>
+                        </div>
+                    </div>
+                    <button class="btn-logout" id="logoutBtn" onclick="auth.logout()">Logout</button>
+                </div>
+            </header>
+
+            <div class="content-area">
+                <div class="card">
+                    <div class="card-header flex justify-between items-center">
+                        <h3 class="card-title">System Users</h3>
+                        <button class="btn btn-primary btn-sm" onclick="openAddUserModal()">+ Add System User</button>
+                    </div>
+                    <div class="table-container">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Username</th>
+                                    <th>Full Name</th>
+                                    <th>Email</th>
+                                    <th>Role</th>
+                                    <th>Status</th>
+                                    <th>Security</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="usersTable">
+                                <tr>
+                                    <td colspan="7" class="text-center">Loading...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Reset Password Modal -->
+    <div class="modal" id="resetPasswordModal">
+        <div class="modal-content" style="max-width: 500px; width: 90%;">
+            <div class="modal-header">
+                <h3 class="modal-title">Reset Password</h3>
+                <button class="modal-close" onclick="closeResetModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-4 text-gray-600 text-sm">You are resetting the password for <strong id="targetUsername"></strong>.</p>
+                <form id="resetPasswordForm" onsubmit="event.preventDefault(); submitPasswordReset();">
+                    <input type="hidden" id="resetUserId">
+                    
+                    <div class="form-group mb-4">
+                        <label class="form-label font-semibold">New Password *</label>
+                        <input type="password" id="newPassword" class="form-control" required placeholder="Enter new complex password">
+                        <div class="error-text" id="pw-error-reqs">Password must be at least 8 characters long and include an uppercase letter, a number, and a special character.</div>
+                    </div>
+                    
+                    <div class="form-group mb-4">
+                        <label class="form-label font-semibold">Confirm Password *</label>
+                        <input type="password" id="confirmPassword" class="form-control" required placeholder="Re-type new password">
+                        <div class="error-text" id="pw-error-match">Passwords do not match.</div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeResetModal()" id="btnCancelReset">Cancel</button>
+                <button class="btn btn-primary" onclick="submitPasswordReset()" id="btnSubmitReset">Reset Password</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Provision Account Modal -->
+    <div class="modal" id="provisionModal">
+        <div class="modal-content" style="max-width: 500px; width: 90%;">
+            <div class="modal-header">
+                <h3 class="modal-title">🚀 Provision System Account</h3>
+                <button class="modal-close" onclick="closeProvisionModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-4 text-gray-600 text-sm">Create a system login for <strong id="provisionUsername"></strong>. They will use their Employee ID to log in.</p>
+                <form id="provisionForm" onsubmit="event.preventDefault(); submitProvision();">
+                    <input type="hidden" id="provisionEmployeeId">
+                    
+                    <div class="form-group mb-4">
+                        <label class="form-label font-semibold">Initial Password *</label>
+                        <input type="password" id="provPassword" class="form-control" required placeholder="Min 8 chars, Upper, Number, Special">
+                        <div class="error-text" id="prov-error-reqs">Password must meet security requirements (8+ chars, Upper, Number, Special).</div>
+                    </div>
+                    
+                    <div class="form-group mb-4">
+                        <label class="form-label font-semibold">Confirm Password *</label>
+                        <input type="password" id="provConfirmPassword" class="form-control" required placeholder="Re-type password">
+                        <div class="error-text" id="prov-error-match">Passwords do not match.</div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeProvisionModal()" id="btnCancelProv">Cancel</button>
+                <button class="btn btn-primary" onclick="submitProvision()" id="btnSubmitProv">Create Account</button>
+            </div>
+        </div>
+    </div>
+    <!-- Add User Modal -->
+    <div class="modal" id="addUserModal">
+        <div class="modal-content" style="max-width: 500px; width: 90%;">
+            <div class="modal-header">
+                <h3 class="modal-title">🆕 Add System User</h3>
+                <button class="modal-close" onclick="closeAddUserModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="addUserForm" onsubmit="event.preventDefault(); submitAddUser();">
+                    <div class="form-group mb-4">
+                        <label class="form-label font-semibold">Username *</label>
+                        <input type="text" id="addUsername" class="form-control" required placeholder="Unique username">
+                    </div>
+                    <div class="form-group mb-4">
+                        <label class="form-label font-semibold">Full Name *</label>
+                        <input type="text" id="addFullName" class="form-control" required placeholder="Display name">
+                    </div>
+                    <div class="form-group mb-4">
+                        <label class="form-label font-semibold">Email *</label>
+                        <input type="email" id="addEmail" class="form-control" required placeholder="User email">
+                    </div>
+                    <div class="form-group mb-4">
+                        <label class="form-label font-semibold">Role *</label>
+                        <select id="addRoleId" class="form-control" required>
+                            <option value="1">Admin</option>
+                            <option value="5">HR</option>
+                            <option value="6">Manager</option>
+                            <option value="7">Employee</option>
+                        </select>
+                    </div>
+                    <div class="form-group mb-4">
+                        <label class="form-label font-semibold">Password *</label>
+                        <input type="password" id="addPassword" class="form-control" required placeholder="Secure password">
+                        <div class="error-text" id="add-pw-error">Password must be at least 8 chars + Upper + Number + Special.</div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeAddUserModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="submitAddUser()" id="btnSubmitAdd">Create User</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit User Modal -->
+    <div class="modal" id="editUserModal">
+        <div class="modal-content" style="max-width: 500px; width: 90%;">
+            <div class="modal-header">
+                <h3 class="modal-title">✏️ Edit System User</h3>
+                <button class="modal-close" onclick="closeEditUserModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="editUserForm" onsubmit="event.preventDefault(); submitEditUser();">
+                    <input type="hidden" id="editUserId">
+                    <div class="form-group mb-4">
+                        <label class="form-label font-semibold">Full Name *</label>
+                        <input type="text" id="editFullName" class="form-control" required>
+                    </div>
+                    <div class="form-group mb-4">
+                        <label class="form-label font-semibold">Email *</label>
+                        <input type="email" id="editEmail" class="form-control" required>
+                    </div>
+                    <div class="form-group mb-4">
+                        <label class="form-label font-semibold">Role *</label>
+                        <select id="editRoleId" class="form-control" required>
+                            <option value="1">Admin</option>
+                            <option value="5">HR</option>
+                            <option value="6">Manager</option>
+                            <option value="7">Employee</option>
+                        </select>
+                    </div>
+                    <div class="form-group mb-4">
+                        <label class="form-label font-semibold">Status *</label>
+                        <select id="editStatus" class="form-control" required>
+                            <option value="Active">Active</option>
+                            <option value="Inactive">Inactive</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeEditUserModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="submitEditUser()" id="btnSubmitEdit">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="../scripts/toast.js"></script>
+    <script src="../scripts/sidebar.js"></script>
+    <script src="../scripts/role-manager.js"></script>
+    <script src="../scripts/auth.js"></script>
+    <script src="../scripts/api.js"></script>
+    <script src="../scripts/theme.js"></script>
+    <script src="../scripts/header.js"></script>
+
+
+    <script>
+        // STRICT ADMIN ENFORCEMENT
+        auth.requireAuth();
+        auth.initAuth();
+
+        window.addEventListener('roleChanged', () => {
+            const isAdmin = auth.hasRole('Admin');
+            if (!isAdmin) {
+                // Instantly block non-admins from rendering visually or intercepting.
+                document.body.innerHTML = '<h1 style="color:red; text-align:center; margin-top:50px;">UNAUTHORIZED ACCESS</h1>';
+                setTimeout(() => {
+                    window.location.href = '../index.html';
+                }, 1500);
+            } else {
+                document.getElementById('secureAppContainer').style.display = 'flex';
+                loadUsers();
+            }
+        });
+
+        // If the initial event fires synchronously before logic is bound, double check asynchronously
+        setTimeout(() => {
+            if (window.auth && window.auth.user) {
+                const isAdmin = auth.hasRole('Admin');
+                if (!isAdmin) {
+                    window.location.href = '../index.html';
+                } else {
+                    document.getElementById('secureAppContainer').style.display = 'flex';
+                    if (usersList.length === 0) loadUsers();
+                }
+            }
+        }, 500);
+
+        let usersList = [];
+
+        // Fetch users securely
+        async function loadUsers() {
+            try {
+                showLoading(true);
+                const response = await endpoints.users.getAll();
+                usersList = response.data || [];
+                renderTable();
+            } catch (error) {
+                console.error('Failed fetching users:', error);
+                utils.showAlert(error.message || 'Failed to load system users. Are you an Admin?', 'error');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        // Render Table
+        function renderTable() {
+            const tbody = document.getElementById('usersTable');
+            if (usersList.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center">No users found.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = usersList.map(u => {
+                // Optional label styling for roles
+                let roleColor = '#6b7280'; // gray default
+                if(u.role_name === 'Admin') roleColor = '#dc2626'; // red
+                else if (u.role_name === 'HR') roleColor = '#ea580c'; // orange
+                else if (u.role_name === 'Manager') roleColor = '#2563eb'; // blue
+                else if (u.role_name === 'Employee') roleColor = '#16a34a'; // green
+                
+                const mustChange = u.must_change_password ? '<span class="badge" style="background:#fef08a;color:#854d0e;">Pending Change</span>' : '<span class="badge badge-success">OK</span>';
+                
+                // Status badge logic
+                let statusBadgeClass = 'badge-success';
+                if (u.status === 'No Account') statusBadgeClass = 'badge-warning';
+                else if (u.status !== 'Active') statusBadgeClass = 'badge-danger';
+
+                const actionButton = u.has_account ? 
+                    `
+                    <div class="flex gap-2">
+                        <button class="btn btn-sm btn-outline" onclick="openEditUserModal(${u.id})" title="Edit User">✏️</button>
+                        <button class="btn btn-sm btn-outline" onclick="openResetModal(${u.id}, '${u.username}')" title="Reset Password">🔑</button>
+                        <button class="btn btn-sm btn-outline" style="color:#ef4444; border-color:#fca5a5;" onclick="deleteUser(${u.id}, '${u.username}')" title="Delete User">🗑️</button>
+                    </div>
+                    ` :
+                    `<button class="btn btn-sm" style="background:#ea580c;color:#fff;" onclick="openProvisionModal(${u.employee_id}, '${u.username}')">🚀 Provision Account</button>`;
+
+                return `
+                <tr style="${!u.has_account ? 'opacity:0.85; background-color:#fffbeb;' : ''}">
+                    <td><strong>${u.username}</strong></td>
+                    <td>${u.full_name || '-'}</td>
+                    <td>${u.email || '-'}</td>
+                    <td><span class="badge" style="background:${roleColor}!important; color:white;">${u.role_name}</span></td>
+                    <td><span class="badge ${statusBadgeClass}">${u.status}</span></td>
+                    <td>${u.has_account ? mustChange : '-'}</td>
+                    <td>
+                        ${actionButton}
+                    </td>
+                </tr>
+            `}).join('');
+        }
+
+        // Modal Lifecycle Management
+        function openResetModal(userId, username) {
+            document.getElementById('resetPasswordForm').reset();
+            document.getElementById('pw-error-reqs').classList.remove('active');
+            document.getElementById('pw-error-match').classList.remove('active');
+            
+            document.getElementById('resetUserId').value = userId;
+            document.getElementById('targetUsername').textContent = username;
+            
+            document.getElementById('resetPasswordModal').classList.add('active');
+        }
+
+        function closeResetModal() {
+            document.getElementById('resetPasswordForm').reset(); // Critical security wipe
+            document.getElementById('pw-error-reqs').classList.remove('active');
+            document.getElementById('pw-error-match').classList.remove('active');
+            document.getElementById('resetUserId').value = '';
+            document.getElementById('resetPasswordModal').classList.remove('active');
+        }
+
+        // Password Reset Request
+        async function submitPasswordReset() {
+            const form = document.getElementById('resetPasswordForm');
+            if(!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+
+            const password = document.getElementById('newPassword').value;
+            const confirm = document.getElementById('confirmPassword').value;
+            
+            const reqsErr = document.getElementById('pw-error-reqs');
+            const matchErr = document.getElementById('pw-error-match');
+            reqsErr.classList.remove('active');
+            matchErr.classList.remove('active');
+
+            // Secure validation (min 8 len, +1 Upper, 1 lower implicitly/explicitly mostly, 1 num, 1 spec)
+            const secureRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]{8,}$/;
+            
+            if (!secureRegex.test(password)) {
+                reqsErr.classList.add('active');
+                return;
+            }
+
+            if (password !== confirm) {
+                matchErr.classList.add('active');
+                return;
+            }
+
+            // Disable buttons to prevent spam loading states
+            const btnSubmit = document.getElementById('btnSubmitReset');
+            const btnCancel = document.getElementById('btnCancelReset');
+            const userId = document.getElementById('resetUserId').value;
+            
+            btnSubmit.disabled = true;
+            btnCancel.disabled = true;
+            btnSubmit.textContent = "Processing...";
+
+            try {
+                // Call API via central api.js (it maintains HTTP-only credentials globally)
+                await endpoints.users.resetPassword(userId, password);
+                
+                // Clear state manually just to be safe
+                form.reset();
+                
+                utils.showAlert('Password reset successfully. The user will be required to change it upon next login.', 'success');
+                closeResetModal();
+                loadUsers(); // Refresh layout to show "Pending Change" status
+            } catch (error) {
+                console.error('Password reset failed:', error);
+                utils.showAlert(error.message || 'Failed to reset password', 'error');
+            } finally {
+                btnSubmit.disabled = false;
+                btnCancel.disabled = false;
+                btnSubmit.textContent = "Reset Password";
+            }
+        }
+
+        // Provisioning Lifecycle
+        function openProvisionModal(employeeId, username) {
+            document.getElementById('provisionForm').reset();
+            document.getElementById('prov-error-reqs').classList.remove('active');
+            document.getElementById('prov-error-match').classList.remove('active');
+            
+            document.getElementById('provisionEmployeeId').value = employeeId;
+            document.getElementById('provisionUsername').textContent = username;
+            
+            document.getElementById('provisionModal').classList.add('active');
+        }
+
+        function closeProvisionModal() {
+            document.getElementById('provisionForm').reset();
+            document.getElementById('prov-error-reqs').classList.remove('active');
+            document.getElementById('prov-error-match').classList.remove('active');
+            document.getElementById('provisionEmployeeId').value = '';
+            document.getElementById('provisionModal').classList.remove('active');
+        }
+
+        async function submitProvision() {
+            const form = document.getElementById('provisionForm');
+            if(!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+
+            const password = document.getElementById('provPassword').value;
+            const confirm = document.getElementById('provConfirmPassword').value;
+            
+            const reqsErr = document.getElementById('prov-error-reqs');
+            const matchErr = document.getElementById('prov-error-match');
+            reqsErr.classList.remove('active');
+            matchErr.classList.remove('active');
+
+            const secureRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]{8,}$/;
+            
+            if (!secureRegex.test(password)) {
+                reqsErr.classList.add('active');
+                return;
+            }
+
+            if (password !== confirm) {
+                matchErr.classList.add('active');
+                return;
+            }
+
+            const btnSubmit = document.getElementById('btnSubmitProv');
+            const btnCancel = document.getElementById('btnCancelProv');
+            const employeeId = document.getElementById('provisionEmployeeId').value;
+            
+            btnSubmit.disabled = true;
+            btnCancel.disabled = true;
+            btnSubmit.textContent = "Provisioning...";
+
+            try {
+                await endpoints.users.provision({ 
+                    employeeId: parseInt(employeeId), 
+                    password: password 
+                });
+                
+                utils.showAlert('Account created successfully. The employee can now log in using their ID.', 'success');
+                closeProvisionModal();
+                loadUsers(); 
+            } catch (error) {
+                console.error('Provisioning failed:', error);
+                utils.showAlert(error.message || 'Failed to create account', 'error');
+            } finally {
+                btnSubmit.disabled = false;
+                btnCancel.disabled = false;
+                btnSubmit.textContent = "Create Account";
+            }
+        }
+
+        // Add User Functions
+        function openAddUserModal() {
+            document.getElementById('addUserForm').reset();
+            document.getElementById('addUserModal').classList.add('active');
+        }
+        function closeAddUserModal() {
+            document.getElementById('addUserModal').classList.remove('active');
+        }
+        async function submitAddUser() {
+            const form = document.getElementById('addUserForm');
+            if(!form.checkValidity()) return form.reportValidity();
+
+            const password = document.getElementById('addPassword').value;
+            const secureRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]{8,}$/;
+            if (!secureRegex.test(password)) {
+                document.getElementById('add-pw-error').classList.add('active');
+                return;
+            }
+
+            try {
+                const data = {
+                    username: document.getElementById('addUsername').value,
+                    fullName: document.getElementById('addFullName').value,
+                    email: document.getElementById('addEmail').value,
+                    roleId: parseInt(document.getElementById('addRoleId').value),
+                    password: password
+                };
+                await endpoints.users.create(data);
+                utils.showAlert('User created successfully', 'success');
+                closeAddUserModal();
+                loadUsers();
+            } catch (error) {
+                utils.showAlert(error.message, 'error');
+            }
+        }
+
+        // Edit User Functions
+        function openEditUserModal(userId) {
+            const user = usersList.find(u => u.id === userId);
+            if (!user) return;
+
+            document.getElementById('editUserId').value = userId;
+            document.getElementById('editFullName').value = user.full_name || '';
+            document.getElementById('editEmail').value = user.email || '';
+            
+            // Map role name back to ID if possible, otherwise default
+            const roleMap = { 'Admin': 1, 'HR': 5, 'Manager': 6, 'Employee': 7 };
+            document.getElementById('editRoleId').value = roleMap[user.role_name] || 7;
+            document.getElementById('editStatus').value = user.status === 'Active' ? 'Active' : 'Inactive';
+
+            document.getElementById('editUserModal').classList.add('active');
+        }
+        function closeEditUserModal() {
+            document.getElementById('editUserModal').classList.remove('active');
+        }
+        async function submitEditUser() {
+            const id = document.getElementById('editUserId').value;
+            const data = {
+                fullName: document.getElementById('editFullName').value,
+                email: document.getElementById('editEmail').value,
+                roleId: parseInt(document.getElementById('editRoleId').value),
+                status: document.getElementById('editStatus').value
+            };
+            try {
+                await endpoints.users.update(id, data);
+                utils.showAlert('User updated successfully', 'success');
+                closeEditUserModal();
+                loadUsers();
+            } catch (error) {
+                utils.showAlert(error.message, 'error');
+            }
+        }
+
+        // Delete User Function
+        async function deleteUser(id, username) {
+            if (!confirm(`Are you sure you want to PERMANENTLY delete account "${username}"? This cannot be undone.`)) return;
+            try {
+                await endpoints.users.delete(id);
+                utils.showAlert('User deleted successfully', 'success');
+                loadUsers();
+            } catch (error) {
+                utils.showAlert(error.message, 'error');
+            }
+        }
+    </script>
+</body>
+
+</html>

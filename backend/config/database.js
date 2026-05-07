@@ -1,5 +1,6 @@
-const sql = require("mssql");
-require("dotenv").config();
+const sql    = require('mssql');
+const logger = require('../utils/logger');
+require('dotenv').config();
 
 const config = {
   server: process.env.DB_SERVER,
@@ -41,10 +42,10 @@ const getConnection = async () => {
       return pool;
     }
     pool = await sql.connect(config);
-    console.log("✅ Database connected successfully");
+    logger.info('✅ Database connected successfully');
     return pool;
   } catch (error) {
-    console.error("❌ Database connection failed:", error.message);
+    logger.error('Database connection failed', { error: error.message });
     throw error;
   }
 };
@@ -54,10 +55,10 @@ const closeConnection = async () => {
     if (pool) {
       await pool.close();
       pool = null;
-      console.log("Database connection closed");
+      logger.info('Database connection closed');
     }
   } catch (error) {
-    console.error("Error closing database connection:", error.message);
+    logger.error('Error closing database connection', { error: error.message });
   }
 };
 

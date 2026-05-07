@@ -5,11 +5,20 @@ const { successResponse, errorResponse } = require('../utils/helpers');
 // Get all appreciations
 const getAllAppreciations = async (req, res, next) => {
     try {
-        const { employeeId } = req.query;
+        let { employeeId } = req.query;
+        
+        // SECURITY: Role-based scoping
+        if (req.user.role === 'employee') {
+            employeeId = req.user.id;
+        }
+
+        const showDeleted = req.query.showDeleted === 'true' ? 1 : 0;
+        const canSeeDeleted = req.user && (req.user.isAdmin() || req.user.isHR());
         const pool = await getConnection();
 
         const result = await pool.request()
             .input('EmployeeId', sql.Int, employeeId || null)
+            .input('ShowDeleted', sql.Bit, canSeeDeleted ? showDeleted : 0)
             .execute('sp_GetAllAppreciations');
 
         res.json(successResponse(result.recordset));
@@ -89,17 +98,53 @@ const updateAppreciation = async (req, res, next) => {
     }
 };
 
-// Delete appreciation
+// Soft delete appreciation
 const deleteAppreciation = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const { reason } = req.body;
+        const deletedBy = req.user?.role || 'admin';
+        const pool = await getConnection();
+
+        await pool.request()
+            .input('AppreciationId', sql.Int, id)
+            .input('DeletedBy', sql.NVarChar(100), deletedBy)
+            .input('DeleteReason', sql.NVarChar(500), reason || null)
+            .execute('sp_SoftDeleteAppreciation');
+
+        res.json(successResponse(null, 'Appreciation deleted successfully'));
+    } catch (error) {
+        next(error);
+    }
+};
+
+// Restore soft-deleted appreciation (admin/hr only)
+const restoreAppreciation = async (req, res, next) => {
     try {
         const { id } = req.params;
         const pool = await getConnection();
 
         await pool.request()
             .input('AppreciationId', sql.Int, id)
-            .execute('sp_DeleteAppreciation');
+            .execute('sp_RestoreAppreciation');
 
-        res.json(successResponse(null, 'Appreciation deleted successfully'));
+        res.json(successResponse(null, 'Appreciation restored successfully'));
+    } catch (error) {
+        next(error);
+    }
+};
+
+// Hard delete appreciation (admin only)
+const hardDeleteAppreciation = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const pool = await getConnection();
+
+        await pool.request()
+            .input('AppreciationId', sql.Int, id)
+            .execute('sp_HardDeleteAppreciation');
+
+        res.json(successResponse(null, 'Appreciation permanently deleted'));
     } catch (error) {
         next(error);
     }
@@ -110,5 +155,7 @@ module.exports = {
     getAppreciationById,
     createAppreciation,
     updateAppreciation,
-    deleteAppreciation
+    deleteAppreciation,
+    restoreAppreciation,
+    hardDeleteAppreciation
 };

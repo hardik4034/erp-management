@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asset Management - HRMS</title>
+    <link rel="icon" type="image/x-icon" href="../assets/favicon.png">
+    <link rel="shortcut icon" type="image/x-icon" href="../assets/favicon.png">
+    <link rel="stylesheet" href="../styles/main.css">
+    <link rel="stylesheet" href="../styles/toast.css">
+    <link rel="stylesheet" href="../styles/role-selector.css">
+    <link rel="stylesheet" href="../styles/premium-tables.css">
+    <link rel="stylesheet" href="../styles/tailwind.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: { DEFAULT: '#ea580c', dark: '#c2410c', light: '#f97316' }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-content {
+            background: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid #f1f5f9;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: #64748b;
+            cursor: pointer;
+        }
+
+        .modal-body {
+            padding: 24px;
+        }
+
+        .modal-footer {
+            padding: 16px 24px;
+            border-top: 1px solid #f1f5f9;
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 15px;
+        }
+
+        .two-col>.form-group {
+            flex: 1;
+        }
+
+        .three-col>.form-group {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #475569;
+            margin-bottom: 6px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        .form-control:focus {
+            border-color: #ea580c;
+            box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.1);
+        }
+
+        .btn-sm {
+            padding: 4px 8px;
+            font-size: 0.8rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Sidebar Overlay -->
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <a href="../index.html"><img src="../assets/soleos.png" alt="Soleos Logo" class="sidebar-logo"></a>
+                <button class="sidebar-close-btn" id="sidebarClose">&#x2715;</button>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section-label">Main</div>
+                <div class="nav-item"><a href="../index.html" class="nav-link"><i>📊</i> Dashboard</a></div>
+                <div class="nav-item"><a href="./profile.html" id="myProfileLink" class="nav-link"><i>👤</i> My
+                        Profile</a></div>
+                <div class="nav-item"><a href="./employees.html" class="nav-link"><i>👥</i> Employees</a></div>
+
+                <div class="nav-section-label">Time & Leave</div>
+                <div class="nav-item"><a href="./attendance.html" class="nav-link"><i>📅</i> Attendance</a></div>
+                <div class="nav-item"><a href="./leaves.html" class="nav-link"><i>🏖️</i> Leaves</a></div>
+                <div class="nav-item"><a href="./holidays.html" class="nav-link"><i>🎉</i> Holidays</a></div>
+                <div class="nav-item"><a href="./calendar.html" class="nav-link"><i>📆</i> Calendar</a></div>
+
+                <div class="nav-section-label">Payroll</div>
+                <div class="nav-item"><a href="./payroll.html" class="nav-link"><i>💰</i> Payroll</a></div>
+                <div class="nav-item"><a href="./employee-salary.html" class="nav-link"><i>💵</i> Employee Salary</a>
+                </div>
+
+                <div class="nav-section-label">Organisation</div>
+                <div class="nav-item"><a href="./departments.html" class="nav-link"><i>🏢</i> Departments</a></div>
+                <div class="nav-item"><a href="./designations.html" class="nav-link"><i>💼</i> Designations</a></div>
+                <div class="nav-item"><a href="./appreciations.html" class="nav-link"><i>🏆</i> Appreciations</a></div>
+                <div class="nav-item"><a href="./assets.html" class="nav-link hr-only"><i>💻</i> Assets</a></div>
+                <div class="nav-item"><a href="./note.html" class="nav-link"><i>📝</i> Notes</a></div>
+
+                <div class="nav-section-label">Reports</div>
+                <div class="nav-item"><a href="./reports.html" class="nav-link hr-only"><i>📈</i> Reports</a></div>
+
+                <div class="nav-section-label">Settings</div>
+                <div class="nav-item"><a href="./audit-logs.html" class="nav-link admin-only"><i>📜</i> Audit Logs</a></div>
+                <div class="nav-item"><a href="./biometric-settings.html" class="nav-link hr-only"><i>🔐</i> Biometric
+                        Settings</a></div>
+
+
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="header">
+                <div class="header-left">
+                    <button class="hamburger-btn" id="sidebarToggle">☰</button>
+                    <div class="header-title">
+                        <h1>Asset Management</h1>
+                    </div>
+                </div>
+                                <div class="header-actions">
+                    <!-- Global Search -->
+                    <div class="global-search" id="globalSearchWrap">
+                        <span class="global-search-icon">🔍</span>
+                        <input type="text" id="globalSearchInput" class="global-search-input" placeholder="Search pages..." autocomplete="off">
+                        <div class="global-search-dropdown" id="globalSearchDropdown"></div>
+                    </div>
+                    <!-- Notification Bell -->
+                    <button class="notif-btn" id="notifBtn" title="Pending approvals">
+                        🔔
+                        <span class="notif-badge" id="notifBadge" style="display:none;">0</span>
+                    </button>
+                    <!-- Dark Mode Toggle -->
+                    <button class="dark-mode-btn" id="darkModeBtn" title="Toggle dark mode">🌙</button>
+
+                    <div class="user-info">
+                        <div class="user-avatar" id="userAvatarInitial">?</div>
+                        <div>
+                            <div class="user-name" id="userDisplayName">Loading...</div>
+                            <div class="user-role-badge"><span class="role-badge" id="roleBadge">Loading...</span></div>
+                        </div>
+                    </div>
+                    <button class="btn-logout" id="logoutBtn" onclick="auth.logout()">Logout</button>
+                </div>
+            </header>
+
+            <div class="content-area">
+                <div class="card hr-only">
+                    <div class="card-header" style="flex-wrap: wrap; gap: 15px;">
+                        <h3 class="card-title">Assets</h3>
+                        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                            <div class="search-box">
+                                <input type="text" id="searchInput" placeholder="Search assets..." class="form-control"
+                                    onkeyup="handleSearch()" style="width: 250px; padding: 0.375rem 0.75rem;">
+                            </div>
+                            <button class="btn btn-primary create-btn hr-only" onclick="openAddAssetModal()">+ Add
+                                Asset</button>
+                            <button class="btn btn-outline-secondary hr-only" onclick="exportAssets()">Export to
+                                Excel</button>
+                        </div>
+                    </div>
+
+                    <div
+                        style="padding: 0 24px 15px; display: flex; gap: 15px; flex-wrap: wrap; border-bottom: 1px solid #ebebf2; margin-bottom: 15px; align-items: center;">
+                        <select id="filterStatus" class="form-control" onchange="loadAssets()" style="width: 150px;">
+                            <option value="">All Status</option>
+                            <option value="Available">Available</option>
+                            <option value="Assigned">Assigned</option>
+                            <option value="Damaged">Damaged</option>
+                        </select>
+                        <select id="filterCategory" class="form-control" onchange="loadAssets()" style="width: 150px;">
+                            <option value="">All Categories</option>
+                            <option value="IT Asset">IT Asset</option>
+                            <option value="Office Asset">Office Asset</option>
+                        </select>
+                    </div>
+
+                    <div class="table-container hr-view-area">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>ASSET CODE</th>
+                                    <th>ASSET NAME</th>
+                                    <th>BRAND / MODEL</th>
+                                    <th>S/N</th>
+                                    <th>STATUS</th>
+                                    <th>ASSIGNED TO</th>
+                                    <th style="text-align: center;">ACTION</th>
+                                </tr>
+                            </thead>
+                            <tbody id="assetsTable">
+                                <tr>
+                                    <td colspan="7" class="text-center">Loading...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- EMPLOYEES VIEW MY ASSETS -->
+                <div class="card employee-only" style="display: none;" id="myAssetsCard">
+                    <div class="card-header">
+                        <h3 class="card-title">My Assigned Assets</h3>
+                    </div>
+                    <div class="table-container">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>ASSET CODE</th>
+                                    <th>ASSET NAME</th>
+                                    <th>BRAND / MODEL</th>
+                                    <th>S/N</th>
+                                    <th>ASSIGN DATE</th>
+                                </tr>
+                            </thead>
+                            <tbody id="myAssetsTable">
+                                <tr>
+                                    <td colspan="5" class="text-center">Loading...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Add/Edit Asset Modal -->
+    <div class="modal" id="assetModal">
+        <div class="modal-content" style="max-width: 1200px;">
+            <div class="modal-header">
+                <h3 class="modal-title" id="assetModalTitle">Add New Asset</h3>
+                <button class="modal-close" onclick="closeAssetModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="assetForm">
+                    <input type="hidden" id="assetId">
+                    <input type="hidden" id="existingPhoto">
+
+                    <div class="form-group" style="margin-bottom: 15px;">
+                        <label class="form-label">Asset Code (Manual/Auto)</label>
+                        <input type="text" id="assetCode" class="form-control"
+                            placeholder="e.g. SEL/LAP/101 (Leave blank for auto-gen)">
+                    </div>
+
+                    <div class="form-row two-col">
+                        <div class="form-group">
+                            <label class="form-label">Asset Name *</label>
+                            <input type="text" id="assetName" class="form-control" required
+                                placeholder="Laptop, Monitor...">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Category *</label>
+                            <select id="assetCategory" class="form-control" required>
+                                <option value="IT Asset">IT Asset</option>
+                                <option value="Office Asset">Office Asset</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row two-col">
+                        <div class="form-group">
+                            <label class="form-label">Brand</label>
+                            <input type="text" id="assetBrand" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Model</label>
+                            <input type="text" id="assetModel" class="form-control">
+                        </div>
+                    </div>
+                    <div class="form-row two-col">
+                        <div class="form-group">
+                            <label class="form-label">Serial Number</label>
+                            <input type="text" id="assetSerialNumber" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Issue Date</label>
+                            <input type="date" id="assetIssueDate" class="form-control">
+                        </div>
+                    </div>
+                    <div class="form-row two-col">
+                        <div class="form-group">
+                            <label class="form-label">Condition</label>
+                            <select id="assetCondition" class="form-control">
+                                <option value="New">New</option>
+                                <option value="Used">Used</option>
+                                <option value="Repair">Repair</option>
+                            </select>
+                        </div>
+                        <div class="form-group" id="statusGroup" style="display:none;">
+                            <label class="form-label">Status</label>
+                            <select id="assetStatus" class="form-control">
+                                <option value="Available">Available</option>
+                                <option value="Damaged">Damaged</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row three-col">
+                        <div class="form-group">
+                            <label class="form-label">Processor</label>
+                            <input type="text" id="assetProcessor" class="form-control" placeholder="e.g. i5, i7, M1">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">RAM</label>
+                            <input type="text" id="assetRAM" class="form-control" placeholder="e.g. 8GB, 16GB">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Storage</label>
+                            <input type="text" id="assetStorage" class="form-control" placeholder="e.g. 256GB SSD">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Photo Upload</label>
+                        <input type="file" id="assetPhoto" accept="image/*" class="form-control">
+                        <div id="photoPreview" style="margin-top: 10px;"></div>
+                    </div>
+
+                    <!-- Quick Assign Section (Only for New Assets) -->
+                    <div id="quickAssignSection"
+                        style="margin-top: 20px; padding-top: 15px; border-top: 1px dashed #cbd5e1;">
+                        <h4 style="margin-bottom: 10px; color: #64748b; font-size: 0.875rem;">Quick Assign (Optional)
+                        </h4>
+                        <div class="form-row two-col">
+                            <div class="form-group">
+                                <label class="form-label">Assign to Employee</label>
+                                <select id="quickAssignEmployeeId" class="form-control">
+                                    <option value="">Select Employee</option>
+                                    <!-- Populated by JS -->
+                                </select>
+                            </div>
+
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeAssetModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="saveAsset()">Save Asset</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Assign Asset Modal -->
+    <div class="modal" id="assignModal">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h3 class="modal-title">Assign Asset</h3>
+                <button class="modal-close" onclick="closeAssignModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="assignForm">
+                    <input type="hidden" id="assignAssetId">
+                    <div class="form-group">
+                        <label class="form-label">Employee *</label>
+                        <select id="assignEmployeeId" class="form-control" required>
+                            <option value="">Select Employee</option>
+                        </select>
+                    </div>
+                    <div class="form-row two-col">
+                        <div class="form-group">
+                            <label class="form-label">Assign Date *</label>
+                            <input type="date" id="assignDate" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Expected Return Date</label>
+                            <input type="date" id="assignReturnDate" class="form-control">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Remarks</label>
+                        <textarea id="assignRemarks" class="form-control" rows="2"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeAssignModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="submitAssign()">Assign Asset</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Return Asset Modal -->
+    <div class="modal" id="returnModal">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h3 class="modal-title">Return Asset</h3>
+                <button class="modal-close" onclick="closeReturnModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="returnForm">
+                    <input type="hidden" id="returnAssetId">
+                    <div class="form-row two-col">
+                        <div class="form-group">
+                            <label class="form-label">Return Date *</label>
+                            <input type="date" id="returnDate" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Returned Condition *</label>
+                            <select id="returnCondition" class="form-control" required>
+                                <option value="Used">Used (Good)</option>
+                                <option value="Repair">Needs Repair</option>
+                                <option value="Damaged">Damaged</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Remarks</label>
+                        <textarea id="returnRemarks" class="form-control" rows="2"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeReturnModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="submitReturn()">Process Return</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="../scripts/toast.js"></script>
+    <script src="../scripts/sidebar.js"></script>
+    <script src="../scripts/role-manager.js"></script>
+    <script src="../scripts/auth.js"></script>
+    <script>
+        auth.initAuth();
+    </script>
+    <script src="../scripts/api.js"></script>
+    <script src="../scripts/theme.js"></script>
+    <script src="../scripts/header.js"></script>
+
+    <script src="../scripts/assets.js"></script>
+</body>
+
+</html>

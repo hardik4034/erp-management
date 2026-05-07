@@ -3,6 +3,9 @@ const router = express.Router();
 const appreciationController = require('../controllers/appreciationController');
 const { appreciationValidation } = require('../middleware/validation');
 const upload = require('../middleware/upload');
+const { extractUserContext, requireRole } = require('../middleware/roleMiddleware');
+
+router.use(extractUserContext);
 
 // Get all appreciations
 router.get('/', appreciationController.getAllAppreciations);
@@ -17,7 +20,13 @@ router.post('/', upload.single('photo'), appreciationController.createAppreciati
 // Update appreciation (Admin/HR only)
 router.put('/:id', upload.single('photo'), appreciationController.updateAppreciation);
 
-// Delete appreciation (Admin/HR only)
-router.delete('/:id', appreciationController.deleteAppreciation);
+// Soft delete appreciation (Admin/HR only)
+router.delete('/:id', requireRole('admin', 'hr'), appreciationController.deleteAppreciation);
+
+// Restore soft-deleted appreciation (Admin/HR only)
+router.post('/:id/restore', requireRole('admin', 'hr'), appreciationController.restoreAppreciation);
+
+// Hard (permanent) delete appreciation (Admin only)
+router.delete('/:id/hard', requireRole('admin'), appreciationController.hardDeleteAppreciation);
 
 module.exports = router;

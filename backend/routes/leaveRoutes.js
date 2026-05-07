@@ -22,10 +22,19 @@ router.get('/:id', leaveController.getLeaveById);
 // Apply for leave
 router.post('/', ...leaveValidation.create, leaveController.applyLeave);
 
+// Update existing leave (Pending only for employees)
+router.put('/:id', ...leaveValidation.create, leaveController.updateLeave);
+
 // Update leave status (Admin/HR/Manager only)
 router.put('/:id/status', requireRole('admin', 'hr', 'manager'), ...leaveValidation.updateStatus, leaveController.updateLeaveStatus);
 
-// Delete leave (Admin/HR only, or own leaves for Employee)
+// Soft delete leave (Admin/HR or own leave for Employee)
 router.delete('/:id', leaveController.deleteLeave);
+
+// Restore soft-deleted leave (Admin/HR only)
+router.post('/:id/restore', requireRole('admin', 'hr'), leaveController.restoreLeave);
+
+// Hard (permanent) delete leave (Admin only)
+router.delete('/:id/hard', requireRole('admin'), leaveController.hardDeleteLeave);
 
 module.exports = router;

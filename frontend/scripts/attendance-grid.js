@@ -3,8 +3,7 @@
 // Calendar view for attendance management
 // =============================================
 
-auth.requireAuth();
-auth.initAuth();
+// auth.requireAuth() and auth.initAuth() are handled by auth.js on DOMContentLoaded
 
 // Global State
 let currentDate = new Date();
@@ -14,11 +13,22 @@ let holidays = [];
 let activeFilter = 'all';
 let selectedFile = null;
 let currentView = 'grid'; // Default to grid view
-const canManage = auth.hasRole('Admin', 'HR');
+let canManage = false; // Will be set after auth initializes
 
-if (!canManage) {
-    document.getElementById('addBtn').style.display = 'none';
-}
+// Hide/show manage button and load data after auth confirms role
+let gridInitialized = false;
+window.addEventListener('roleChanged', () => {
+    canManage = auth.hasRole('Admin', 'HR');
+    const addBtn = document.getElementById('addBtn');
+    if (addBtn) addBtn.style.display = canManage ? '' : 'none';
+    // Run full init on first roleChanged (auth complete), reload on subsequent changes
+    if (!gridInitialized) {
+        gridInitialized = true;
+        init();
+    } else {
+        loadAttendanceGrid();
+    }
+});
 
 // =============================================
 // Status Configuration - Single Source of Truth
@@ -184,9 +194,12 @@ async function loadAttendanceGrid() {
                 employees = allEmployees.filter(emp => emp.EmployeeId == currentEmployeeId);
                 console.log(`📊 Attendance filtered to own data: ${employees.length} employee(s)`);
             } else if (dataScope === 'team' && currentEmployeeId) {
-                // Manager role: show their team (employees reporting to them)
+                // Manager role: show their team (employees reporting to them or where they are an approver)
                 employees = allEmployees.filter(emp => 
-                    emp.ReportingTo == currentEmployeeId || emp.EmployeeId == currentEmployeeId
+                    emp.ReportingTo == currentEmployeeId || 
+                    emp.AttendanceApproverId == currentEmployeeId || 
+                    emp.LeaveApproverId == currentEmployeeId || 
+                    emp.EmployeeId == currentEmployeeId
                 );
                 console.log(`📊 Attendance filtered to team data: ${employees.length} employee(s)`);
             } else {
@@ -211,11 +224,7 @@ async function loadAttendanceGrid() {
     }
 }
 
-// Listen for role changes and reload attendance data
-window.addEventListener('roleChanged', (event) => {
-    console.log(`🔄 Role changed, reloading attendance data...`);
-    loadAttendanceGrid();
-});
+
 
 // =============================================
 // Get Month Date Range
@@ -765,15 +774,8 @@ function closeModal() {
 async function exportAttendance() {
     try {
         const { fromDate, toDate } = getMonthDateRange();
-        const url = `http://localhost:5000/api/attendance/export?fromDate=${fromDate}&toDate=${toDate}`;
+        const blob = await endpoints.attendance.export({ fromDate, toDate });
         
-        const response = await fetch(url, {
-            headers: { 'Authorization': `Bearer ${auth.getToken()}` }
-        });
-        
-        if (!response.ok) throw new Error('Export failed');
-        
-        const blob = await response.blob();
         const downloadUrl = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = downloadUrl;
@@ -846,16 +848,7 @@ async function processImport() {
             return;
         }
         
-        const response = await fetch(`http://localhost:5000/api/attendance/import`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${auth.getToken()}`
-            },
-            body: JSON.stringify({ attendanceData })
-        });
-        
-        const result = await response.json();
+        const result = await endpoints.attendance.import({ attendanceData });
         
         if (result.success) {
             utils.showAlert(`Successfully imported ${result.data.InsertedCount} records`, 'success');
@@ -1096,5 +1089,134 @@ window.filterEmployeesByDepartment = filterEmployeesByDepartment;
 window.applyFilter = applyFilter;
 window.navigateMonth = navigateMonth;
 
-// Initialize on page load
-init();
+// Initialize on page load — driven by roleChanged event (fired after auth.initAuth completes)
+// This ensures roleManager.getCurrentEmployeeId() is always populated before init() runs.
+// =============================================
+// Biometric Integration Functions
+// =============================================
+
+function openBiometricModal() {
+    const modal = document.getElementById('biometricModal');
+    if (!modal) return;
+    
+    // Populate employee dropdown in the modal
+    const mockSelect = document.getElementById('mockBiometricEmployee');
+    if (mockSelect && employees.length > 0) {
+        // Only show employees with BiometricId set for simulation
+        const employeesWithBio = employees.filter(e => e.BiometricId);
+        mockSelect.innerHTML = '<option value="">Select Employee</option>' + 
+            employeesWithBio.map(e => 
+                `<option value="${e.BiometricId}">${e.FirstName} ${e.LastName} (${e.BiometricId})</option>`
+            ).join('');
+            
+        if (employeesWithBio.length === 0) {
+            mockSelect.innerHTML = '<option value="">No employees with BiometricId found</option>';
+        }
+    }
+    
+    // Set default time to now
+    const now = new Date();
+    const localNow = new Date(now.getTime() - (now.getTimezoneOffset() * 60000)).toISOString().slice(0, 16);
+    const timeInput = document.getElementById('mockPunchTime');
+    if (timeInput) timeInput.value = localNow;
+    
+    modal.classList.add('active');
+}
+
+function closeBiometricModal() {
+    const modal = document.getElementById('biometricModal');
+    if (modal) modal.classList.remove('active');
+}
+
+async function syncAllBiometric() {
+    const btn = document.getElementById('biometricSyncBtn');
+    const originalText = btn.innerHTML;
+    
+    try {
+        btn.disabled = true;
+        btn.innerHTML = '🔄 Syncing...';
+        
+        const response = await endpoints.biometric.syncAll();
+        utils.showAlert(response.message || 'Sync started for all devices', 'success');
+        
+        // Don't wait for sync to finish (it's async), but suggest processing after a few seconds
+        setTimeout(() => {
+            utils.showAlert('Sync may still be running in background. You can try processing logs now.', 'info');
+        }, 3000);
+        
+    } catch (error) {
+        console.error('Error syncing biometrics:', error);
+        utils.showAlert('Failed to trigger sync: ' + error.message, 'error');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+    }
+}
+
+async function processBiometricLogs() {
+    const btn = document.getElementById('biometricProcessBtn');
+    const originalText = btn.innerHTML;
+    
+    try {
+        btn.disabled = true;
+        btn.innerHTML = '⚙️ Processing...';
+        
+        // Use current month range for processing
+        const { fromDate, toDate } = getMonthDateRange();
+        const response = await endpoints.biometric.process({ startDate: fromDate, endDate: toDate });
+        
+        if (response.success) {
+            const s = response.summary;
+            const msg = s 
+                ? `Processed ${s.LogsMarkedProcessed} logs for ${s.EmployeesProcessed} employees.` 
+                : 'No new logs processed.';
+            utils.showAlert('✅ ' + msg, 'success');
+            
+            // Reload grid to reflect changes
+            loadAttendanceGrid();
+        } else {
+            utils.showAlert(response.message || 'Processing failed', 'error');
+        }
+    } catch (error) {
+        console.error('Error processing biometric logs:', error);
+        utils.showAlert('Failed to process logs: ' + error.message, 'error');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+    }
+}
+
+async function simulatePunch() {
+    const bioId = document.getElementById('mockBiometricEmployee').value;
+    const punchType = document.getElementById('mockPunchType').value;
+    const punchTime = document.getElementById('mockPunchTime').value;
+    const btn = document.getElementById('simulatePunchBtn');
+    
+    if (!bioId) {
+        utils.showAlert('Please select an employee with a BiometricId', 'warning');
+        return;
+    }
+    
+    try {
+        btn.disabled = true;
+        btn.innerHTML = 'Adding...';
+        
+        const response = await endpoints.biometric.mockPunch({
+            biometricUserId: bioId,
+            punchType: punchType,
+            punchTime: punchTime
+        });
+        
+        if (response.success) {
+            utils.showAlert('Mock punch added! Now click "Process Logs" to reflect it.', 'success');
+        } else {
+            utils.showAlert(response.message || 'Failed to add mock punch', 'error');
+        }
+    } catch (error) {
+        console.error('Error simulating punch:', error);
+        utils.showAlert('Failed to simulate punch: ' + error.message, 'error');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '▶ Add Mock Punch';
+    }
+}

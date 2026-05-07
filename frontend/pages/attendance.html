@@ -1,81 +1,32 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Attendance - HRMS</title>
-    <link rel="icon" type="image/x-icon" href="../assets/favicon.png"><link rel="shortcut icon" type="image/x-icon" href="../assets/favicon.png">
+    <title>Attendance Management - HRMS</title>
+    <link rel="icon" type="image/x-icon" href="../assets/favicon.png">
+    <link rel="shortcut icon" type="image/x-icon" href="../assets/favicon.png">
     <link rel="stylesheet" href="../styles/main.css">
     <link rel="stylesheet" href="../styles/toast.css">
     <link rel="stylesheet" href="../styles/attendance-grid.css">
-    <style>
-        .view-toggle {
-            display: flex;
-            gap: 8px;
+    <link rel="stylesheet" href="../styles/tailwind.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: { DEFAULT: '#ea580c', dark: '#c2410c', light: '#f97316' }
+                    }
+                }
+            }
         }
-        .view-toggle-btn {
-            padding: 8px 16px;
-            border: 1px solid var(--border-color);
-            background: white;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.875rem;
-            transition: all 0.2s;
-        }
-        .view-toggle-btn.active {
-            background: var(--primary-color);
-            color: white;
-            border-color: var(--primary-color);
-        }
-        .attendance-list-table {
-            width: 100%;
-            border-collapse: collapse;
-            background: white;
-            border-radius: 8px;
-            overflow: hidden;
-        }
-        .attendance-list-table th {
-            background: var(--bg-secondary);
-            padding: 12px;
-            text-align: left;
-            font-weight: 600;
-            font-size: 0.875rem;
-            border-bottom: 2px solid var(--border-color);
-        }
-        .attendance-list-table td {
-            padding: 12px;
-            border-bottom: 1px solid var(--border-light);
-        }
-        .attendance-list-table tr:hover {
-            background: var(--bg-hover);
-        }
-        .status-badge {
-            padding: 4px 12px;
-            border-radius: 12px;
-            font-size: 0.75rem;
-            font-weight: 500;
-            display: inline-block;
-        }
-        .status-present { background: #d4edda; color: #155724; }
-        .status-absent { background: #f8d7da; color: #721c24; }
-        .status-half-day { background: #fff3cd; color: #856404; }
-        .status-late { background: #ffeaa7; color: #d63031; }
-        .status-on-leave { background: #d1ecf1; color: #0c5460; }
-        .btn-icon {
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-size: 1.2rem;
-            padding: 4px 8px;
-        }
-        .btn-icon:hover {
-            opacity: 0.7;
-        }
-    </style>
+    </script>
 </head>
+
 <body>
     <script>
-        window.onerror = function(msg, url, line, col, error) {
+        window.onerror = function (msg, url, line, col, error) {
             alert("JS Error: " + msg + "\nURL: " + url + "\nLine: " + line);
             return false;
         };
@@ -87,21 +38,44 @@
         <!-- Sidebar -->
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
-                <img src="../assets/logo.png" alt="Soleos Logo" class="sidebar-logo">
-                <button class="sidebar-close-btn" id="sidebarClose">&times;</button>
+                <a href="../index.html"><img src="../assets/soleos.png" alt="Soleos Logo" class="sidebar-logo"></a>
+                <button class="sidebar-close-btn" id="sidebarClose">&#x2715;</button>
             </div>
             <nav class="sidebar-nav">
+                <div class="nav-section-label">Main</div>
                 <div class="nav-item"><a href="../index.html" class="nav-link"><i>📊</i> Dashboard</a></div>
-                <div class="nav-item"><a href="employees.html" class="nav-link"><i>👥</i> Employees</a></div>
-                <div class="nav-item"><a href="attendance.html" class="nav-link active"><i>📅</i> Attendance</a></div>
-                <div class="nav-item"><a href="leaves.html" class="nav-link"><i>🏖️</i> Leaves</a></div>
-                <div class="nav-item"><a href="holidays.html" class="nav-link"><i>🎉</i> Holidays</a></div>
-                <div class="nav-item"><a href="payroll.html" class="nav-link"><i>💰</i> Payroll</a></div>
-                <div class="nav-item"><a href="employee-salary.html" class="nav-link"><i>💵</i> Employee Salary</a></div>
-                <div class="nav-item"><a href="departments.html" class="nav-link"><i>🏢</i> Departments</a></div>
-                <div class="nav-item"><a href="designations.html" class="nav-link"><i>💼</i> Designations</a></div>
-                <div class="nav-item"><a href="appreciations.html" class="nav-link"><i>🏆</i> Appreciations</a></div>
-                <div class="nav-item"><a href="note.html" class="nav-link"><i>📝</i> Note</a></div>
+                <div class="nav-item"><a href="./profile.html" id="myProfileLink" class="nav-link"><i>👤</i> My
+                        Profile</a></div>
+                <div class="nav-item"><a href="./employees.html" class="nav-link"><i>👥</i> Employees</a></div>
+
+                <div class="nav-section-label">Time & Leave</div>
+                <div class="nav-item"><a href="./attendance.html" class="nav-link"><i>📅</i> Attendance</a></div>
+                <div class="nav-item"><a href="./leaves.html" class="nav-link"><i>🏖️</i> Leaves</a></div>
+                <div class="nav-item"><a href="./holidays.html" class="nav-link"><i>🎉</i> Holidays</a></div>
+                <div class="nav-item"><a href="./calendar.html" class="nav-link"><i>📆</i> Calendar</a></div>
+
+                <div class="nav-section-label">Payroll</div>
+                <div class="nav-item"><a href="./payroll.html" class="nav-link"><i>💰</i> Payroll</a></div>
+                <div class="nav-item"><a href="./employee-salary.html" class="nav-link"><i>💵</i> Employee Salary</a>
+                </div>
+
+                <div class="nav-section-label">Organisation</div>
+                <div class="nav-item"><a href="./departments.html" class="nav-link"><i>🏢</i> Departments</a></div>
+                <div class="nav-item"><a href="./designations.html" class="nav-link"><i>💼</i> Designations</a></div>
+                <div class="nav-item"><a href="./appreciations.html" class="nav-link"><i>🏆</i> Appreciations</a></div>
+                <div class="nav-item"><a href="./assets.html" class="nav-link hr-only"><i>💻</i> Assets</a></div>
+                <div class="nav-item"><a href="./note.html" class="nav-link"><i>📝</i> Notes</a></div>
+
+                <div class="nav-section-label">Reports</div>
+                <div class="nav-item"><a href="./reports.html" class="nav-link hr-only"><i>📈</i> Reports</a></div>
+
+                <div class="nav-section-label">Settings</div>
+                <div class="nav-item"><a href="./audit-logs.html" class="nav-link admin-only"><i>📜</i> Audit Logs</a>
+                </div>
+                <div class="nav-item"><a href="./biometric-settings.html" class="nav-link hr-only"><i>🔐</i> Biometric
+                        Settings</a></div>
+
+
             </nav>
         </aside>
 
@@ -112,17 +86,33 @@
                     <button class="hamburger-btn" id="sidebarToggle">
                         ☰
                     </button>
-                    <div class="header-title"><h1>Attendance Management</h1></div>
+                    <div class="header-title">
+                        <h1>Attendance Management</h1>
+                    </div>
                 </div>
                 <div class="header-actions">
+                    <!-- Global Search -->
+                    <div class="global-search" id="globalSearchWrap">
+                        <span class="global-search-icon">🔍</span>
+                        <input type="text" id="globalSearchInput" class="global-search-input" placeholder="Search pages..." autocomplete="off">
+                        <div class="global-search-dropdown" id="globalSearchDropdown"></div>
+                    </div>
+                    <!-- Notification Bell -->
+                    <button class="notif-btn" id="notifBtn" title="Pending approvals">
+                        🔔
+                        <span class="notif-badge" id="notifBadge" style="display:none;">0</span>
+                    </button>
+                    <!-- Dark Mode Toggle -->
+                    <button class="dark-mode-btn" id="darkModeBtn" title="Toggle dark mode">🌙</button>
+                    <!-- User Info -->
                     <div class="user-info">
-                        <div class="user-avatar" id="userAvatar">A</div>
+                        <div class="user-avatar" id="userAvatarInitial">?</div>
                         <div>
-                            <div style="font-weight: 600;" id="userName">Admin</div>
-                            <div style="font-size: 0.75rem; color: var(--text-secondary);" id="userRole">Admin</div>
+                            <div class="user-name" id="userDisplayName">Loading...</div>
+                            <div class="user-role-badge"><span class="role-badge" id="roleBadge">Loading...</span></div>
                         </div>
                     </div>
-                    <button class="btn btn-outline btn-sm" onclick="auth.logout()">Logout</button>
+                    <button class="btn-logout" id="logoutBtn" onclick="auth.logout()">Logout</button>
                 </div>
             </header>
 
@@ -141,6 +131,13 @@
                     <button class="btn btn-outline" onclick="exportAttendance()">
                         <span>📤</span> Export
                     </button>
+                    <button class="btn btn-outline" onclick="openBiometricModal()" id="biometricBtn"
+                        style="color: #667eea; border-color: #667eea;">
+                        <span>🔐</span> Biometric
+                    </button>
+
+
+
                     <div style="margin-left: auto; display: flex; gap: 8px;">
                         <button class="view-toggle-btn active" id="gridViewBtn" onclick="switchView('grid')">
                             📊 Grid View
@@ -243,7 +240,7 @@
             <div class="modal-body">
                 <form id="attendanceForm">
                     <input type="hidden" id="attendanceId">
-                    
+
                     <!-- Section Header -->
                     <div class="section-header">
                         <h4>Attendance Details</h4>
@@ -270,7 +267,8 @@
                         <label class="form-label">Mark Attendance By</label>
                         <div class="radio-group">
                             <label class="radio-label">
-                                <input type="radio" name="attendanceBy" value="month" checked onchange="toggleDateFields()">
+                                <input type="radio" name="attendanceBy" value="month" checked
+                                    onchange="toggleDateFields()">
                                 <span>Month</span>
                             </label>
                             <label class="radio-label">
@@ -393,8 +391,9 @@
                     <div class="form-group">
                         <label class="checkbox-label">
                             <input type="checkbox" id="attendanceOverwrite">
-                            <span>Attendance Overwrite 
-                                <span class="info-icon" title="Check this to overwrite existing attendance records">ⓘ</span>
+                            <span>Attendance Overwrite
+                                <span class="info-icon"
+                                    title="Check this to overwrite existing attendance records">ⓘ</span>
                             </span>
                         </label>
                     </div>
@@ -429,7 +428,8 @@
                     </div>
                 </div>
                 <div style="margin-top: 1rem;">
-                    <a href="#" onclick="downloadSampleCSV()" style="color: var(--primary-color); text-decoration: none;">
+                    <a href="#" onclick="downloadSampleCSV()"
+                        style="color: var(--primary-color); text-decoration: none;">
                         📥 Download Sample CSV Template
                     </a>
                 </div>
@@ -441,12 +441,77 @@
         </div>
     </div>
 
+    <!-- Biometric Modal -->
+    <div class="modal" id="biometricModal">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3 class="modal-title">🔐 Biometric Integration</h3>
+                <button class="modal-close" onclick="closeBiometricModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="info-box"
+                    style="background: #f0f4ff; border-left: 4px solid #667eea; padding: 12px; border-radius: 8px; margin-bottom: 20px;">
+                    <p style="font-size: 14px; color: #555;">Sync logs from eSSL ADMS cloud or simulate a punch for
+                        testing.</p>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Action</label>
+                    <div style="display: flex; gap: 10px; margin-top: 10px;">
+                        <button class="btn btn-primary" id="biometricSyncBtn" onclick="syncAllBiometric()"
+                            style="flex: 1; background: #667eea;">
+                            🔄 Sync All Devices
+                        </button>
+                        <button class="btn btn-success" id="biometricProcessBtn" onclick="processBiometricLogs()"
+                            style="flex: 1; background: #11998e;">
+                            ⚙️ Process Logs
+                        </button>
+                    </div>
+                </div>
+
+                <hr style="margin: 25px 0; border: 0; border-top: 1px solid #eee;">
+
+                <h4 style="margin-bottom: 15px; color: #333;">🧪 Simulate Biometric Punch</h4>
+                <div class="form-group">
+                    <label class="form-label">Employee</label>
+                    <select id="mockBiometricEmployee" class="form-control">
+                        <option value="">Select Employee</option>
+                    </select>
+                </div>
+                <div class="form-row-2col">
+                    <div class="form-group">
+                        <label class="form-label">Punch Type</label>
+                        <select id="mockPunchType" class="form-control">
+                            <option value="IN">Punch IN</option>
+                            <option value="OUT">Punch OUT</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Time</label>
+                        <input type="datetime-local" id="mockPunchTime" class="form-control">
+                    </div>
+                </div>
+                <button class="btn btn-outline" id="simulatePunchBtn" onclick="simulatePunch()"
+                    style="width: 100%; margin-top: 10px;">
+                    ▶ Add Mock Punch
+                </button>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeBiometricModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
     <script src="../scripts/toast.js"></script>
-    <script src="../scripts/auth.js"></script>
+
+    <script src="../scripts/api.js"></script>
+    <script src="../scripts/theme.js"></script>
+    <script src="../scripts/header.js"></script>
     <script src="../scripts/sidebar.js"></script>
     <script src="../scripts/role-manager.js"></script>
-    <script src="../scripts/api.js"></script>
+    <script src="../scripts/auth.js"></script>
     <script src="../scripts/attendance-grid.js"></script>
     <script src="../scripts/attendance-list-view.js"></script>
 </body>
+
 </html>

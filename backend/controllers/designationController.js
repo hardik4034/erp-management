@@ -6,10 +6,13 @@ const { successResponse, errorResponse } = require('../utils/helpers');
 const getAllDesignations = async (req, res, next) => {
     try {
         const { departmentId } = req.query;
+        const showDeleted = req.query.showDeleted === 'true' ? 1 : 0;
+        const canSeeDeleted = req.user && (req.user.isAdmin() || req.user.isHR());
         const pool = await getConnection();
 
         const result = await pool.request()
             .input('DepartmentId', sql.Int, departmentId || null)
+            .input('ShowDeleted', sql.Bit, canSeeDeleted ? showDeleted : 0)
             .execute('sp_GetAllDesignations');
 
         res.json(successResponse(result.recordset));
@@ -76,17 +79,53 @@ const updateDesignation = async (req, res, next) => {
     }
 };
 
-// Delete designation
+// Soft delete designation
 const deleteDesignation = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const { reason } = req.body;
+        const deletedBy = req.user?.role || 'admin';
+        const pool = await getConnection();
+
+        await pool.request()
+            .input('DesignationId', sql.Int, id)
+            .input('DeletedBy', sql.NVarChar(100), deletedBy)
+            .input('DeleteReason', sql.NVarChar(500), reason || null)
+            .execute('sp_SoftDeleteDesignation');
+
+        res.json(successResponse(null, 'Designation deleted successfully'));
+    } catch (error) {
+        next(error);
+    }
+};
+
+// Restore soft-deleted designation (admin/hr only)
+const restoreDesignation = async (req, res, next) => {
     try {
         const { id } = req.params;
         const pool = await getConnection();
 
         await pool.request()
             .input('DesignationId', sql.Int, id)
-            .execute('sp_DeleteDesignation');
+            .execute('sp_RestoreDesignation');
 
-        res.json(successResponse(null, 'Designation deleted successfully'));
+        res.json(successResponse(null, 'Designation restored successfully'));
+    } catch (error) {
+        next(error);
+    }
+};
+
+// Hard delete designation (admin only)
+const hardDeleteDesignation = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const pool = await getConnection();
+
+        await pool.request()
+            .input('DesignationId', sql.Int, id)
+            .execute('sp_HardDeleteDesignation');
+
+        res.json(successResponse(null, 'Designation permanently deleted'));
     } catch (error) {
         next(error);
     }
@@ -97,5 +136,7 @@ module.exports = {
     getDesignationById,
     createDesignation,
     updateDesignation,
-    deleteDesignation
+    deleteDesignation,
+    restoreDesignation,
+    hardDeleteDesignation
 };
