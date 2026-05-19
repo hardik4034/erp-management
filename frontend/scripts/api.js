@@ -41,7 +41,7 @@ const createAPIClient = (baseURL) => {
 
         try {
             let response = await fetch(url, config);
-            
+
             // Handle Token Expiry
             if (response.status === 401 && !endpoint.includes('/auth/login')) {
                 // If we're already refreshing, wait for it
@@ -59,7 +59,7 @@ const createAPIClient = (baseURL) => {
                     // Refresh failed, clear and redirect
                     _accessToken = null;
                     handleAuthFailure();
-                    return new Promise(() => {});
+                    return new Promise(() => { });
                 }
             }
 
@@ -249,7 +249,7 @@ const endpoints = {
         getGroups: () => api.get('/salary/groups'),
         createGroup: (data) => api.post('/salary/groups', data)
     },
-    
+
     documents: {
         getAll: (employeeId) => api.get(`/documents/${employeeId}`),
         upload: (employeeId, formData) => api.post(`/documents/${employeeId}`, formData),
@@ -263,7 +263,7 @@ const endpoints = {
         update: (id, data) => api.put(`/notes/update/${id}`, data),
         delete: (id) => api.delete(`/notes/delete/${id}`)
     },
-    
+
     biometric: {
         getDevices: () => api.get('/biometric/devices'),
         connect: (data) => api.post('/biometric/connect', data),
@@ -274,14 +274,14 @@ const endpoints = {
         getUnmapped: () => api.get('/biometric/unmapped'),
         mockPunch: (data) => api.post('/biometric/mock-punch', data)
     },
-    
+
     calendar: {
         getEvents: (params) => api.get('/calendar', params),
         create: (data) => api.post('/calendar', data),
         update: (id, data) => api.put(`/calendar/${id}`, data),
         delete: (id) => api.delete(`/calendar/${id}`)
     },
-    
+
     assets: {
         getAll: (params) => api.get('/assets', params),
         getById: (id) => api.get(`/assets/${id}`),
@@ -293,7 +293,7 @@ const endpoints = {
         getByEmployee: (employeeId) => api.get(`/assets/employee/${employeeId}`),
         getHistory: (id) => api.get(`/assets/${id}/history`)
     },
-    
+
     auth: {
         login: (credentials) => api.post('/auth/login', credentials),
         me: () => api.get('/auth/me'),
@@ -322,7 +322,7 @@ const showAlert = (message, type = 'info') => {
         const alertDiv = document.createElement('div');
         alertDiv.className = `alert alert-${type}`;
         alertDiv.textContent = message;
-        
+
         const container = document.querySelector('.content-area');
         if (container) {
             container.insertBefore(alertDiv, container.firstChild);
